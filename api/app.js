@@ -1,7 +1,8 @@
 const express = require('express')
-const asyncHandler = require('express-async-handler')
 const path = require('node:path')
 const cors = require('cors')
+const authRouter = require('./routes/auth')
+const cookieParser = require('cookie-parser')
 
 
 const app = express();
@@ -26,12 +27,13 @@ app.use(cors(corsOptions));
 app.options('*', cors((corsOptions)))
 app.set('trust proxy', 1)
 app.use(express.json())
+app.use(cookieParser())
 app.use(express.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 
 
-
+app.use('/', authRouter);
 
 app.use((req, res, next) => {
     const error = new Error('404 Not Found')
