@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const db = require('../db/queries')
 const {body, validationResult} = require('express-validator');
 const jwt = require('jsonwebtoken');
+const fn = require('./fn')
 require("dotenv").config();
 
 const router = Router();
@@ -19,6 +20,7 @@ const validateRegistration = [
         return value === req.body.password;
       }).withMessage("Passwords don't match")
 ];
+
 
 router.post('/register', validateRegistration, asyncHandler(async(req, res, next) => {
     const result = validationResult(req);
@@ -53,8 +55,45 @@ router.post('/login',validateLogin, asyncHandler(async(req, res, next) => {
         error.code = 400;
         throw error;
     }
-    res.send('hello');
+    const payload = {
+        username: user.username
+    }
+    req.user = user
+    const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_KEY, { expiresIn: 60})
+    res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 1000})
+    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_KEY, { expiresIn: 20})
+    return res.json({accessToken})
 }))
+
+router.post('/refresh', asyncHandler(async(req, res, next) => {
+    if(!req.cookies.jwt) {
+        const error = new Error('Unauthorized Access')
+        error.code = 401;
+        throw error;
+    }
+    const refreshToken = req.cookies.jwt;
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_KEY, async(err, decoded) => {
+        if(err) {
+            const error = new Error(err.message)
+            error.code = 401;
+            return next(error)
+        }
+        try {
+            const user = await db.getUser(decoded.username);
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_KEY, { expiresIn: 20})
+            return res.json({accessToken})
+        } catch(err) {
+            return next(err)
+        }
+    })
+}))
+
+
+router.post('/protected', fn.isAuthenticated, (req, res) => {
+    res.send('LOGGED IN BAHAHA!!!!')
+})
+
+
 
 
 
