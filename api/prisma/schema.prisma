@@ -25,14 +25,15 @@ model User {
   bio           String?
   conversations Conversation[]
   messages      Message[]
-  joinDate      DateTime      @default(now())
+  joinDate      DateTime       @default(now())
 }
 
 model Conversation {
-  id            Int         @id @default(autoincrement())
-  participants  User[]
-  messages      Message[]
-  creationDate  DateTime    @default(now())
+  id                Int         @id @default(autoincrement())
+  participants      User[]
+  messages          Message[]
+  creationDate      DateTime    @default(now())
+  lastMessageTime   DateTime?
 }
 
 model Message {

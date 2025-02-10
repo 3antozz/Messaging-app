@@ -4,12 +4,15 @@ const bcrypt = require('bcrypt');
 const db = require('../db/queries')
 const {body, validationResult} = require('express-validator');
 const jwt = require('jsonwebtoken');
-const fn = require('./fn')
+const fn = require('./fn');
 require("dotenv").config();
 
 const router = Router();
 
-const validateLogin = body("username").trim().notEmpty().withMessage("Incorrect Username").bail().matches(/^[a-zA-Z0-9_]+$/).withMessage("Incorrect Username").bail().isLength({min: 3, max: 20}).withMessage("Incorrect Usernames")
+const validateLogin = [body("username").trim().notEmpty().withMessage("Username must not be Empty").bail().matches(/^[a-zA-Z0-9_]+$/). 
+withMessage("Incorrect Username").bail().isLength({min: 3, max: 20}).withMessage("Incorrect Usernames"),
+    body("password").trim().notEmpty().withMessage("Password must not be Empty")
+];
 
 const validateRegistration = [
     body("first_name").trim().notEmpty().withMessage("First Name must not be empty").bail().isAlpha().withMessage("First Name must only contain alphabet and no spaces").isLength({min: 2, max: 20}).withMessage("First name must be between 2 and 20 characters"),
@@ -35,7 +38,7 @@ router.post('/register', validateRegistration, asyncHandler(async(req, res, next
         return res.json({done: true})
 }))
 
-router.post('/login',validateLogin, asyncHandler(async(req, res, next) => {
+router.post('/login', validateLogin, asyncHandler(async(req, res, next) => {
     const result = validationResult(req);
     if (!result.isEmpty()) {
         const errors = result.errors.map(err => err.msg);
@@ -58,15 +61,15 @@ router.post('/login',validateLogin, asyncHandler(async(req, res, next) => {
     const payload = {
         username: user.username
     }
-    req.user = user
-    const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_KEY, { expiresIn: 60})
-    res.cookie('jwt', refreshToken, { httpOnly: true, sameSite: 'none', maxAge: 24 * 60 * 60 * 1000})
-    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_KEY, { expiresIn: 20})
+    const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_KEY, { expiresIn: 60 * 30})
+    res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 1000 * 60 * 30})
+    const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_KEY, { expiresIn: 240})
     return res.json({accessToken})
 }))
 
 router.post('/refresh', asyncHandler(async(req, res, next) => {
     if(!req.cookies.jwt) {
+        console.log('no cookies!')
         const error = new Error('Unauthorized Access')
         error.code = 401;
         throw error;
@@ -80,7 +83,7 @@ router.post('/refresh', asyncHandler(async(req, res, next) => {
         }
         try {
             const user = await db.getUser(decoded.username);
-            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_KEY, { expiresIn: 20})
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_KEY, { expiresIn: 300})
             return res.json({accessToken})
         } catch(err) {
             return next(err)
@@ -88,9 +91,19 @@ router.post('/refresh', asyncHandler(async(req, res, next) => {
     })
 }))
 
+router.post('/logout', asyncHandler((req, res) => {
+    if(!req.cookies.jwt) {
+        const error = new Error('Unauthorized Access')
+        error.code = 401;
+        throw error;
+    }
+    res.clearCookie('jwt', { httpOnly: true, secure: true, sameSite: 'none' })
+    res.json({done: true})
+}))
 
-router.post('/protected', fn.isAuthenticated, (req, res) => {
-    res.send('LOGGED IN BAHAHA!!!!')
+
+router.get('/user', fn.isAuthenticated, (req, res) => {
+    res.json({user: req.user})
 })
 
 

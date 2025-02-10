@@ -1,0 +1,18 @@
+.sidebar {
+    padding: 1rem;
+    border-right: 2px solid rgb(178, 176, 176);;
+}
+
+.you, .sidebar nav {
+    border-bottom: 2px solid rgb(178, 176, 176);
+    padding: 0.5rem;
+}
+
+.conversations {
+    padding: 0.5rem 0.1rem;
+}
+
+.conversations ul {
+    padding: 0;
+    margin: 0;
+}

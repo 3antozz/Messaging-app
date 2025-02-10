@@ -21,16 +21,17 @@ exports.isAuthenticated = (req, res, next) => {
     }
     jwt.verify(accessToken, process.env.ACCESS_TOKEN_KEY, async(err, decoded) => {
         if(err) {
+            console.log("this null?: " + accessToken);
             const error = new Error(err.message)
             error.code = 401;
             return next(error)
         }
-            try {
-                const user = await db.getUser(decoded.username);
-                req.user = user;
-                return next();
-            } catch(err) {
-                return next(err)
-            }
+        try {
+            const user = await db.getUserForClient(decoded.username);
+            req.user = user;
+            return next();
+        } catch(err) {
+            return next(err)
+        }
     })
 }

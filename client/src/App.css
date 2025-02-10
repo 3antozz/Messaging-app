@@ -1,42 +1,57 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/*
+  Josh's Custom CSS Reset
+  https://www.joshwcomeau.com/css/custom-css-reset/
+*/
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+* {
+  margin: 0;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
 }
 
-.card {
-  padding: 2em;
+input, button, textarea, select {
+  font: inherit;
 }
 
-.read-the-docs {
-  color: #888;
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
 }
+
+p {
+  text-wrap: pretty;
+}
+
+#root, #__next {
+  isolation: isolate;
+}
+
+body {
+  height: 100dvh;
+  background-color: #313338;
+  color: white;
+  font-family:  "Roboto", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  align-content: center;
+}
+
+main {
+  border: 2px solid rgb(178, 176, 176);
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  width: fit-content;
+  margin: auto;
+  padding: 1rem;
+}
+
