@@ -33,6 +33,9 @@ model Conversation {
   participants      User[]
   messages          Message[]
   creationDate      DateTime    @default(now())
+  isGroup           Boolean     @default(false)
+  group_name        String?
+  picture_url       String?
   lastMessageTime   DateTime?
 }
 

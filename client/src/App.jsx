@@ -11,7 +11,6 @@ function App() {
   const [user, setUser] = useState(null)
   const timeoutRef = useRef(null);
   const fetchToken = useCallback(async function fetchToken () {
-    console.log('called');
     try {
       const request = await fetch(`${import.meta.env.VITE_API_URL}/refresh`, {
         method: 'POST',

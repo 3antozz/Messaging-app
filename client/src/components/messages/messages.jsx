@@ -12,17 +12,18 @@ export default function Messages () {
                 <p>message</p>
                 <p>message</p>
             </div>
-            <form>
-                <div className={styles.messageDiv}>
+            <div>
+                <form className={styles.messageDiv}>
                     <label htmlFor="message" hidden></label>
                     <textarea name="message" id="message" placeholder='Send a message...'></textarea>
-                </div>
-                <div className={styles.uploadDiv}>
+                    <button>Send Message</button>
+                </form>
+                <form className={styles.uploadDiv}>
                     <label htmlFor="image" hidden></label>
                     <input type="file" />
-                </div>
-                <button>Send</button>
-            </form>
+                    {/* <button>Send Image</button> */}
+                </form>
+            </div>
         </section>
     )
 }

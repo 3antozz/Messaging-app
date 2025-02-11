@@ -30,7 +30,6 @@ exports.getUserForClient = async(username) => {
             username
         },
         omit: {
-            id: true,
             password: true,
         },
         include: {
@@ -43,6 +42,13 @@ exports.getUserForClient = async(username) => {
                             username: true
                         }
                     }
+                }
+            },
+            friends: {
+                omit: {
+                    password: true,
+                    bio: true,
+                    username: true
                 }
             }
         }

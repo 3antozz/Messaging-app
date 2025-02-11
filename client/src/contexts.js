@@ -6,3 +6,6 @@ export const AuthContext = createContext({
     setUser: () => {},
     logout: () => {}
 })
+
+export const ConversationContext = createContext({
+})
