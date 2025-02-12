@@ -4,6 +4,8 @@ const cors = require('cors')
 const cookieParser = require('cookie-parser')
 const authRouter = require('./routes/auth')
 const friendsRouter = require('./routes/friends')
+const convosRouter = require('./routes/conversations')
+const messagesRouter = require('./routes/messages')
 
 
 const app = express();
@@ -36,6 +38,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', authRouter);
 app.use('/friends', friendsRouter)
+app.use('/conversations', convosRouter)
+app.use('/messages', messagesRouter)
 
 app.use((req, res, next) => {
     const error = new Error('404 Not Found')

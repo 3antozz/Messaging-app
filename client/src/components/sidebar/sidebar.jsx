@@ -1,9 +1,9 @@
 import styles from './sidebar.module.css'
-import { AuthContext, ConversationContext } from '../../contexts'
-import { useContext, useState, useMemo } from 'react'
-export default function Sidebar () {
+import PropTypes from 'prop-types';
+import { AuthContext } from '../../contexts'
+import { useContext, useState, useMemo, memo } from 'react'
+const Sidebar = memo(function Sidebar ({setID}) {
     const { user } = useContext(AuthContext)
-    const { setConversation } = useContext(ConversationContext)
     const [view, setView] = useState('Friends')
     const friends = useMemo(() => {
         if(user) {
@@ -36,22 +36,8 @@ export default function Sidebar () {
         const button = e.target.closest('button')
         if (button) {
             const id = button.id;
-            console.log(id);
-            // try {
-            //     const request = await fetch(`${import.meta.env.VITE_API_URL}/refresh`, {
-            //       method: 'POST',
-            //       credentials: 'include'
-            //     })
-            //     const response = await request.json();
-            //     console.log(response);
-            //     setToken(response.accessToken);
-            //     if(response.accessToken) {
-            //       clearTimeout(timeoutRef.current);
-            //       timeoutRef.current = setTimeout(fetchToken,  1000 * 60 * 4);
-            //     }
-            //   } catch(err) {
-            //     console.log(err)
-            //   }
+            setID(id)
+            console.log(id)
         } else {
             return;
         }
@@ -95,7 +81,10 @@ export default function Sidebar () {
                         <li key={conversation.id} className={styles.conversation}>
                             <button id={conversation.id}>
                                 {otherParticipant.picture_url ? <img src={otherParticipant.picture_url} alt={`${otherParticipant.first_name} ${conversation.participants[1].last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
-                                <p>{otherParticipant.first_name} {otherParticipant.last_name}</p>
+                                <div className={styles.info}>
+                                    <p>{otherParticipant.first_name} {otherParticipant.last_name}</p>
+                                    <p>{conversation.messages[0].senderId === otherParticipant.id ? `${otherParticipant.first_name}: ` : 'You: '} {conversation.messages[0].content}</p>
+                                </div>
                             </button>
                         </li>
                         )
@@ -107,4 +96,10 @@ export default function Sidebar () {
             </section>
         </aside>
     )
+})
+
+Sidebar.propTypes = {
+    setID: PropTypes.func.isRequired
 }
+
+export default Sidebar;

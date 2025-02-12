@@ -3,7 +3,82 @@
     border-bottom: 2px solid rgb(178, 176, 176);
 }
 
+.main {
+    overflow-y: auto;
+}
+
+
+.info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.info img {
+    width: 2.5rem;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+}
+
 .messenger {
     border-radius: 15px;
-    padding: 1rem;
+    padding: 0 1rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.messageInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.main ul {
+    padding: 0;
+    margin: 0;
+}
+
+.main li {
+    list-style: none;
+}
+
+.message {
+    margin-bottom: 0.5rem;
+}
+
+.message > div {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.messageDate {
+    font-size: 0.6rem;
+    padding-left: 0.2rem;
+}
+
+.yourMessage {
+    background-color: rgb(99, 99, 162);
+}
+
+.otherMessage {
+    background-color: rgb(106, 106, 106);
+}
+
+.messageContent {
+    align-self: center;
+    border-radius: 15px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.95rem;
+}
+.message img {
+    width: 2.5rem;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.messageSender {
+    font-weight: bold;
 }

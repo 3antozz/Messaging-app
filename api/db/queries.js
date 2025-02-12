@@ -41,14 +41,17 @@ exports.getUserForClient = async(username) => {
                             bio: true,
                             username: true
                         }
+                    },
+                    messages: {
+                        select: {
+                            content: true,
+                            date: true  
+                        },
+                        orderBy: {
+                            date: 'desc'
+                        },
+                        take: 1
                     }
-                }
-            },
-            friends: {
-                omit: {
-                    password: true,
-                    bio: true,
-                    username: true
                 }
             }
         }
@@ -94,6 +97,54 @@ exports.removeFriend = async(username, friendName) => {
                     username: friendName
                 }
             }
+        }
+    })
+}
+
+exports.getConversation = async(id) => {
+    return await prisma.conversation.findUniqueOrThrow({
+        where:{
+            id
+        },
+        include:{
+            participants: {
+                omit: {
+                    password: true,
+                    bio: true,
+                    username: true
+                }
+            },
+            messages: {
+                include: {
+                    sender: {
+                        omit: {
+                            password: true,
+                            bio: true,
+                            username: true
+                        }
+                    }
+                },
+                orderBy: {
+                    date: "asc"
+                }
+            }
+        }
+    })
+}
+
+exports.addMessage = async(convoId, content, senderId) => {
+    return await prisma.conversation.update({
+        where: {
+            id: convoId
+        },
+        data: {
+            messages: {
+                create: {
+                    content,
+                    senderId
+                }
+            },
+            lastMessageTime: new Date()
         }
     })
 }

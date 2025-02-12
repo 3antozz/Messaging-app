@@ -2,14 +2,14 @@ import styles from './Messenger.module.css'
 import Messages from '../messages/messages'
 import Sidebar from '../sidebar/sidebar'
 import { Link } from 'react-router'
-import { AuthContext, ConversationContext } from '../../contexts'
+import { AuthContext } from '../../contexts'
 import { useContext, useState } from 'react'
 
 
 
 export default function Messenger () {
     const { user, logout } = useContext(AuthContext)
-    const [conversation, setConversation] = useState({})
+    const [conversationID, setConversationID] = useState(null)
     return (
         <>
             <header className={styles.header}>
@@ -18,12 +18,10 @@ export default function Messenger () {
                 <button onClick={logout}>Logout</button>
                 }
             </header>
-            <ConversationContext.Provider value={{conversation, setConversation}}>
                 <main>
-                    <Sidebar />
-                    <Messages />
+                    <Sidebar setID={setConversationID} />
+                    <Messages conversationID={conversationID} />
                 </main>
-            </ConversationContext.Provider>
         </>
     )
 }

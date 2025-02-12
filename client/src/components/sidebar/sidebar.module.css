@@ -1,5 +1,5 @@
 .sidebar {
-    padding: 1rem;
+    padding: 0 1rem;
     border-right: 2px solid rgb(178, 176, 176);
 }
 
@@ -15,6 +15,19 @@
 .conversations ul {
     padding: 0;
     margin: 0;
+}
+
+.info {
+    text-align: left;
+}
+
+.info > p:first-child {
+    font-weight: bold;
+}
+
+.info > p:last-child {
+    color: rgb(196, 193, 193);
+    font-size: 0.85rem;
 }
 
 .conversations li {
@@ -37,11 +50,12 @@
 .conversation button:hover, .you button:hover {
     cursor: pointer;
     transform: scale(1.05);
-    background-color: rgb(178, 176, 176);
+    background-color: rgb(106, 106, 106);
 }
 
 .conversation img, .you img {
     width: 2.5rem;
     aspect-ratio: 1/1;
     border-radius: 50%;
+    align-self: flex-start;
 }

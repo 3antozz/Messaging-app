@@ -41,9 +41,9 @@ model Conversation {
 
 model Message {
   id              Int             @id @default(autoincrement())
-  sender          User            @relation(fields: [senderId], references: [id])
+  sender          User            @relation(fields: [senderId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   senderId        Int
-  conversation    Conversation    @relation(fields: [conversationId], references: [id])
+  conversation    Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   conversationId  Int
   content         String?
   picture_url     String?

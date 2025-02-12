@@ -1,5 +1,6 @@
 const db = require('../db/queries')
 const jwt = require('jsonwebtoken');
+const { format } = require('date-fns');
 
 exports.isAuthenticated = (req, res, next) => {
     if (!req.headers.authorization) {
@@ -34,4 +35,8 @@ exports.isAuthenticated = (req, res, next) => {
             return next(err)
         }
     })
+}
+
+exports.formatDate = (date) => {
+    return format(new Date(date), 'P H:mm');
 }

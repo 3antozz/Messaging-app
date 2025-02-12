@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import './App.css'
-import { Routes, Route } from "react-router";
+import { Routes, Route, useNavigate } from "react-router";
 import AuthLayout from './components/auth/layout.jsx';
 import Login from './components/auth/login/login.jsx';
 import Messenger from './components/Messenger/Messenger.jsx';
@@ -10,6 +10,7 @@ function App() {
   const [token, setToken] = useState(null)
   const [user, setUser] = useState(null)
   const timeoutRef = useRef(null);
+  const navigate = useNavigate()
   const fetchToken = useCallback(async function fetchToken () {
     try {
       const request = await fetch(`${import.meta.env.VITE_API_URL}/refresh`, {
@@ -63,6 +64,7 @@ function App() {
       if(response.done) {
         setToken(null)
         setUser(null)
+        navigate('/')
       }
     } catch(err) {
       console.log(err)
