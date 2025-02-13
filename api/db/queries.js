@@ -44,6 +44,7 @@ exports.getUserForClient = async(username) => {
                     },
                     messages: {
                         select: {
+                            senderId: true,
                             content: true,
                             date: true  
                         },
@@ -146,5 +147,19 @@ exports.addMessage = async(convoId, content, senderId) => {
             },
             lastMessageTime: new Date()
         }
+    })
+}
+
+exports.getAllUsers = async(userId) => {
+    return await prisma.user.findMany({
+        where: {
+            NOT: {
+                id: userId
+            }
+        },
+        orderBy: [
+            {first_name: 'asc'},
+            {last_name: 'asc'}
+        ]
     })
 }

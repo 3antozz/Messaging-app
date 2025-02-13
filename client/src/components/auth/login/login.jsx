@@ -1,16 +1,21 @@
 import styles from "./login.module.css"
 import { useState } from "react"
-import { useNavigate } from "react-router"
+import { useNavigate, Link } from "react-router"
 import { useContext } from 'react'
 import { AuthContext } from "../../../contexts"
+import Popup from "../../popup/popup"
 export default function Login () {
     const navigate = useNavigate();
     const { setToken, timeoutRef, fetchToken } = useContext(AuthContext)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState(null);
+    const [success, setSuccess] = useState(false)
     const handleSubmit = async(e) => {
         e.preventDefault();
         try {
+            setLoading(true)
             const request = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
                 method: 'POST',
                 credentials: 'include',
@@ -28,25 +33,45 @@ export default function Login () {
                 error.errors = response.errors;
                 throw error
             }
+            setSuccess(true)
+            setTimeout(() => {
+                if(!success) {
+                    setSuccess(false)
+                }
+            }, 2500)
+            setErrors(null)
             setToken(response.accessToken)
             timeoutRef.current = setTimeout(fetchToken, 1000 * 60 * 4);
             console.log(response)
-            navigate('/')
+            setTimeout(() => {
+                navigate('/')
+                setLoading(false)
+            }, 3000)
         } catch(err) {
             console.log(err)
-        }
+            setErrors(err.errors)
+        } 
     }
     return (
         <form onSubmit={handleSubmit}>
+            <Popup shouldRender={success} close={setSuccess}>
+                <p>You have logged in successfully!</p>
+            </Popup>
+            <p>You don&apos;t have an account? <Link to='/register'>Register here</Link></p>
+            {errors && 
+            <ul>
+                {errors.map((error, index) => <li key={index}><p>{error}</p></li>)}
+            </ul>
+            }
             <div className={styles.input}>
                 <label htmlFor="username">Username</label>
                 <input type="text" id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
             </div>
             <div>
-                <label htmlFor="username">Password</label>
+                <label htmlFor="password">Password</label>
                 <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
-            <button>Login</button>
+            <button disabled={success ? true : loading ? true : false}>{loading ? 'Loading' : 'Login'}</button>
         </form>
     )
 }

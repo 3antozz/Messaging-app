@@ -1,10 +1,16 @@
 import styles from './sidebar.module.css'
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
-import { useContext, useState, useMemo, memo } from 'react'
+import { useContext, useState, useMemo, memo, useEffect } from 'react';
+import { MessageSquare, UserPlus } from 'lucide-react';
+
 const Sidebar = memo(function Sidebar ({setID}) {
-    const { user } = useContext(AuthContext)
+    const { user, token } = useContext(AuthContext)
     const [view, setView] = useState('Friends')
+    const [users, setUsers] = useState([])
+    const [isFetched, setFetched] = useState(false)
+    const [usersLoading, setUsersLoading] = useState(false)
+    const [error, setError] = useState(false)
     const friends = useMemo(() => {
         if(user) {
             const array = [];
@@ -22,6 +28,35 @@ const Sidebar = memo(function Sidebar ({setID}) {
     }, [user])
     const groups = useMemo(() => user && user.conversations.filter(group => group.isGroup), [user])
     const conversations = useMemo(() => user && user.conversations.filter(conversation => conversation.lastMessageTime), [user])
+    useEffect(() => {
+        const fetchUsers = async() => {
+            setUsersLoading(true)
+            try {
+                const request = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                const response = await request.json();
+                console.log(response);
+                if(!request.ok) {
+                    const error = new Error('An error has occured, please try again later')
+                    throw error;
+                }
+                setUsers(response.users)
+                setError(false)
+                setFetched(true)
+            } catch(err) {
+                console.log(err)
+                setError(true)
+            } finally {
+                setUsersLoading(false)
+            }
+        }
+        if(!isFetched) {
+            fetchUsers();
+        }
+    }, [token, isFetched])
     if(!user) {
         return <h3>loading...</h3>
     }
@@ -34,7 +69,7 @@ const Sidebar = memo(function Sidebar ({setID}) {
     }
     const handleListClick = async(e) => {
         const button = e.target.closest('button')
-        if (button) {
+        if (button && button.dataset.func === 'convo') {
             const id = button.id;
             setID(id)
             console.log(id)
@@ -43,6 +78,7 @@ const Sidebar = memo(function Sidebar ({setID}) {
         }
     } 
     return (
+        <>
         <aside className={styles.sidebar}>
             <section className={styles.you}>
                 <button>
@@ -61,10 +97,11 @@ const Sidebar = memo(function Sidebar ({setID}) {
                     {view === 'Friends' ?
                     friends.map(friend => 
                         <li key={friend.id} className={styles.conversation}>
-                            <button id={friend.conversationId}>
-                                {friend.picture_url ? <img src={friend.picture_url} alt={`${friend.first_name} ${friend.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
-                                <p>{friend.first_name} {friend.last_name}</p>
-                            </button>
+                            {friend.picture_url ? <img src={friend.picture_url} alt={`${friend.first_name} ${friend.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
+                            <p>{friend.first_name} {friend.last_name}</p>
+                            <div className={styles.buttons}>
+                                <button id={friend.conversationId} data-func='convo'><MessageSquare size={24} color='white' /></button>
+                            </div>
                         </li>
                     ) : view === 'Groups' ?
                     groups.map(group => 
@@ -79,7 +116,7 @@ const Sidebar = memo(function Sidebar ({setID}) {
                         const otherParticipant = conversation.participants.filter((participant) => participant.id !== user.id)[0];
                         return (
                         <li key={conversation.id} className={styles.conversation}>
-                            <button id={conversation.id}>
+                            <button id={conversation.id} data-func='convo'>
                                 {otherParticipant.picture_url ? <img src={otherParticipant.picture_url} alt={`${otherParticipant.first_name} ${conversation.participants[1].last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
                                 <div className={styles.info}>
                                     <p>{otherParticipant.first_name} {otherParticipant.last_name}</p>
@@ -89,12 +126,24 @@ const Sidebar = memo(function Sidebar ({setID}) {
                         </li>
                         )
                     })
-                    : null
-                    
+                    : usersLoading ? <p>Loading</p> : error ? <p>An Error has occured, please try again later</p> :  
+                    <ul>
+                    {users.map((user) => {
+                        return (
+                        <li className={styles.user} key={user.id}>
+                            <button>
+                                {user.picture_url ? <img src={user.picture_url} alt={`${user.first_name} ${user.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
+                                <p>{user.first_name} {user.last_name}</p>
+                            </button>
+                        </li>
+                        )
+                    })} 
+                    </ul>
                     }
                 </ul>
             </section>
         </aside>
+        </>
     )
 })
 

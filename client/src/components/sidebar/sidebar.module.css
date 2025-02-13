@@ -21,7 +21,7 @@
     text-align: left;
 }
 
-.info > p:first-child {
+.info > p:first-child, .user p, .conversation button > p {
     font-weight: bold;
 }
 
@@ -34,7 +34,7 @@
     list-style: none;
 }
 
-.conversation button, .you button {
+.conversation > button, .conversation, .you button, .user button {
     color: inherit;
     background: none;
     width: 100%;
@@ -47,13 +47,32 @@
     border: none;
 }
 
-.conversation button:hover, .you button:hover {
+.buttons button {
+    background-color: #3551ca;
+    padding: 0.3rem;
+    border: none;
+    border-radius: 8px;
+    transition: transform 200ms ease;
+}
+
+.conversation > p {
+    flex: 1;
+    font-weight: bold;
+}
+
+.buttons button:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+    filter: brightness(1.5);
+}
+
+.conversation > button:hover, .you button:hover, .user button:hover {
     cursor: pointer;
     transform: scale(1.05);
     background-color: rgb(106, 106, 106);
 }
 
-.conversation img, .you img {
+.conversation img, .you img, .user img {
     width: 2.5rem;
     aspect-ratio: 1/1;
     border-radius: 50%;

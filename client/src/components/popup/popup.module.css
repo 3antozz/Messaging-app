@@ -1,0 +1,51 @@
+.container {
+    position: fixed;
+    top: 10%;
+    right: 1rem;
+    background-color: rgb(110, 91, 91);
+    color: white;
+    border: 1px solid orange;
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+    border-radius: 10px;
+}
+
+.container button {
+    position: absolute;
+    top: -20%;
+    right: 0;
+    border-radius: 50%;
+    padding: 0.1rem;
+    border: none;
+}
+
+.visible {
+    animation: 250ms linear forwards popin;
+}
+
+.exit {
+    animation: 250ms linear forwards popout;
+}
+
+
+@keyframes popin {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes popout {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}

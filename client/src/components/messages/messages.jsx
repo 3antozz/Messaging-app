@@ -36,7 +36,6 @@ export default function Messages ({conversationID}) {
     useEffect(() => {
         const container = scrollRef.current;
         if (container) {
-            console.log('hello?')
             container.scrollTop = container.scrollHeight;
         }
     }, [isFetched])
@@ -61,7 +60,7 @@ export default function Messages ({conversationID}) {
             console.log(err)
           }
     }
-    if (!conversation) {
+    if (!conversation || !user) {
         return <h1>Loading</h1>
     }
     return (

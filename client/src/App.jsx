@@ -3,6 +3,7 @@ import './App.css'
 import { Routes, Route, useNavigate } from "react-router";
 import AuthLayout from './components/auth/layout.jsx';
 import Login from './components/auth/login/login.jsx';
+import Register from './components/auth/register/register.jsx';
 import Messenger from './components/Messenger/Messenger.jsx';
 import { AuthContext } from './contexts.js';
 
@@ -10,7 +11,23 @@ function App() {
   const [token, setToken] = useState(null)
   const [user, setUser] = useState(null)
   const timeoutRef = useRef(null);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const logout = useCallback(async() => {
+    try {
+      const request = await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include'
+      })
+      const response = await request.json();
+      if(response.done) {
+        setToken(null)
+        setUser(null)
+        navigate('/')
+      }
+    } catch(err) {
+      console.log(err)
+    }
+  }, [navigate])
   const fetchToken = useCallback(async function fetchToken () {
     try {
       const request = await fetch(`${import.meta.env.VITE_API_URL}/refresh`, {
@@ -25,9 +42,11 @@ function App() {
         timeoutRef.current = setTimeout(fetchToken,  1000 * 60 * 4);
       }
     } catch(err) {
-      console.log(err)
+      logout();
+      navigate('/login');
+      console.log(err);
     }
-  }, [])
+  }, [logout, navigate])
   useEffect(() => {
     let ignore = false;
     const fetchUser = async () => {
@@ -54,22 +73,6 @@ function App() {
     }
     return () => ignore = true;
   }, [fetchToken, token, user])
-  const logout = async() => {
-    try {
-      const request = await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
-        method: 'POST',
-        credentials: 'include'
-      })
-      const response = await request.json();
-      if(response.done) {
-        setToken(null)
-        setUser(null)
-        navigate('/')
-      }
-    } catch(err) {
-      console.log(err)
-    }
-  }
 
 
   return (
@@ -78,7 +81,7 @@ function App() {
             <Route path="/" element={<Messenger />} />
             <Route element={<AuthLayout />}>
               <Route path="/login" element={<Login />} />
-              {/* <Route path="register" element={<Register />} /> */}
+              <Route path="/register" element={<Register />} />
             </Route>
         </Routes>
     </AuthContext.Provider>
