@@ -9,8 +9,8 @@ const router = Router();
 
 
 router.put('/add', fn.isAuthenticated, asyncHandler(async(req, res) => {
-    const { friend_username } = req.body;
-    await db.addFriend(req.user.username, friend_username);
+    const { friendId } = req.body;
+    await db.addFriend(req.user.id, +friendId);
     return res.json({done: true})
 }))
 

@@ -11,6 +11,7 @@ function App() {
   const [token, setToken] = useState(null)
   const [user, setUser] = useState(null)
   const timeoutRef = useRef(null);
+  const [isFetched, setFetched] = useState(false)
   const navigate = useNavigate();
   const logout = useCallback(async() => {
     try {
@@ -22,6 +23,7 @@ function App() {
       if(response.done) {
         setToken(null)
         setUser(null)
+        setFetched(false)
         navigate('/')
       }
     } catch(err) {
@@ -37,21 +39,35 @@ function App() {
       const response = await request.json();
       console.log(response);
       setToken(response.accessToken);
+      if(response.message === 'jwt expired') {
+        const error = new Error('Please login in')
+        logout();
+        throw error
+      }
+      if(!request.ok) {
+        const error = new Error('Please login in')
+        throw error
+      }
       if(response.accessToken) {
         clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(fetchToken,  1000 * 60 * 4);
       }
     } catch(err) {
-      logout();
       navigate('/login');
       console.log(err);
     }
   }, [logout, navigate])
+
   useEffect(() => {
-    let ignore = false;
+      if(!token) {
+        fetchToken();
+    }
+  }, [fetchToken, token])
+
+  useEffect(() => {
     const fetchUser = async () => {
       try {
-        const request = await fetch(`${import.meta.env.VITE_API_URL}/user`, {
+        const request = await fetch(`${import.meta.env.VITE_API_URL}/users/user`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -59,20 +75,18 @@ function App() {
         const response = await request.json();
         console.log(response);
         setUser(response.user);
+        setFetched(true)
       } catch(err) {
         console.log(err)
+        setFetched(false)
       }
     }
-    if(!ignore) {
-      if(!token) {
-        fetchToken();
-      }
+    if(!isFetched && token) {
       if(!user) {
         fetchUser();
       }
     }
-    return () => ignore = true;
-  }, [fetchToken, token, user])
+  }, [isFetched, token, user])
 
 
   return (

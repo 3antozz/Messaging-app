@@ -4,7 +4,6 @@ const bcrypt = require('bcrypt');
 const db = require('../db/queries')
 const {body, validationResult} = require('express-validator');
 const jwt = require('jsonwebtoken');
-const fn = require('./fn');
 require("dotenv").config();
 
 const router = Router();
@@ -102,9 +101,6 @@ router.post('/logout', asyncHandler((req, res) => {
 }))
 
 
-router.get('/user', fn.isAuthenticated, (req, res) => {
-    res.json({user: req.user})
-})
 
 
 

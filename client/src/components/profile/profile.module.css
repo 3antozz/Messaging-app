@@ -1,0 +1,69 @@
+.backdrop {
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    background-color: rgba(0, 0, 0, 0.464);
+    z-index: 9999999;
+    align-content: center;
+    top: 0;
+    left: 0;
+    border: none;
+}
+
+.profile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-direction: column;
+    background-color: #101218;
+    width: 500px;
+    margin: auto;
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    border: 2px solid grey;
+    color: white;
+}
+
+.profile img {
+    width: 8rem;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+}
+
+.close {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    transition: transform 150ms ease;
+    padding: 0;
+    margin: 0;
+}
+
+.close:hover {
+    cursor: pointer;
+    transform: scale(1.8);
+}
+
+.close svg:hover {
+    stroke: red;
+}
+
+.edit {
+    background-color: #3551ca;
+    color: inherit;
+    border-radius: 8px;
+    padding: 0.3rem 0.6rem;
+    border: none;
+    transition: transform 150ms ease;
+    margin: 0;
+}
+
+.edit:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+    filter: brightness(1.3);
+}

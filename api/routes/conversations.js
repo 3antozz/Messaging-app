@@ -8,7 +8,7 @@ const router = Router();
 
 router.get('/:convoId', fn.isAuthenticated, asyncHandler(async(req, res) => {
     const convoId = +req.params.convoId;
-    const convo = await db.getConversation(convoId);
+    const convo = await db.getConversation(req.user.id, convoId);
     const formattedMessages = convo.messages.map((message) => ({ ...message, date: fn.formatDate(message.date)}))
     const newConvo = { ...convo, messages: formattedMessages}
     return res.json({conversation: newConvo});

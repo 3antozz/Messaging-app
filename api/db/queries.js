@@ -17,9 +17,6 @@ exports.getUser = async(username) => {
     return await prisma.user.findUnique({
         where: {
             username
-        },
-        omit: {
-            id: true,
         }
     })
 }
@@ -33,9 +30,46 @@ exports.getUserForClient = async(username) => {
             password: true,
         },
         include: {
+            friends: {
+                omit: {
+                    user1Id: true,
+                    user2Id: true
+                },
+                include: {
+                    user2: {
+                        omit: {
+                            username: true,
+                            password: true,
+                            bio: true,
+                            joinDate: true,
+                        }
+                    },
+                }
+            },
+            friends2: {
+                omit: {
+                    user1Id: true,
+                    user2Id: true
+                },
+                include: {
+                    user1: {
+                        omit: {
+                            username: true,
+                            password: true,
+                            bio: true,
+                            joinDate: true,
+                        }
+                    }
+                }
+            },
             conversations: {
                 include: {
                     participants: {
+                        where: {
+                            NOT: {
+                                username
+                            }
+                        },
                         omit: {
                             password: true,
                             bio: true,
@@ -53,6 +87,36 @@ exports.getUserForClient = async(username) => {
                         },
                         take: 1
                     }
+                },
+                orderBy: {
+                    lastMessageTime: 'desc'
+                }
+            }
+        }
+    })
+}
+
+exports.addFriend = async(userId, friendId) => {
+    return await prisma.friendship.create({
+        data: {
+            user1: {
+                connect: {
+                    id: userId
+                }
+            },
+            user2: {
+                connect: {
+                    id: friendId
+                }
+            },
+            conversation: {
+                create: {
+                    participants: {
+                        connect: [
+                            { id: userId },
+                            { id: friendId }
+                        ]
+                    }
                 }
             }
         }
@@ -60,55 +124,33 @@ exports.getUserForClient = async(username) => {
 }
 
 
-exports.addFriend = async(username, friendName) => {
-    return await prisma.$transaction([
-        prisma.user.update({
-            where: {
-                username
-            },
-            data: {
-                friends: {
-                    connect: {
-                        username: friendName
-                    }
-                },
-            },
-        }),
-        prisma.conversation.create({
-            data: {
-                participants: {
-                    connect: [
-                        {username},
-                        {username: friendName}
-                    ]
-                }
-            }
-        })
-    ])
-}
-
-exports.removeFriend = async(username, friendName) => {
+exports.removeFriend = async(userId, friendId) => {
     return await prisma.user.update({
         where: {
-            username
+            id: userId
         },
         data: {
             friends: {
                 disconnect: {
-                    username: friendName
+                    id: friendId
                 }
             }
         }
     })
 }
 
-exports.getConversation = async(id) => {
+exports.getConversation = async(userId, id) => {
     return await prisma.conversation.findUniqueOrThrow({
         where:{
             id
         },
         include:{
             participants: {
+                where: {
+                    NOT: {
+                        id: userId
+                    }
+                },
                 omit: {
                     password: true,
                     bio: true,
@@ -157,9 +199,27 @@ exports.getAllUsers = async(userId) => {
                 id: userId
             }
         },
+        omit: {
+            username: true,
+            password: true,
+            bio: true,
+            joinDate: true,
+        },
         orderBy: [
             {first_name: 'asc'},
             {last_name: 'asc'}
         ]
+    })
+}
+
+exports.getUserProfile = async(userId) => {
+    return await prisma.user.findUniqueOrThrow({
+        where: {
+            id: userId
+        },
+        omit: {
+            password: true,
+            username: true,
+        },
     })
 }

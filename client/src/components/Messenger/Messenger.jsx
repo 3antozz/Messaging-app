@@ -4,14 +4,17 @@ import Sidebar from '../sidebar/sidebar'
 import { Link } from 'react-router'
 import { AuthContext } from '../../contexts'
 import { useContext, useState } from 'react'
+import Profile from '../profile/profile'
 
 
 
 export default function Messenger () {
     const { user, logout } = useContext(AuthContext)
     const [conversationID, setConversationID] = useState(null)
+    const [profileID, setProfileID] = useState(null)
     return (
         <>
+            <Profile userId={profileID} setProfileID={setProfileID} />
             <header className={styles.header}>
                 {!user ?
                 <Link to="/login">Login</Link> :
@@ -19,8 +22,8 @@ export default function Messenger () {
                 }
             </header>
                 <main>
-                    <Sidebar setID={setConversationID} />
-                    <Messages conversationID={conversationID} />
+                    <Sidebar setID={setConversationID} setProfileID={setProfileID} />
+                    <Messages conversationID={conversationID} setProfileID={setProfileID} />
                 </main>
         </>
     )

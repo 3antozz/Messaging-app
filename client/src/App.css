@@ -45,6 +45,11 @@ body {
   align-content: center;
 }
 
+#root {
+  height: 100%;
+  align-content: center;
+}
+
 main {
   border: 2px solid rgb(178, 176, 176);
   border-radius: 15px;

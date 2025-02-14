@@ -38,5 +38,32 @@ exports.isAuthenticated = (req, res, next) => {
 }
 
 exports.formatDate = (date) => {
-    return format(new Date(date), 'H:mm P');
+    return format(new Date(date), 'P H:mm');
+}
+
+exports.formatDateWithoutTime = (date) => {
+    return format(new Date(date), 'P');
+}
+
+
+exports.mergeFriends = (user) => {
+    const mergedFriends = [
+        ...user.friends.map(f => ({
+            id: f.user2.id,
+            first_name: f.user2.first_name,
+            last_name: f.user2.last_name,
+            picture_url: f.user2.picture_url,
+            conversationId : f.conversationId
+        })),
+        ...user.friends2.map(f => ({
+            id: f.user1.id,
+            first_name: f.user1.first_name,
+            last_name: f.user1.last_name,
+            picture_url: f.user1.picture_url,
+            conversationId : f.conversationId
+        })),
+    ];
+    // eslint-disable-next-line no-unused-vars
+    const {friends, friends2, ...rest} = user;
+    return {...rest, friends: mergedFriends}
 }

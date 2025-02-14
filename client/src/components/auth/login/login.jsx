@@ -55,7 +55,7 @@ export default function Login () {
     return (
         <form onSubmit={handleSubmit}>
             <Popup shouldRender={success} close={setSuccess}>
-                <p>You have logged in successfully!</p>
+                <p>Login successful!</p>
             </Popup>
             <p>You don&apos;t have an account? <Link to='/register'>Register here</Link></p>
             {errors && 

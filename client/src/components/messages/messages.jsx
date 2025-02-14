@@ -2,17 +2,12 @@ import styles from './messages.module.css'
 import { AuthContext } from '../../contexts'
 import { useContext, useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-export default function Messages ({conversationID}) {
+export default function Messages ({conversationID, setProfileID}) {
     const { user, token } = useContext(AuthContext)
     const [conversation, setConversation] = useState(null);
     const [messageInput, setMessageInput] = useState("");
     const [isFetched, setFetched] = useState(false)
     const scrollRef = useRef(null);
-    let otherParticipant;
-    if(user && conversation) {
-        otherParticipant = conversation.participants.filter((participant) => participant.id !== user.id)[0];
-    }
-
     useEffect(() => {
         const fetchConversation = async() => {
             try {
@@ -66,8 +61,8 @@ export default function Messages ({conversationID}) {
     return (
         <section className={styles.messenger}>
             <div className={styles.info}>
-                {otherParticipant.picture_url ? <img src={otherParticipant.picture_url} alt={`${otherParticipant.first_name} ${otherParticipant.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
-                <h3>{otherParticipant.first_name} {otherParticipant.last_name}</h3>
+                {conversation.participants[0].picture_url ? <button onClick={() => setProfileID(conversation.participants[0].id)}><img src={conversation.participants[0].picture_url} alt={`${conversation.participants[0].first_name} ${conversation.participants[0].last_name} profile picture`}></img></button> : <button><img onClick={() => setProfileID(conversation.participants[0].id)} src='/images/no-profile-pic.jpg'></img></button>}
+                <button onClick={() => setProfileID(conversation.participants[0].id)}>{conversation.participants[0].first_name} {conversation.participants[0].last_name}</button>
             </div>
             <div className={styles.main} ref={scrollRef}>
                 <ul>
@@ -76,7 +71,7 @@ export default function Messages ({conversationID}) {
                     <div>
                         {message.sender.picture_url ? <img src={message.sender.picture_url} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
                         <div>
-                            <p className={message.senderId === otherParticipant.id ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}` }>{message.content}</p>
+                            <p className={message.senderId === conversation.participants[0].id ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}` }>{message.content}</p>
                             <p className={styles.messageDate}>{message.date}</p>
                         </div>
                     </div>
@@ -106,5 +101,6 @@ export default function Messages ({conversationID}) {
 }
 
 Messages.propTypes = {
-    conversationID: PropTypes.number.isRequired
+    conversationID: PropTypes.number.isRequired,
+    setProfileID: PropTypes.func.isRequired,
 }

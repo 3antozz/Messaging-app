@@ -7,6 +7,25 @@
     overflow-y: auto;
 }
 
+.info > button{
+    background: none;
+    border: none;
+    color: inherit;
+    font-weight: bold;
+    font-size: 1.5rem;
+    transition: transform 200ms ease;
+    padding: 0;
+}
+
+.info button:hover {
+    text-decoration: underline;
+    color: red;
+    cursor: pointer;
+    transform: scale(1.05);
+}
+
+
+
 
 .info {
     display: flex;
@@ -16,7 +35,7 @@
 }
 
 .info img {
-    width: 2.5rem;
+    width: 3rem;
     aspect-ratio: 1/1;
     border-radius: 50%;
 }
@@ -69,7 +88,7 @@
     width: fit-content;
     border-radius: 15px;
     padding: 0.4rem 0.6rem;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
 }
 .message img {
     width: 2.5rem;
