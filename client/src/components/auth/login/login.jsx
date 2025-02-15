@@ -6,7 +6,7 @@ import { AuthContext } from "../../../contexts"
 import Popup from "../../popup/popup"
 export default function Login () {
     const navigate = useNavigate();
-    const { setToken, timeoutRef, fetchToken } = useContext(AuthContext)
+    const { token, timeoutRef, fetchToken, setAuthentication } = useContext(AuthContext)
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [loading, setLoading] = useState(false);
@@ -40,7 +40,8 @@ export default function Login () {
                 }
             }, 2500)
             setErrors(null)
-            setToken(response.accessToken)
+            token.current = response.accessToken;
+            setAuthentication(true)
             timeoutRef.current = setTimeout(fetchToken, 1000 * 60 * 4);
             console.log(response)
             setTimeout(() => {

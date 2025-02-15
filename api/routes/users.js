@@ -13,7 +13,6 @@ router.get('/', fn.isAuthenticated , asyncHandler(async(req, res) => {
 }))
 
 router.get('/user', fn.isAuthenticated, (req, res) => {
-    console.log(req.user.friends);
     const newUser = fn.mergeFriends(req.user);
     res.json({user: newUser})
 })

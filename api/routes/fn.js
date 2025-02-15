@@ -22,7 +22,6 @@ exports.isAuthenticated = (req, res, next) => {
     }
     jwt.verify(accessToken, process.env.ACCESS_TOKEN_KEY, async(err, decoded) => {
         if(err) {
-            console.log("this null?: " + accessToken);
             const error = new Error(err.message)
             error.code = 401;
             return next(error)
@@ -38,11 +37,11 @@ exports.isAuthenticated = (req, res, next) => {
 }
 
 exports.formatDate = (date) => {
-    return format(new Date(date), 'P H:mm');
+    return format(new Date(date), 'dd-MM-y H:mm');
 }
 
 exports.formatDateWithoutTime = (date) => {
-    return format(new Date(date), 'P');
+    return format(new Date(date), 'dd-MM-y');
 }
 
 

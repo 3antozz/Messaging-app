@@ -3,7 +3,7 @@ import { AuthContext } from '../../contexts'
 import { useContext, useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 export default function Messages ({conversationID, setProfileID}) {
-    const { user, token } = useContext(AuthContext)
+    const { user, token, socket } = useContext(AuthContext)
     const [conversation, setConversation] = useState(null);
     const [messageInput, setMessageInput] = useState("");
     const [isFetched, setFetched] = useState(false)
@@ -13,21 +13,20 @@ export default function Messages ({conversationID, setProfileID}) {
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/${conversationID}`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token.current}`
                     }
                 })
                 const response = await request.json();
                 console.log(response);
                 setConversation(response.conversation);
-                setFetched(true)
             } catch(err) {
                 console.log(err)
             }
         }
-        if(conversationID && !isFetched) {
+        if(conversationID) {
             fetchConversation();
         }
-    }, [conversationID, isFetched, token])
+    }, [conversationID, token])
     useEffect(() => {
         const container = scrollRef.current;
         if (container) {
@@ -36,11 +35,15 @@ export default function Messages ({conversationID, setProfileID}) {
     }, [isFetched])
     const handleMessageSend = async(e) => {
         e.preventDefault();
+        if(!messageInput) {
+            return;
+        }
         try {
+            socket.current.emit('chat message', messageInput);
             const request = await fetch(`${import.meta.env.VITE_API_URL}/messages/${conversationID}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${token.current}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
@@ -92,7 +95,7 @@ export default function Messages ({conversationID, setProfileID}) {
                 </form>
                 <form className={styles.uploadDiv}>
                     <label htmlFor="image" hidden></label>
-                    <input type="file" />
+                    <input type="file" id='image' />
                     {/* <button>Send Image</button> */}
                 </form>
             </div>

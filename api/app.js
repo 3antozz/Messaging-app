@@ -7,9 +7,20 @@ const friendsRouter = require('./routes/friends')
 const convosRouter = require('./routes/conversations')
 const messagesRouter = require('./routes/messages')
 const usersRouter = require('./routes/users')
+const { createServer } = require('node:http');
+const { Server } = require('socket.io');
 
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: ["http://localhost:5173"],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true
+    },
+    
+});
 
 
 const allowedOrigins = [
@@ -35,6 +46,13 @@ app.use(cookieParser())
 app.use(express.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
 
+
+io.on('connection', (socket) => {
+    console.log('a user connected');
+    socket.on('chat message', (msg) => {
+        io.emit('chat message', msg);
+    });
+});
 
 
 app.use('/', authRouter);
@@ -83,4 +101,4 @@ app.use((error, req, res, next) => {
 
 
 
-app.listen(3000, () => console.log('Server Listening on port 3000'));
+server.listen(3000, () => console.log('Server Listening on port 3000'));

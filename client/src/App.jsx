@@ -6,12 +6,15 @@ import Login from './components/auth/login/login.jsx';
 import Register from './components/auth/register/register.jsx';
 import Messenger from './components/Messenger/Messenger.jsx';
 import { AuthContext } from './contexts.js';
+import { io } from "socket.io-client";
 
 function App() {
-  const [token, setToken] = useState(null)
+  const token = useRef(null)
   const [user, setUser] = useState(null)
   const timeoutRef = useRef(null);
   const [isFetched, setFetched] = useState(false)
+  const [isAuthenticated, setAuthentication] = useState(false)
+  const socket = useRef(io(`${import.meta.env.VITE_API_URL}`))
   const navigate = useNavigate();
   const logout = useCallback(async() => {
     try {
@@ -21,9 +24,10 @@ function App() {
       })
       const response = await request.json();
       if(response.done) {
-        setToken(null)
+        token.current = null;
         setUser(null)
         setFetched(false)
+        setAuthentication(false);
         navigate('/')
       }
     } catch(err) {
@@ -38,7 +42,6 @@ function App() {
       })
       const response = await request.json();
       console.log(response);
-      setToken(response.accessToken);
       if(response.message === 'jwt expired') {
         const error = new Error('Please login in')
         logout();
@@ -49,6 +52,8 @@ function App() {
         throw error
       }
       if(response.accessToken) {
+        token.current = response.accessToken;
+        setAuthentication(true);
         clearTimeout(timeoutRef.current);
         timeoutRef.current = setTimeout(fetchToken,  1000 * 60 * 4);
       }
@@ -59,17 +64,18 @@ function App() {
   }, [logout, navigate])
 
   useEffect(() => {
-      if(!token) {
+      if(!token.current) {
         fetchToken();
     }
-  }, [fetchToken, token])
+  }, [fetchToken])
+
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const request = await fetch(`${import.meta.env.VITE_API_URL}/users/user`, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token.current}`
           }
         })
         const response = await request.json();
@@ -81,16 +87,16 @@ function App() {
         setFetched(false)
       }
     }
-    if(!isFetched && token) {
+    if(!isFetched && isAuthenticated) {
       if(!user) {
         fetchUser();
       }
     }
-  }, [isFetched, token, user])
+  }, [isFetched, user, isAuthenticated])
 
 
   return (
-    <AuthContext.Provider value={{token, setToken, user, setUser, timeoutRef, fetchToken, logout}}>
+    <AuthContext.Provider value={{token, user, setUser, setAuthentication, socket, timeoutRef, fetchToken, logout}}>
         <Routes>
             <Route path="/" element={<Messenger />} />
             <Route element={<AuthLayout />}>

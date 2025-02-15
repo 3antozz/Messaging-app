@@ -19,7 +19,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
                     headers: {
-                        'Authorization': `Bearer ${token}`
+                        'Authorization': `Bearer ${token.current}`
                     }
                 })
                 const response = await request.json();
@@ -57,7 +57,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
             const request = await fetch(`${import.meta.env.VITE_API_URL}/friends/add`, {
                 method: 'PUT',
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${token.current}`,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
