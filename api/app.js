@@ -7,6 +7,8 @@ const friendsRouter = require('./routes/friends')
 const convosRouter = require('./routes/conversations')
 const messagesRouter = require('./routes/messages')
 const usersRouter = require('./routes/users')
+const messagesController = require('./controllers/messagesController')
+const fn = require('./routes/fn')
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
 
@@ -49,9 +51,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 io.on('connection', (socket) => {
     console.log('a user connected');
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
+    socket.on('chat message', async(msgData) => {
+        const message = await messagesController.postMessageSocket(+msgData.convoId, msgData.message, +msgData.senderId)
+        if (message) {
+            const formattedMessage = {...message, date: fn.formatDate(message.date)}
+            io.to(msgData.convoId).emit('chat message', formattedMessage);
+        }
     });
+    socket.on('join rooms', (conversationIds) => {
+        socket.join(conversationIds);
+    })
 });
 
 

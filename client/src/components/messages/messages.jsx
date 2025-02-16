@@ -1,15 +1,18 @@
 import styles from './messages.module.css'
 import { AuthContext } from '../../contexts'
-import { useContext, useEffect, useState, useRef } from 'react';
+import { useContext, useEffect, useState, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 export default function Messages ({conversationID, setProfileID}) {
     const { user, token, socket } = useContext(AuthContext)
-    const [conversation, setConversation] = useState(null);
     const [messageInput, setMessageInput] = useState("");
-    const [isFetched, setFetched] = useState(false)
+    const [conversations, setConversations] = useState({})
     const scrollRef = useRef(null);
+    const conversation = useMemo(() => {
+        return conversations[conversationID];
+    },  [conversationID, conversations])
     useEffect(() => {
         const fetchConversation = async() => {
+            console.log('fetched!');
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/${conversationID}`, {
                     headers: {
@@ -18,45 +21,70 @@ export default function Messages ({conversationID, setProfileID}) {
                 })
                 const response = await request.json();
                 console.log(response);
-                setConversation(response.conversation);
+                setConversations((prev) => ({...prev, [response.conversation.id]: response.conversation}))
             } catch(err) {
                 console.log(err)
             }
         }
         if(conversationID) {
-            fetchConversation();
+            const convo = conversations[conversationID];
+            if(!convo) {
+                fetchConversation();
+            }
         }
-    }, [conversationID, token])
+    }, [conversationID, conversations, token])
     useEffect(() => {
+        const handleIncomingMessage = (msg) => {
+            console.log(msg);
+            if (conversations[msg.conversationId]) {
+                setConversations((prev) => ({...prev, [msg.conversationId]: {
+                    ...prev[msg.conversationId], messages: [
+                        ...prev[msg.conversationId].messages,
+                        msg
+                    ]  
+                }}))
+            }
+        }
+        const listener = socket.current
+        socket.current.on('chat message', handleIncomingMessage)
         const container = scrollRef.current;
         if (container) {
             container.scrollTop = container.scrollHeight;
         }
-    }, [isFetched])
+        return () => {
+            listener.off('chat message', handleIncomingMessage);
+        };
+    }, [conversations, socket])
     const handleMessageSend = async(e) => {
         e.preventDefault();
         if(!messageInput) {
             return;
         }
         try {
-            socket.current.emit('chat message', messageInput);
-            const request = await fetch(`${import.meta.env.VITE_API_URL}/messages/${conversationID}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token.current}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    content: messageInput
-                })
-            })
-            const response = await request.json();
-            setFetched(false)
+            socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput});
             setMessageInput('');
-            console.log(response);
-          } catch(err) {
-            console.log(err)
-          }
+        } catch (error) {
+            console.log(error)
+        }
+        // try {
+        //     socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput});
+        //     const request = await fetch(`${import.meta.env.VITE_API_URL}/messages/${conversationID}`, {
+        //         method: 'POST',
+        //         headers: {
+        //             'Authorization': `Bearer ${token.current}`,
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({
+        //             content: messageInput
+        //         })
+        //     })
+        //     const response = await request.json();
+        //     setFetched(false)
+        //     setMessageInput('');
+        //     console.log(response);
+        //   } catch(err) {
+        //     console.log(err)
+        //   }
     }
     if (!conversation || !user) {
         return <h1>Loading</h1>

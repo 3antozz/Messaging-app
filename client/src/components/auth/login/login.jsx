@@ -29,7 +29,7 @@ export default function Login () {
             })
             const response = await request.json();
             if(!request.ok) {
-                const error = new Error('Invalid Request')
+                const error = new Error(response.message || 'Invalid Request')
                 error.errors = response.errors;
                 throw error
             }
@@ -50,8 +50,15 @@ export default function Login () {
             }, 3000)
         } catch(err) {
             console.log(err)
-            setErrors(err.errors)
-        } 
+            if(err.errors) {
+                setErrors(err.errors)
+            } else {
+                setErrors([err.message])
+            }
+
+        } finally {
+            setLoading(false);
+        }
     }
     return (
         <form onSubmit={handleSubmit}>

@@ -5,14 +5,16 @@ import { useContext, useState, useMemo, memo, useEffect } from 'react';
 import { MessageSquare, UserPlus } from 'lucide-react';
 
 const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
-    const { user, token } = useContext(AuthContext)
+    const { user, token, socket } = useContext(AuthContext)
+    const [conversations, setConversations] = useState([])
+    const [friends, setFriends] = useState([])
     const [view, setView] = useState('Messages')
     const [users, setUsers] = useState([])
     const [isFetched, setFetched] = useState(false)
     const [usersLoading, setUsersLoading] = useState(false)
     const [error, setError] = useState(false)
-    const groups = useMemo(() => user && user.conversations.filter(group => group.isGroup), [user])
-    const conversations = useMemo(() => user && user.conversations.filter(conversation => conversation.lastMessageTime), [user])
+    const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
+    const messages = useMemo(() => conversations.filter(conversation => conversation.lastMessageTime), [conversations])
     useEffect(() => {
         const fetchUsers = async() => {
             setUsersLoading(true)
@@ -42,6 +44,27 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
             fetchUsers();
         }
     }, [token, isFetched])
+
+    useEffect(() => {
+        const connectToRooms = () => {
+            const conversationsIds = conversations.map((conversation) => `${conversation.id}`)
+            socket.current.emit('join rooms', conversationsIds)
+        }
+        if(user && conversations.length > 0) {
+            connectToRooms();
+        }
+    }, [socket, user, conversations])
+
+    useEffect(() => {
+        if(user) {
+            setConversations(user.conversations)
+            setFriends(user.friends)
+        }
+    }, [user])
+    // useEffect(() => {
+    //     socket.current.on('chat message', (msg) => {
+    //     });
+    // }, [socket])
     if(!user) {
         return <h3>loading...</h3>
     }
@@ -109,7 +132,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
             <section className={styles.conversations}>
                 <ul onClick={handleListClick}>
                     {view === 'Friends' ?
-                    user.friends.map(friend => 
+                    friends.map(friend => 
                         <li key={friend.id} className={styles.conversation}>
                             <div className={styles.friendButton}>
                                 {friend.picture_url ? <button id={friend.id} data-func="profile"><img src={friend.picture_url} alt={`${friend.first_name} ${friend.last_name} profile picture`}></img></button> : <button id={friend.id} data-func="profile"><img data-func="profile" src='/images/no-profile-pic.jpg'></img></button>}
@@ -128,7 +151,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
                             </button>
                         </li>
                     ) : view === 'Messages' ? 
-                    conversations.map(conversation => {
+                    messages.map(conversation => {
                         return (
                         <li key={conversation.id} className={styles.conversation}>
                             <button id={conversation.id} data-func='convo' className={styles.messageButton}>
