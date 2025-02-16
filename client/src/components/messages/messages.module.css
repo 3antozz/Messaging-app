@@ -5,6 +5,7 @@
 
 .main {
     overflow-y: auto;
+    position: relative;
 }
 
 .info > button{
@@ -62,26 +63,53 @@
     list-style: none;
 }
 
-.message {
-    margin-bottom: 0.5rem;
-}
-
 .message > div {
     display: flex;
     gap: 0.5rem;
 }
 
+.message {
+    margin-bottom: 0.2rem;
+}
+
 .messageDate {
-    font-size: 0.6rem;
+    width: max-content;
+    font-size: 1rem;
     padding-left: 0.2rem;
+    visibility: hidden;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgb(90, 88, 88);
+    padding: 0.3rem 0.8rem;
+    border-radius: 10px;
+    opacity: 0;
+    transition: opacity 150ms 250ms ease;
+    z-index: 10;
+}
+
+.message > div > div:hover .messageDate {
+    opacity: 1;
+    visibility: visible;
 }
 
 .yourMessage {
     background-color: #3551ca;
+    border-radius: 15px;
+    margin-left: auto;
+}
+
+.yourMessage + p {
+    text-align: right;
 }
 
 .otherMessage {
     background-color: rgb(90, 88, 88);
+    border-radius: 15px;
+}
+
+.yourDiv {
+    justify-content: flex-end;
 }
 
 .messageContent {
@@ -90,7 +118,7 @@
     padding: 0.4rem 0.6rem;
     font-size: 1.1rem;
 }
-.message img {
+.message img, .void {
     width: 2.5rem;
     aspect-ratio: 1/1;
     border-radius: 50%;
@@ -101,3 +129,4 @@
 .messageSender {
     font-weight: bold;
 }
+

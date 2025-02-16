@@ -8,6 +8,6 @@ exports.postMessage = async(req, res) => {
 }
 
 
-exports.postMessageSocket = async (convoId, content, senderId) => {
-    return await db.addMessage(convoId, content, senderId);
+exports.postMessageSocket = async (convoId, content, senderId, date) => {
+    return await db.addMessage(convoId, content, senderId, new Date(date));
 }

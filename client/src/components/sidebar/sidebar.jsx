@@ -17,6 +17,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
     const messages = useMemo(() => conversations.filter(conversation => conversation.lastMessageTime), [conversations])
     useEffect(() => {
         const fetchUsers = async() => {
+            console.log('users fetching?')
             setUsersLoading(true)
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
@@ -30,6 +31,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
                     const error = new Error('An error has occured, please try again later')
                     throw error;
                 }
+                console.log('setting users bro')
                 setUsers(response.users)
                 setError(false)
                 setFetched(true)
@@ -54,17 +56,34 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
             connectToRooms();
         }
     }, [socket, user, conversations])
+    useEffect(() => {
+        const updateLastMessage = (msg) => {
+            const index = conversations.findIndex(conversation => msg.conversationId === conversation.id);
+            const copy = conversations.slice();
+            // copy[index] = {...copy[index], messages: [msg]}
+            const convo = {...copy[index], messages: [msg]}
+            copy.splice(index, 1)
+            copy.unshift(convo);
+            setConversations(copy);
+        }
+        if(socket.current) {
+            socket.current.on('chat message', updateLastMessage);
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('chat message', updateLastMessage);
+            }
+        };
+    }, [socket, conversations])
 
     useEffect(() => {
         if(user) {
             setConversations(user.conversations)
+            console.log(user.conversations);
             setFriends(user.friends)
         }
     }, [user])
-    // useEffect(() => {
-    //     socket.current.on('chat message', (msg) => {
-    //     });
-    // }, [socket])
     if(!user) {
         return <h3>loading...</h3>
     }

@@ -52,15 +52,23 @@ app.use(express.static(path.join(__dirname, 'public')));
 io.on('connection', (socket) => {
     console.log('a user connected');
     socket.on('chat message', async(msgData) => {
-        const message = await messagesController.postMessageSocket(+msgData.convoId, msgData.message, +msgData.senderId)
-        if (message) {
-            const formattedMessage = {...message, date: fn.formatDate(message.date)}
-            io.to(msgData.convoId).emit('chat message', formattedMessage);
+        try {
+            const message = await messagesController.postMessageSocket(+msgData.convoId, msgData.message, +msgData.senderId, msgData.date)
+            if (message) {
+                const formattedMessage = {...message, date: fn.formatDate(message.date)}
+                io.to(msgData.convoId).emit('chat message', formattedMessage);
+            }
+        } catch(err) {
+            console.log(err);
+            io.to(msgData.convoId).emit('error', { message: "Failed to send message" });
         }
     });
     socket.on('join rooms', (conversationIds) => {
         socket.join(conversationIds);
     })
+    socket.on("disconnect", () => {
+        console.log("User disconnected:", socket.id);
+    });
 });
 
 

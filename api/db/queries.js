@@ -192,23 +192,49 @@ exports.getConversation = async(userId, id) => {
 //     })
 // }
 
-exports.addMessage = async(convoId, content, senderId) => {
-    return await prisma.message.create({
-        data: {
-            conversationId: convoId,
-            content,
-            senderId
-        },
-        include: {
-            sender: {
-                omit: {
-                    password: true,
-                    bio: true,
-                    username: true
+// exports.addMessage = async(convoId, content, senderId) => {
+//     return await prisma.message.create({
+//         data: {
+//             conversationId: convoId,
+//             content,
+//             senderId
+//         },
+//         include: {
+//             sender: {
+//                 omit: {
+//                     password: true,
+//                     bio: true,
+//                     username: true
+//                 }
+//             }
+//         }
+//     })
+// }
+
+exports.addMessage = async(convoId, content, senderId, date) => {
+    const result = await prisma.$transaction([
+        prisma.message.create({
+            data: {
+                conversationId: convoId,
+                content,
+                senderId
+            },
+            include: {
+                sender: {
+                    omit: {
+                        password: true,
+                        bio: true,
+                        username: true
+                    }
                 }
             }
-        }
-    })
+        }),
+        prisma.conversation.update({
+            where: { id: convoId },
+            data: { lastMessageTime: date }
+          })
+    ])
+    return result[0]
 }
 
 exports.getAllUsers = async(userId) => {

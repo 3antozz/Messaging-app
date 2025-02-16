@@ -14,7 +14,7 @@ function App() {
   const timeoutRef = useRef(null);
   const [isFetched, setFetched] = useState(false)
   const [isAuthenticated, setAuthentication] = useState(false)
-  const socket = useRef(io(`${import.meta.env.VITE_API_URL}`))
+  const socket = useRef(null)
   const navigate = useNavigate();
   const logout = useCallback(async() => {
     try {
@@ -68,6 +68,16 @@ function App() {
         fetchToken();
     }
   }, [fetchToken])
+
+  useEffect(() => {
+    if(isAuthenticated) {
+      socket.current = io(`${import.meta.env.VITE_API_URL}`)
+      socket.current.on("connect", () => {
+        console.log("Connected:", socket.current.id);
+      });
+    }
+    return () => socket.current && socket.current.disconnect()
+  }, [isAuthenticated])
 
 
   useEffect(() => {
