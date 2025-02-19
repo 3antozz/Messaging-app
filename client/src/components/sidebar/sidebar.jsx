@@ -2,7 +2,7 @@ import styles from './sidebar.module.css'
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
-import { MessageSquare, UserPlus } from 'lucide-react';
+import { MessageSquare, UserPlus, LoaderCircle } from 'lucide-react';
 
 const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
     const { user, token, socket } = useContext(AuthContext)
@@ -16,8 +16,12 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
     const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
     const messages = useMemo(() => conversations.filter(conversation => conversation.lastMessageTime), [conversations])
     useEffect(() => {
+        if(user) {
+            setID(user.conversations[0].id)
+        }
+    }, [setID, user])
+    useEffect(() => {
         const fetchUsers = async() => {
-            console.log('users fetching?')
             setUsersLoading(true)
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
@@ -31,7 +35,6 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
                     const error = new Error('An error has occured, please try again later')
                     throw error;
                 }
-                console.log('setting users bro')
                 setUsers(response.users)
                 setError(false)
                 setFetched(true)
@@ -60,7 +63,6 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
         const updateLastMessage = (msg) => {
             const index = conversations.findIndex(conversation => msg.conversationId === conversation.id);
             const copy = conversations.slice();
-            // copy[index] = {...copy[index], messages: [msg]}
             const convo = {...copy[index], messages: [msg]}
             copy.splice(index, 1)
             copy.unshift(convo);
@@ -84,9 +86,6 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
             setFriends(user.friends)
         }
     }, [user])
-    if(!user) {
-        return <h3>loading...</h3>
-    }
     const handleViews = (e) => {
         if (e.target.tagName === 'BUTTON') {
             setView(e.target.textContent); 
@@ -133,6 +132,26 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
             return;
         }
     } 
+    if(!user) {
+        return (
+            <>
+            <aside className={`${styles.sidebar} ${styles.sidebarLoading}`}>
+                <section className={styles.you}>
+                    <button disabled><img src='/images/no-profile-pic.jpg'></img></button>
+                </section>
+                <nav onClick={handleViews}>
+                    <button disabled>Messages</button>
+                    <button disabled>Friends</button>
+                    <button disabled>Groups</button>
+                    <button disabled>Users</button>
+                </nav>
+                <section className={styles.conversationsLoading}>
+                    <LoaderCircle  size={40} color='white' className={styles.loading}/>
+                </section>
+            </aside>
+            </>
+        )
+    }
     return (
         <>
         <aside className={styles.sidebar}>

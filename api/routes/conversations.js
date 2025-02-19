@@ -11,7 +11,8 @@ router.get('/:convoId', fn.isAuthenticated, asyncHandler(async(req, res) => {
     const convo = await db.getConversation(req.user.id, convoId);
     const formattedMessages = convo.messages.map((message) => ({ ...message, date: fn.formatDate(message.date)}))
     const newConvo = { ...convo, messages: formattedMessages}
-    return res.json({conversation: newConvo});
+    setTimeout(() => res.json({conversation: newConvo}), 1500)
+    // return res.json({conversation: newConvo});
 }))
 
 

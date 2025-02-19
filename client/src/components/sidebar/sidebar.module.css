@@ -1,6 +1,12 @@
 .sidebar {
     padding: 0 1rem;
     border-right: 2px solid rgb(178, 176, 176);
+    width: 400px;
+}
+
+.sidebarLoading {
+    display: flex;
+    flex-direction: column;
 }
 
 .you, .sidebar nav {
@@ -10,6 +16,14 @@
 
 .conversations {
     padding: 0.5rem 0.1rem;
+}
+
+.conversationsLoading {
+    padding: 0.5rem 0.1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
 }
 
 .sidebar p {
@@ -127,4 +141,17 @@ nav {
     aspect-ratio: 1/1;
     border-radius: 50%;
     align-self: flex-start;
+}
+
+.loading {
+    animation: 800ms linear 0s infinite loading;
+}
+
+@keyframes loading {
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(1turn);
+    }
 }

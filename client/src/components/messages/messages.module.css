@@ -1,11 +1,17 @@
 .info, .main {
-    padding: 0.5rem;
     border-bottom: 2px solid rgb(178, 176, 176);
+}
+
+.info {
+    padding: 1rem;
 }
 
 .main {
     overflow-y: auto;
     position: relative;
+    padding: 0.5rem;
+    padding-bottom: 0;
+    width: 350px;
 }
 
 .info > button{
@@ -43,9 +49,16 @@
 
 .messenger {
     border-radius: 15px;
-    padding: 0 1rem;
     display: flex;
     flex-direction: column;
+    width: 350px;
+}
+
+.mainLoading {
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .messageInfo {
@@ -81,11 +94,12 @@
     left: 50%;
     transform: translateX(-50%);
     background-color: rgb(90, 88, 88);
-    padding: 0.3rem 0.8rem;
+    padding: 0.2rem 0.8rem;
     border-radius: 10px;
     opacity: 0;
-    transition: opacity 150ms 250ms ease;
+    transition: opacity 150ms 280ms ease;
     z-index: 10;
+    border: 2px solid grey;
 }
 
 .message > div > div:hover .messageDate {
@@ -117,6 +131,7 @@
     border-radius: 15px;
     padding: 0.4rem 0.6rem;
     font-size: 1.1rem;
+    max-width: 230px;
 }
 .message img, .void {
     width: 2.5rem;
@@ -128,5 +143,60 @@
 
 .messageSender {
     font-weight: bold;
+}
+
+.messageDiv {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0;
+}
+
+.messageDiv input {
+    resize: none;
+    width: 100%;
+    height: 40px;
+    background-color: #313338;
+    border-radius: 10px;
+    align-content: center;
+    color: inherit;
+    font-size: 1.1rem;
+    padding: 0.2rem 0.4rem;
+    flex: 1;
+    border: 2px solid grey;
+}
+
+.messageDiv button {
+    background-color: #3551ca;
+    border: none;
+    align-self: stretch;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 200ms ease;
+    padding: 0 0.5rem;
+}
+
+.messageDiv button:hover {
+    cursor: pointer;
+    transform: scale(1.2);
+    filter: brightness(1.3);
+}
+
+
+.forms {
+    padding: 0.8rem 1rem;
+}
+
+.loading {
+    animation: 800ms linear 0s infinite loading;
+}
+
+@keyframes loading {
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(1turn);
+    }
 }
 

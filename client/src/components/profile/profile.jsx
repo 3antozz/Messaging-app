@@ -1,5 +1,5 @@
 import styles from './profile.module.css'
-import { memo, useEffect, useState, useContext } from 'react'
+import { memo, useEffect, useState, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { X } from 'lucide-react';
@@ -7,15 +7,19 @@ import { X } from 'lucide-react';
 const Profile = memo(function Profile ({userId, setProfileID}) {
     const { user } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
-    const [profile, setProfile] = useState(null)
+    const [profiles, setProfiles] = useState({})
+    const profile = useMemo(() => {
+        return profiles[userId];
+    },  [profiles, userId])
     useEffect(() => {
         const fetchProfile = async() => {
+            console.log('profile fetched!')
             try {
                 setLoading(true)
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`)
                 const response = await request.json();
                 console.log(response);
-                setProfile(response.profile);
+                setProfiles((prev) => ({...prev, [response.profile.id]: response.profile}))
             } catch(err) {
                 console.log(err)
             } finally {
@@ -23,9 +27,12 @@ const Profile = memo(function Profile ({userId, setProfileID}) {
             }
         }
         if(userId) {
-            fetchProfile();
+            const profile = profiles[userId];
+            if(!profile) {
+                fetchProfile();
+            }
         }
-    }, [userId])
+    }, [profiles, userId])
 
     if(!profile) {
         return <></>

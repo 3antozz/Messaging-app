@@ -14,7 +14,8 @@ router.get('/', fn.isAuthenticated , asyncHandler(async(req, res) => {
 
 router.get('/user', fn.isAuthenticated, (req, res) => {
     const newUser = fn.mergeFriends(req.user);
-    res.json({user: newUser})
+    setTimeout(() => res.json({user: newUser}), 1500)
+    // res.json({user: newUser})
 })
 
 router.get('/:userId', asyncHandler(async(req, res) => {

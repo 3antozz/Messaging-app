@@ -23,15 +23,18 @@ function App() {
         credentials: 'include'
       })
       const response = await request.json();
+      console.log(response);
       if(response.done) {
         token.current = null;
         setUser(null)
         setFetched(false)
         setAuthentication(false);
-        navigate('/')
+        token.current = null;
       }
     } catch(err) {
       console.log(err)
+    } finally {
+      navigate('/login')
     }
   }, [navigate])
   const fetchToken = useCallback(async function fetchToken () {
@@ -44,7 +47,6 @@ function App() {
       console.log(response);
       if(response.message === 'jwt expired') {
         const error = new Error('Please login in')
-        logout();
         throw error
       }
       if(!request.ok) {
@@ -58,10 +60,12 @@ function App() {
         timeoutRef.current = setTimeout(fetchToken,  1000 * 60 * 4);
       }
     } catch(err) {
-      navigate('/login');
+      if(isAuthenticated) {
+        logout();
+      }
       console.log(err);
     }
-  }, [logout, navigate])
+  }, [logout, isAuthenticated])
 
   useEffect(() => {
       if(!token.current) {
