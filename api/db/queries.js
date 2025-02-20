@@ -97,6 +97,21 @@ exports.getUserForClient = async(username) => {
 }
 
 exports.addFriend = async(userId, friendId) => {
+    const existingConversation = await prisma.conversation.findFirst({
+        where: {
+            participants: {
+                some: {
+                    AND: [
+                        {id: userId},
+                        {id: friendId}
+                    ]
+                }
+            }
+        },
+        select: {
+            id: true
+        }
+    })
     return await prisma.friendship.create({
         data: {
             user1: {
@@ -110,14 +125,42 @@ exports.addFriend = async(userId, friendId) => {
                 }
             },
             conversation: {
-                create: {
-                    participants: {
-                        connect: [
-                            { id: userId },
-                            { id: friendId }
-                        ]
+                connectOrCreate: {
+                    where: {
+                        id: existingConversation && existingConversation.id || -1
+                    },
+                    create: {
+                        participants: {
+                            connect: [
+                                {id: userId},
+                                {id: friendId}
+                            ]
+                        }
                     }
                 }
+            }
+        },
+        select: {
+            user2: {
+                omit: {
+                    password: true,
+                    bio: true,
+                    username: true,
+                }
+            },
+            conversationId: true,
+        }
+    })
+}
+
+exports.createConversation = async(user1, user2) => {
+    return await prisma.conversation.create({
+        data: {
+            participants: {
+                connect: [
+                    {id: user1},
+                    {id: user2}
+                ]
             }
         }
     })
@@ -125,16 +168,12 @@ exports.addFriend = async(userId, friendId) => {
 
 
 exports.removeFriend = async(userId, friendId) => {
-    return await prisma.user.update({
+    return await prisma.friendship.deleteMany({
         where: {
-            id: userId
-        },
-        data: {
-            friends: {
-                disconnect: {
-                    id: friendId
-                }
-            }
+            OR: [
+                { user1Id: userId, user2Id: friendId },
+                { user1Id: friendId, user2Id: userId }
+            ]
         }
     })
 }
@@ -175,41 +214,6 @@ exports.getConversation = async(userId, id) => {
     })
 }
 
-// exports.addMessage = async(convoId, content, senderId) => {
-//     return await prisma.conversation.update({
-//         where: {
-//             id: convoId
-//         },
-//         data: {
-//             messages: {
-//                 create: {
-//                     content,
-//                     senderId
-//                 }
-//             },
-//             lastMessageTime: new Date()
-//         }
-//     })
-// }
-
-// exports.addMessage = async(convoId, content, senderId) => {
-//     return await prisma.message.create({
-//         data: {
-//             conversationId: convoId,
-//             content,
-//             senderId
-//         },
-//         include: {
-//             sender: {
-//                 omit: {
-//                     password: true,
-//                     bio: true,
-//                     username: true
-//                 }
-//             }
-//         }
-//     })
-// }
 
 exports.addMessage = async(convoId, content, senderId, date) => {
     const result = await prisma.$transaction([

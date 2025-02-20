@@ -48,8 +48,8 @@ model Friendship {
   user1Id           Int
   user2             User              @relation(name: "friendship2", fields: [user2Id], references: [id])
   user2Id           Int
-  conversation      Conversation      @relation(fields: [conversationId], references: [id])       
-  conversationId    Int               @unique   
+  conversation      Conversation?     @relation(fields: [conversationId], references: [id])       
+  conversationId    Int?              @unique   
 
   @@unique([user1Id, user2Id])        
 }

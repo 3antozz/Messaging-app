@@ -12,13 +12,8 @@
 
 .profile {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    flex-direction: column;
     background-color: #101218;
-    width: 500px;
+    width: 400px;
     margin: auto;
     padding: 1rem 2rem;
     border-radius: 15px;
@@ -26,10 +21,55 @@
     color: white;
 }
 
+.info {
+    background-color: #313338;
+    border-radius: 15px;
+    padding: 1rem;
+    padding-bottom: 0.5rem;
+}
+
+.profile > div {
+    margin-bottom: 1rem;
+}
+
+.profile h3 {
+    text-align: center;
+}
+
+.bio {
+    font-weight: bold;
+}
+
+.date {
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    border-top: 1px solid grey;
+    padding-top: 0.5rem;
+}
+
 .profile img {
-    width: 8rem;
+    width: 6rem;
     aspect-ratio: 1/1;
     border-radius: 50%;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0.5rem;
+    gap: 0.5rem;
+}
+
+.top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    border-bottom: 1px solid grey;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem !important;
 }
 
 .close {
@@ -52,8 +92,7 @@
     stroke: red;
 }
 
-.edit {
-    background-color: #3551ca;
+.buttons button, .edit {
     color: inherit;
     border-radius: 8px;
     padding: 0.3rem 0.6rem;
@@ -62,7 +101,19 @@
     margin: 0;
 }
 
-.edit:hover {
+.addFriend {
+    background-color: #3cca35;
+}
+
+.removeFriend {
+    background-color: #ca3535;
+}
+
+.edit, .messageBtn {
+    background-color: #3551ca;
+}
+
+.buttons button:hover, .edit:hover {
     cursor: pointer;
     transform: scale(1.2);
     filter: brightness(1.3);

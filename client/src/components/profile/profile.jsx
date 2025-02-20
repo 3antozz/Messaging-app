@@ -4,13 +4,66 @@ import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { X } from 'lucide-react';
 
-const Profile = memo(function Profile ({userId, setProfileID}) {
-    const { user } = useContext(AuthContext)
+const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends}) {
+    const { user, token } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [profiles, setProfiles] = useState({})
     const profile = useMemo(() => {
         return profiles[userId];
     },  [profiles, userId])
+    const addFriend = async() => {
+        try {
+            const request = await fetch(`${import.meta.env.VITE_API_URL}/friends/add`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token.current}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    friendId: profile.id
+                })
+            })
+            const response = await request.json();
+            console.log(response);
+            if(!request.ok) {
+                const error = new Error('An error has occured, please try again later')
+                throw error;
+            }
+            setFriends(prev => ([...prev, response.friend]))
+            setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: true} }))
+        } catch(err) {
+            console.log(err)
+        }
+    }
+    const removeFriend = async() => {
+        try {
+            const request = await fetch(`${import.meta.env.VITE_API_URL}/friends/remove`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token.current}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    friendId: profile.id
+                })
+            })
+            const response = await request.json();
+            console.log(response);
+            if(!request.ok) {
+                const error = new Error('An error has occured, please try again later')
+                throw error;
+            }
+            setFriends(prev => {
+                const array = prev.slice();
+                const index = array.findIndex(friend => friend.id === profile.id);
+                array.splice(index, 1);
+                return array;
+            })
+            setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: false} }))
+        } catch(err) {
+            console.log(err)
+        }
+    }
     useEffect(() => {
         const fetchProfile = async() => {
             console.log('profile fetched!')
@@ -19,6 +72,10 @@ const Profile = memo(function Profile ({userId, setProfileID}) {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`)
                 const response = await request.json();
                 console.log(response);
+                const isFriend = friends.findIndex((friend) => friend.id === response.profile.id)
+                if (isFriend > -1) {
+                    response.profile = {...response.profile, isFriend: true}
+                }
                 setProfiles((prev) => ({...prev, [response.profile.id]: response.profile}))
             } catch(err) {
                 console.log(err)
@@ -32,7 +89,7 @@ const Profile = memo(function Profile ({userId, setProfileID}) {
                 fetchProfile();
             }
         }
-    }, [profiles, userId])
+    }, [friends, profiles, userId])
 
     if(!profile) {
         return <></>
@@ -46,14 +103,25 @@ const Profile = memo(function Profile ({userId, setProfileID}) {
                 <button onClick={() => setProfileID(null)}>Close</button>
                 </> :
                 <>
-                {profile.picture_url ? <img src={profile.picture_url} alt={`${profile.first_name} ${profile.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
-                <h2>{profile.first_name} {profile.last_name}</h2>
-                <p>{profile.bio ? `${profile.bio}` : 'User has no bio'}</p>
-                <p>Join Date: {profile.joinDate}</p>
-                <button className={styles.close} onClick={() => setProfileID(null)}><X size={30} color='white'/></button>
-                {(user && user.id == userId) && 
-                <button className={styles.edit}>Edit Profile</button>
+                <div className={styles.top}>
+                    {profile.picture_url ? <img src={profile.picture_url} alt={`${profile.first_name} ${profile.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
+                    <h2>{profile.first_name} {profile.last_name}</h2>
+                    {(user && user.id == userId) && 
+                    <button className={styles.edit}>Edit Profile</button>
+                    }
+                </div>
+                <h3>About Me</h3>
+                <div className={styles.info}>
+                    <p className={styles.bio}>{profile.bio ? `${profile.bio}` : 'User has no bio'}</p>
+                    <p className={styles.date}>Join Date: {profile.joinDate}</p>
+                </div>
+                {(user && user.id !== +userId) &&
+                <div className={styles.buttons}>
+                    <button className={styles.messageBtn}>Message</button>
+                    {profile.isFriend ? <button className={styles.removeFriend} onClick={removeFriend}>Remove Friend</button> : <button className={styles.addFriend} onClick={addFriend}>Add friend</button>}
+                </div>
                 }
+                <button className={styles.close} onClick={() => setProfileID(null)}><X size={30} color='white'/></button>
                 </>
                 }
             </section>
@@ -66,6 +134,8 @@ const Profile = memo(function Profile ({userId, setProfileID}) {
 Profile.propTypes = {
     userId: PropTypes.number,
     setProfileID: PropTypes.func.isRequired,
+    friends: PropTypes.array.isRequired,
+    setFriends: PropTypes.func.isRequired,
 }
 
 export default Profile;

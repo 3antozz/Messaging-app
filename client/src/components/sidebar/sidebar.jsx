@@ -2,12 +2,11 @@ import styles from './sidebar.module.css'
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
-import { MessageSquare, UserPlus, LoaderCircle } from 'lucide-react';
+import { MessageSquare, LoaderCircle } from 'lucide-react';
 
-const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
+const Sidebar = memo(function Sidebar ({setID, setProfileID, friends}) {
     const { user, token, socket } = useContext(AuthContext)
     const [conversations, setConversations] = useState([])
-    const [friends, setFriends] = useState([])
     const [view, setView] = useState('Messages')
     const [users, setUsers] = useState([])
     const [isFetched, setFetched] = useState(false)
@@ -15,11 +14,11 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
     const [error, setError] = useState(false)
     const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
     const messages = useMemo(() => conversations.filter(conversation => conversation.lastMessageTime), [conversations])
-    useEffect(() => {
-        if(user) {
-            setID(user.conversations[0].id)
-        }
-    }, [setID, user])
+    // useEffect(() => {
+    //     if(user) {
+    //         setID(user.conversations[0].id)
+    //     }
+    // }, [setID, user])
     useEffect(() => {
         const fetchUsers = async() => {
             setUsersLoading(true)
@@ -45,10 +44,10 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
                 setUsersLoading(false)
             }
         }
-        if(!isFetched) {
+        if(!isFetched && user) {
             fetchUsers();
         }
-    }, [token, isFetched])
+    }, [token, isFetched, user])
 
     useEffect(() => {
         const connectToRooms = () => {
@@ -82,8 +81,6 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
     useEffect(() => {
         if(user) {
             setConversations(user.conversations)
-            console.log(user.conversations);
-            setFriends(user.friends)
         }
     }, [user])
     const handleViews = (e) => {
@@ -93,41 +90,24 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
             return;
         }
     }
-    const addFriend = async(id) => {
-        try {
-            const request = await fetch(`${import.meta.env.VITE_API_URL}/friends/add`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token.current}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    friendId: id
-                })
-            })
-            const response = await request.json();
-            console.log(response);
-            if(!request.ok) {
-                const error = new Error('An error has occured, please try again later')
-                throw error;
-            }
-            setFetched(false)
-        } catch(err) {
-            console.log(err)
-            setError(true)
-        }
-    }
     const handleListClick = async(e) => {
         const button = e.target.closest('button')
         if (button && button.dataset.func === 'convo') {
             const id = button.id;
             setID(id)
+        } else if (button && button.dataset.func === 'new-convo') {
+            const userId = +button.id;
+            const isExistant = user.conversations.findIndex(conversation => {
+                return !conversation.isGroup && conversation.participants[0].id === userId
+            })
+            if(isExistant > -1) {
+                setID(user.conversations[isExistant].id)
+            } else {
+                return;
+            }
         } else if (button && button.dataset.func === 'profile') {
             const id = button.id;
             setProfileID(id)
-        } else if (button && button.dataset.func === 'add-friend') {
-            const id = button.id;
-            addFriend(id);
         } else {
             return;
         }
@@ -212,8 +192,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
                                 <button id={user.id} data-func="profile">{user.first_name} {user.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={user.id} data-func='convo'><MessageSquare size={24} color='white' /></button>
-                                <button id={user.id} data-func='add-friend'><UserPlus size={24} color='white' /></button>
+                                <button id={user.id} data-func='new-convo'><MessageSquare size={24} color='white' /></button>
                             </div>
                         </li>
                         )
@@ -230,6 +209,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID}) {
 Sidebar.propTypes = {
     setID: PropTypes.func.isRequired,
     setProfileID: PropTypes.func.isRequired,
+    friends: PropTypes.array.isRequired,
 }
 
 export default Sidebar;

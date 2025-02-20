@@ -17,6 +17,7 @@ function App() {
   const socket = useRef(null)
   const navigate = useNavigate();
   const logout = useCallback(async() => {
+    console.log('logout called!')
     try {
       const request = await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
         method: 'POST',
@@ -60,12 +61,16 @@ function App() {
         timeoutRef.current = setTimeout(fetchToken,  1000 * 60 * 4);
       }
     } catch(err) {
-      if(isAuthenticated) {
-        logout();
-      }
+      console.log('refresh error');
+      setAuthentication(prev => {
+        if(prev) {
+          logout();
+        }
+        return false;
+      })
       console.log(err);
     }
-  }, [logout, isAuthenticated])
+  }, [logout])
 
   useEffect(() => {
       if(!token.current) {

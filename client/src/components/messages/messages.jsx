@@ -33,7 +33,7 @@ const Message = ({message, index, conversation, otherUser, root}) => {
                 <p className={message.senderId === otherUser.id ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>
                 <p className={styles.messageDate}>{message.date}</p>
             </div>
-        </div> : <div className={styles.messageContent}>Loading Message</div>}
+        </div> : <div  style={{ height: "40px" }} className={`${styles.messageContent} ${styles.yourDiv}`}></div>}
     </li>
     )
 }

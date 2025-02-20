@@ -5,6 +5,13 @@ const fn = require('./fn')
 
 const router = Router();
 
+router.post('/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
+    const user1 = +req.user.id;
+    const user2 = +req.params.userId;
+    const conversation = await db.createConversation(user1, user2)
+    res.json({conversation})
+}))
+
 
 router.get('/:convoId', fn.isAuthenticated, asyncHandler(async(req, res) => {
     const convoId = +req.params.convoId;

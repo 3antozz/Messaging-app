@@ -92,7 +92,7 @@ router.post('/refresh', asyncHandler(async(req, res, next) => {
 
 router.post('/logout', asyncHandler((req, res) => {
     if(!req.cookies.jwt) {
-        const error = new Error('Unauthorized Access')
+        const error = new Error('You are not logged in')
         error.code = 401;
         throw error;
     }

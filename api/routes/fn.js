@@ -41,7 +41,7 @@ exports.formatDate = (date) => {
 }
 
 exports.formatDateWithoutTime = (date) => {
-    return format(new Date(date), 'dd-MM-y');
+    return format(new Date(date), 'PP');
 }
 
 
