@@ -108,7 +108,7 @@ export default function Messages ({conversationID, setProfileID}) {
                 }}))
             }
         }
-        const listener = socket.current
+        const listener = socket.current;
         if(socket.current) {
             socket.current.on('chat message', handleIncomingMessage)
         }

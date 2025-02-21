@@ -25,16 +25,13 @@ function App() {
       })
       const response = await request.json();
       console.log(response);
-      if(response.done) {
-        token.current = null;
-        setUser(null)
-        setFetched(false)
-        setAuthentication(false);
-        token.current = null;
-      }
     } catch(err) {
       console.log(err)
     } finally {
+      token.current = null;
+      setUser(null)
+      setFetched(false)
+      setAuthentication(false);
       navigate('/login')
     }
   }, [navigate])
@@ -111,7 +108,7 @@ function App() {
         fetchUser();
       }
     }
-  }, [isFetched, user, isAuthenticated])
+  }, [isFetched, user, isAuthenticated, token])
 
 
   return (

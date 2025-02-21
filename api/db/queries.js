@@ -162,7 +162,32 @@ exports.createConversation = async(user1, user2) => {
                     {id: user2}
                 ]
             }
-        }
+        },
+        include: {
+            participants: {
+                where: {
+                    NOT: {
+                        id: user1
+                    }
+                },
+                omit: {
+                    password: true,
+                    bio: true,
+                    username: true
+                }
+            },
+            messages: {
+                select: {
+                    senderId: true,
+                    content: true,
+                    date: true  
+                },
+                orderBy: {
+                    date: 'desc'
+                },
+                take: 1
+            }
+        },
     })
 }
 

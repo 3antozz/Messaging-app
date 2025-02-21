@@ -13,7 +13,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID, friends}) {
     const [usersLoading, setUsersLoading] = useState(false)
     const [error, setError] = useState(false)
     const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
-    const messages = useMemo(() => conversations.filter(conversation => conversation.lastMessageTime), [conversations])
+    const messages = useMemo(() => conversations.filter(conversation => conversation.messages.length > 0), [conversations])
     // useEffect(() => {
     //     if(user) {
     //         setID(user.conversations[0].id)
@@ -90,6 +90,27 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID, friends}) {
             return;
         }
     }
+    const createConversation = async(userId) => {
+        console.log('conversation fetched!');
+        try {
+            const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token.current}`
+                }
+            })
+            const response = await request.json();
+            if(!request.ok) {
+                const error = new Error('An error has occured, please try again later')
+                throw error;
+            }
+            console.log(response);
+            setConversations((prev) => ([...prev, response.conversation]))
+            setID(response.conversation.id);
+        } catch(err) {
+            console.log(err)
+        }
+    }
     const handleListClick = async(e) => {
         const button = e.target.closest('button')
         if (button && button.dataset.func === 'convo') {
@@ -97,13 +118,13 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID, friends}) {
             setID(id)
         } else if (button && button.dataset.func === 'new-convo') {
             const userId = +button.id;
-            const isExistant = user.conversations.findIndex(conversation => {
+            const isExistant = conversations.findIndex(conversation => {
                 return !conversation.isGroup && conversation.participants[0].id === userId
             })
             if(isExistant > -1) {
-                setID(user.conversations[isExistant].id)
+                setID(conversations[isExistant].id)
             } else {
-                return;
+                createConversation(userId)
             }
         } else if (button && button.dataset.func === 'profile') {
             const id = button.id;
@@ -157,7 +178,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID, friends}) {
                                 <button id={friend.id} data-func="profile">{friend.first_name} {friend.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={friend.conversationId} data-func='convo'><MessageSquare size={24} color='white' /></button>
+                                <button id={friend.id} data-func='new-convo'><MessageSquare size={24} color='white' /></button>
                             </div>
                         </li>
                     ) : view === 'Groups' ?
@@ -213,3 +234,5 @@ Sidebar.propTypes = {
 }
 
 export default Sidebar;
+
+
