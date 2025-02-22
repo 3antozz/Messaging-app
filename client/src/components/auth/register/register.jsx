@@ -59,7 +59,7 @@ export default function Register () {
             <Popup shouldRender={success} close={setSuccess}>
                 <p>Signup Successfull! You can login in from <Link to='/login'>Here</Link></p>
             </Popup>
-            <p>You don&apos;t have an account? <Link to='/login'>Register here</Link></p>
+            <p>You have an account already? <Link to='/login'>Login here</Link></p>
             {errors && 
             <ul>
                 {errors.map((error, index) => <li key={index}><p>{error}</p></li>)}

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { X } from 'lucide-react';
 
-const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends}) {
+const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends, handleListClick}) {
     const { user, token } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [profiles, setProfiles] = useState({})
@@ -64,6 +64,10 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             console.log(err)
         }
     }
+    const handleMessageButton = (e) => {
+        setProfileID(null);
+        handleListClick(e)
+    }
     useEffect(() => {
         const fetchProfile = async() => {
             console.log('profile fetched!')
@@ -117,7 +121,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 </div>
                 {(user && user.id !== +userId) &&
                 <div className={styles.buttons}>
-                    <button className={styles.messageBtn}>Message</button>
+                    <button className={styles.messageBtn} data-func="new-convo" id={profile.id} onClick={handleMessageButton}>Message</button>
                     {profile.isFriend ? <button className={styles.removeFriend} onClick={removeFriend}>Remove Friend</button> : <button className={styles.addFriend} onClick={addFriend}>Add friend</button>}
                 </div>
                 }
@@ -136,6 +140,7 @@ Profile.propTypes = {
     setProfileID: PropTypes.func.isRequired,
     friends: PropTypes.array.isRequired,
     setFriends: PropTypes.func.isRequired,
+    handleListClick: PropTypes.func.isRequired,
 }
 
 export default Profile;

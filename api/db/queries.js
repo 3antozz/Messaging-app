@@ -100,8 +100,8 @@ exports.addFriend = async(userId, friendId) => {
     const existingConversation = await prisma.conversation.findFirst({
         where: {
             participants: {
-                some: {
-                    AND: [
+                every: {
+                    OR: [
                         {id: userId},
                         {id: friendId}
                     ]

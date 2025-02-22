@@ -4,9 +4,8 @@ import { AuthContext } from '../../contexts'
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
 import { MessageSquare, LoaderCircle } from 'lucide-react';
 
-const Sidebar = memo(function Sidebar ({setID, setProfileID, friends}) {
+const Sidebar = memo(function Sidebar ({friends, conversations, setConversations, handleListClick}) {
     const { user, token, socket } = useContext(AuthContext)
-    const [conversations, setConversations] = useState([])
     const [view, setView] = useState('Messages')
     const [users, setUsers] = useState([])
     const [isFetched, setFetched] = useState(false)
@@ -76,13 +75,7 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID, friends}) {
                 listener.off('chat message', updateLastMessage);
             }
         };
-    }, [socket, conversations])
-
-    useEffect(() => {
-        if(user) {
-            setConversations(user.conversations)
-        }
-    }, [user])
+    }, [socket, conversations, setConversations])
     const handleViews = (e) => {
         if (e.target.tagName === 'BUTTON') {
             setView(e.target.textContent); 
@@ -90,49 +83,6 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID, friends}) {
             return;
         }
     }
-    const createConversation = async(userId) => {
-        console.log('conversation fetched!');
-        try {
-            const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/${userId}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token.current}`
-                }
-            })
-            const response = await request.json();
-            if(!request.ok) {
-                const error = new Error('An error has occured, please try again later')
-                throw error;
-            }
-            console.log(response);
-            setConversations((prev) => ([...prev, response.conversation]))
-            setID(response.conversation.id);
-        } catch(err) {
-            console.log(err)
-        }
-    }
-    const handleListClick = async(e) => {
-        const button = e.target.closest('button')
-        if (button && button.dataset.func === 'convo') {
-            const id = button.id;
-            setID(id)
-        } else if (button && button.dataset.func === 'new-convo') {
-            const userId = +button.id;
-            const isExistant = conversations.findIndex(conversation => {
-                return !conversation.isGroup && conversation.participants[0].id === userId
-            })
-            if(isExistant > -1) {
-                setID(conversations[isExistant].id)
-            } else {
-                createConversation(userId)
-            }
-        } else if (button && button.dataset.func === 'profile') {
-            const id = button.id;
-            setProfileID(id)
-        } else {
-            return;
-        }
-    } 
     if(!user) {
         return (
             <>
@@ -228,9 +178,10 @@ const Sidebar = memo(function Sidebar ({setID, setProfileID, friends}) {
 })
 
 Sidebar.propTypes = {
-    setID: PropTypes.func.isRequired,
-    setProfileID: PropTypes.func.isRequired,
     friends: PropTypes.array.isRequired,
+    conversations: PropTypes.array.isRequired,
+    setConversations: PropTypes.func.isRequired,
+    handleListClick: PropTypes.func.isRequired,
 }
 
 export default Sidebar;
