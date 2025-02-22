@@ -12,6 +12,7 @@ export default function Messenger () {
     const { user, logout, token } = useContext(AuthContext)
     const [conversationID, setConversationID] = useState(null)
     const [friends, setFriends] = useState([])
+    const [onlineFriends, setOnlineFriends] = useState(false)
     const [conversations, setConversations] = useState([])
     const [profileID, setProfileID] = useState(null)
     useEffect(() => {
@@ -64,7 +65,7 @@ export default function Messenger () {
     }
     return (
         <>
-            <Profile userId={profileID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} handleListClick={handleListClick} />
+            <Profile userId={profileID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} handleListClick={handleListClick} setOnlineFriends={setOnlineFriends} />
             <header className={styles.header}>
                 {!user ?
                 <Link to="/login">Login</Link> :
@@ -72,7 +73,7 @@ export default function Messenger () {
                 }
             </header>
                 <main>
-                    <Sidebar setConversationID={setConversationID} setProfileID={setProfileID} friends={friends} conversations={conversations} setConversations={setConversations} handleListClick={handleListClick} />
+                    <Sidebar setConversationID={setConversationID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} conversations={conversations} setConversations={setConversations} handleListClick={handleListClick} onlineFriends={onlineFriends} setOnlineFriends={setOnlineFriends} />
                     <Messages conversationID={conversationID} setProfileID={setProfileID} />
                 </main>
         </>

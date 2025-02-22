@@ -15,6 +15,7 @@ function App() {
   const [isFetched, setFetched] = useState(false)
   const [isAuthenticated, setAuthentication] = useState(false)
   const socket = useRef(null)
+  const [socketOn, setSocket] = useState(false)
   const navigate = useNavigate();
   const logout = useCallback(async() => {
     console.log('logout called!')
@@ -76,14 +77,19 @@ function App() {
   }, [fetchToken])
 
   useEffect(() => {
-    if(isAuthenticated) {
-      socket.current = io(`${import.meta.env.VITE_API_URL}`)
+    if(user && isAuthenticated) {
+      socket.current = io(`${import.meta.env.VITE_API_URL}`, {
+        query: {
+          userId: user.id
+        }
+      });
       socket.current.on("connect", () => {
         console.log("Connected:", socket.current.id);
       });
+      setSocket(true)
     }
     return () => socket.current && socket.current.disconnect()
-  }, [isAuthenticated])
+  }, [isAuthenticated, user])
 
 
   useEffect(() => {
@@ -112,7 +118,7 @@ function App() {
 
 
   return (
-    <AuthContext.Provider value={{token, user, setUser, setAuthentication, socket, timeoutRef, fetchToken, logout}}>
+    <AuthContext.Provider value={{token, user, setUser, setAuthentication, socketOn, socket, timeoutRef, fetchToken, logout}}>
         <Routes>
             <Route path="/" element={<Messenger />} />
             <Route element={<AuthLayout />}>

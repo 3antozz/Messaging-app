@@ -48,9 +48,13 @@ app.use(cookieParser())
 app.use(express.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const onlineUsers = new Set();
+
 
 io.on('connection', (socket) => {
     console.log('a user connected');
+    onlineUsers.add(+socket.handshake.query.userId);
+    socket.broadcast.emit('user connected', +socket.handshake.query.userId)
     socket.on('chat message', async(msgData) => {
         try {
             const message = await messagesController.postMessageSocket(+msgData.convoId, msgData.message, +msgData.senderId, msgData.date)
@@ -66,8 +70,20 @@ io.on('connection', (socket) => {
     socket.on('join rooms', (conversationIds) => {
         socket.join(conversationIds);
     })
+    socket.on('online friends', (friendIds) => {
+        const onlineIds = [];
+        friendIds.forEach(id => {
+            if(onlineUsers.has(id)){
+                onlineIds.push(id)
+            }
+            return;
+        });
+        socket.emit('online friends', onlineIds)
+    })
     socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id);
+        onlineUsers.delete(+socket.handshake.query.userId);
+        socket.broadcast.emit('user disconnected', +socket.handshake.query.userId)
     });
 });
 

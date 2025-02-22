@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { X } from 'lucide-react';
 
-const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends, handleListClick}) {
+const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends, handleListClick, setOnlineFriends}) {
     const { user, token } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [profiles, setProfiles] = useState({})
@@ -31,6 +31,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             }
             setFriends(prev => ([...prev, response.friend]))
             setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: true} }))
+            setOnlineFriends(false)
         } catch(err) {
             console.log(err)
         }
@@ -60,6 +61,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 return array;
             })
             setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: false} }))
+            setOnlineFriends(false)
         } catch(err) {
             console.log(err)
         }
@@ -141,6 +143,7 @@ Profile.propTypes = {
     friends: PropTypes.array.isRequired,
     setFriends: PropTypes.func.isRequired,
     handleListClick: PropTypes.func.isRequired,
+    setOnlineFriends: PropTypes.func.isRequired,
 }
 
 export default Profile;

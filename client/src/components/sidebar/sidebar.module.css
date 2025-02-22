@@ -91,7 +91,17 @@ nav {
     gap: 1rem;
 }
 
-.friendButton > button{
+.friendButton > div {
+    position: relative;
+}
+
+.circle {
+    position: absolute;
+    right: 0;
+    bottom: 10%;
+}
+
+.friendButton > button, .friendButton > div > button{
     background: none;
     border: none;
     color: inherit;
@@ -101,7 +111,7 @@ nav {
     padding: 0;
 }
 
-.friendButton > button:hover {
+.friendButton > button:hover, .friendButton > div > button:hover {
     text-decoration: underline;
     color: red;
     cursor: pointer;

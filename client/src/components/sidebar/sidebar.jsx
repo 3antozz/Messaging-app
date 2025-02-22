@@ -2,10 +2,10 @@ import styles from './sidebar.module.css'
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
-import { MessageSquare, LoaderCircle } from 'lucide-react';
+import { MessageSquare, LoaderCircle, Circle } from 'lucide-react';
 
-const Sidebar = memo(function Sidebar ({friends, conversations, setConversations, handleListClick}) {
-    const { user, token, socket } = useContext(AuthContext)
+const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends}) {
+    const { user, token, socket, socketOn } = useContext(AuthContext)
     const [view, setView] = useState('Messages')
     const [users, setUsers] = useState([])
     const [isFetched, setFetched] = useState(false)
@@ -13,6 +13,15 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setConversations
     const [error, setError] = useState(false)
     const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
     const messages = useMemo(() => conversations.filter(conversation => conversation.messages.length > 0), [conversations])
+    const sortedFriends = useMemo(() => friends.toSorted((friend1, friend2) => {
+        if(friend1.isOnline && !friend2.isOnline) {
+            return -1
+        } else if (!friend1.isOnline && friend2.isOnline) {
+            return 1
+        } else {
+            return 0
+        }
+    }), [friends])
     // useEffect(() => {
     //     if(user) {
     //         setID(user.conversations[0].id)
@@ -47,6 +56,55 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setConversations
             fetchUsers();
         }
     }, [token, isFetched, user])
+
+    useEffect(() => {
+        const displayOnlineFriend = (friendId, bool) => {
+            const isFriend = friends.findIndex((friend) => friend.id === friendId)
+            if (isFriend > -1) {
+                setFriends((prev) => {
+                    const friends = prev.slice();
+                    friends[isFriend].isOnline = bool;
+                    return friends;
+                })
+            } else return;
+        }
+        if(socketOn && friends.length > 0){
+            socket.current.on('user connected', (friendId) => displayOnlineFriend(friendId, true))
+            socket.current.on('user disconnected', (friendId) => displayOnlineFriend(friendId, false))
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('user connected');
+                listener.off('user disconnected');
+            }
+        };
+    }, [friends, setFriends, socket, socketOn])
+
+    useEffect(() => {
+        const displayOnlineFriends = (userIds) => {
+            const onlineSet = new Set(userIds);
+            const updatedFriends = friends.map(friend => ({
+                ...friend,
+                isOnline: onlineSet.has(friend.id)
+            }));
+            setFriends(updatedFriends)
+            setOnlineFriends(true)
+        }
+        if(socketOn && friends.length > 0 ) {
+            const friendIds = friends.map((friend) => friend.id)
+            socket.current.emit('online friends', friendIds)
+        }
+        if(socketOn && friends.length > 0 && !onlineFriends){
+            socket.current.on('online friends', displayOnlineFriends)
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('online friends');
+            }
+        };
+    }, [friends, onlineFriends, setFriends, setOnlineFriends, socket, socketOn])
 
     useEffect(() => {
         const connectToRooms = () => {
@@ -121,10 +179,13 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setConversations
             <section className={styles.conversations}>
                 <ul onClick={handleListClick}>
                     {view === 'Friends' ?
-                    friends.map(friend => 
+                    sortedFriends.map(friend => 
                         <li key={friend.id} className={styles.conversation}>
                             <div className={styles.friendButton}>
-                                {friend.picture_url ? <button id={friend.id} data-func="profile"><img src={friend.picture_url} alt={`${friend.first_name} ${friend.last_name} profile picture`}></img></button> : <button id={friend.id} data-func="profile"><img data-func="profile" src='/images/no-profile-pic.jpg'></img></button>}
+                                <div>
+                                    {friend.picture_url ? <button id={friend.id} data-func="profile"><img src={friend.picture_url} alt={`${friend.first_name} ${friend.last_name} profile picture`}></img></button> : <button id={friend.id} data-func="profile"><img data-func="profile" src='/images/no-profile-pic.jpg'></img></button>}
+                                    <Circle className={styles.circle} strokeWidth={0} size={17} fill={friend.isOnline ? '#0bd80b' : 'grey'}/>
+                                </div>
                                 <button id={friend.id} data-func="profile">{friend.first_name} {friend.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
@@ -182,6 +243,9 @@ Sidebar.propTypes = {
     conversations: PropTypes.array.isRequired,
     setConversations: PropTypes.func.isRequired,
     handleListClick: PropTypes.func.isRequired,
+    setFriends: PropTypes.func.isRequired,
+    onlineFriends: PropTypes.bool.isRequired,
+    setOnlineFriends: PropTypes.func.isRequired,
 }
 
 export default Sidebar;
