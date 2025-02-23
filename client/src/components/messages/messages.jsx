@@ -6,7 +6,7 @@ import { useInView } from 'react-intersection-observer';
 import { SendHorizontal, LoaderCircle } from 'lucide-react';
 
 
-const Message = ({message, index, conversation, otherUser, root}) => {
+const Message = ({message, index, conversation, user, root}) => {
     const {ref, inView} = useInView({
         triggerOnce: false,
         root: root,
@@ -14,6 +14,10 @@ const Message = ({message, index, conversation, otherUser, root}) => {
     })
     const [messagesReady, setMessagesReady] = useState(false);
 
+    const shouldShowPictureGroup = index === conversation.messages.length-1 || conversation.messages[index+1].senderId !== message.senderId && conversation.messages[index+1].senderId !== user.id;
+    const shouldShowPicture = index === conversation.messages.length-1 || conversation.messages[index+1].senderId !== message.senderId;
+    const isUserMessage = message.senderId === user.id;
+    const shouldShowSenderName = (index === 0 || conversation.messages[index-1].senderId !== message.senderId) && !isUserMessage && conversation.isGroup
     useEffect(() => {
         setMessagesReady(false);
         setTimeout(() => {
@@ -24,13 +28,14 @@ const Message = ({message, index, conversation, otherUser, root}) => {
         return <p>Loading</p>
     }
     return (
-    <li className={styles.message} ref={ref}>
+    <li className={styles.message} ref={ref} style={{marginBottom: (shouldShowPictureGroup && !isUserMessage && conversation.isGroup) ? '2rem' : null }}>
         {inView || !messagesReady ? 
-        <div className={message.senderId === otherUser.id ? null : `${styles.yourDiv}` }>
-            {(index === conversation.messages.length-1 || conversation.messages[index+1].senderId !== message.senderId) ? 
-            message.senderId === otherUser.id && (message.sender.picture_url ? <img src={message.sender.picture_url} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>) : <div className={styles.void}></div>}
-            <div>
-                <p className={message.senderId === otherUser.id ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>
+        <div className={!isUserMessage ? null : `${styles.yourDiv}`}>
+            {shouldShowPicture ? 
+            !isUserMessage && (<img src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`}></img>) : <div className={styles.void}></div>}
+            <div style={{marginBottom: shouldShowPicture ? '0.5rem' : null }}>
+                { shouldShowSenderName && <p className={styles.sender}>{message.sender.first_name}</p>}
+                <p className={!isUserMessage ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>
                 <p className={styles.messageDate}>{message.date}</p>
             </div>
         </div> : <div  style={{ height: "40px" }} className={`${styles.messageContent} ${styles.yourDiv}`}></div>}
@@ -41,7 +46,7 @@ const Message = ({message, index, conversation, otherUser, root}) => {
 Message.propTypes = {
     message: PropTypes.object.isRequired,
     conversation: PropTypes.object.isRequired,
-    otherUser: PropTypes.object.isRequired,
+    user: PropTypes.object.isRequired,
     index: PropTypes.number.isRequired,
     root: PropTypes.element
 }
@@ -144,7 +149,7 @@ export default function Messages ({conversationID, setProfileID}) {
             <div className={styles.forms}>
                 <form className={styles.messageDiv}>
                     <input name="message" id="message" placeholder='Send a message...' disabled></input>
-                    <button><SendHorizontal color='white' /></button>
+                    <button disabled><SendHorizontal color='white' /></button>
                 </form>
                 {/* <form className={styles.uploadDiv}>
                     <label htmlFor="image" hidden></label>
@@ -158,13 +163,19 @@ export default function Messages ({conversationID, setProfileID}) {
     return (
         <section className={styles.messenger}>
             <div className={styles.info}>
-                {otherUser.picture_url ? <button onClick={() => setProfileID(otherUser.id)}><img src={otherUser.picture_url} alt={`${otherUser.first_name} ${otherUser.last_name} profile picture`}></img></button> : <button><img onClick={() => setProfileID(otherUser.id)} src='/images/no-profile-pic.jpg'></img></button>}
-                <button onClick={() => setProfileID(otherUser.id)}>{otherUser.first_name} {otherUser.last_name}</button>
+                {!conversation.isGroup ?
+                <button onClick={() => setProfileID(otherUser.id)}><img src={otherUser.picture_url || '/images/no-profile-pic.jpg'} alt={`${otherUser.first_name} ${otherUser.last_name} profile picture`}></img></button> : 
+                <button onClick={() => setProfileID(conversation.id)}><img src={conversation.picture_url || '/images/no-group-pic.png'} alt={`${conversation.group_name} group picture`}></img></button>
+                }
+                {!conversation.isGroup ? 
+                <button onClick={() => setProfileID(otherUser.id)}>{otherUser.first_name} {otherUser.last_name}</button> : 
+                <button onClick={() => setProfileID(conversation.id)}>{conversation.group_name}</button>
+                }
             </div>
             <div className={styles.main} ref={scrollRef}>
                 <ul>
                 {conversation.messages.map((message, index) => 
-                    <Message key={message.id} root={scrollRef.current} index={index} message={message} conversation={conversation} otherUser={otherUser} />
+                    <Message key={message.id} root={scrollRef.current} index={index} message={message} conversation={conversation} user={user} />
                 )}
                 </ul>         
             </div>

@@ -41,6 +41,8 @@ model Conversation {
   picture_url       String?
   friendship        Friendship?
   lastMessageTime   DateTime?
+  isPublic          Boolean     @default(false)
+  identifier        String?     @unique
 }
 
 model Friendship {

@@ -12,7 +12,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
     const [usersLoading, setUsersLoading] = useState(false)
     const [error, setError] = useState(false)
     const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
-    const messages = useMemo(() => conversations.filter(conversation => conversation.messages.length > 0), [conversations])
+    const messages = useMemo(() => conversations.filter(conversation => conversation.messages.length > 0 && !conversation.isGroup), [conversations])
     const sortedFriends = useMemo(() => friends.toSorted((friend1, friend2) => {
         if(friend1.isOnline && !friend2.isOnline) {
             return -1
@@ -166,7 +166,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
         <aside className={styles.sidebar}>
             <section className={styles.you}>
                 <button onClick={handleListClick} data-func='profile' id={user.id}>
-                    {user.picture_url ? <img src={user.picture_url} alt={`${user.first_name} ${user.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
+                    <img src={user.picture_url || '/images/no-profile-pic.jpg'} alt={`${user.first_name} ${user.last_name} profile picture`}></img>
                     <h3>{user.username}</h3>
                 </button>
             </section>
@@ -183,7 +183,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                         <li key={friend.id} className={styles.conversation}>
                             <div className={styles.friendButton}>
                                 <div>
-                                    {friend.picture_url ? <button id={friend.id} data-func="profile"><img src={friend.picture_url} alt={`${friend.first_name} ${friend.last_name} profile picture`}></img></button> : <button id={friend.id} data-func="profile"><img data-func="profile" src='/images/no-profile-pic.jpg'></img></button>}
+                                    <button id={friend.id} data-func="profile"><img src={friend.picture_url || '/images/no-profile-pic.jpg'} alt={`${friend.first_name} ${friend.last_name} profile picture`}></img></button>
                                     <Circle className={styles.circle} strokeWidth={0} size={17} fill={friend.isOnline ? '#0bd80b' : 'grey'}/>
                                 </div>
                                 <button id={friend.id} data-func="profile">{friend.first_name} {friend.last_name}</button>
@@ -195,9 +195,12 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                     ) : view === 'Groups' ?
                     groups.map(group => 
                         <li key={group.id} className={styles.conversation}>
-                            <button id={group.id}>
-                                {group.picture_url ? <img src={group.picture_url} alt={`${group.name} group picture`}></img> : <img src='/images/no-group-pic.jpg'></img>}
-                                <p>{group.name}</p>
+                            <button id={group.id} data-func='convo' className={styles.messageButton}>
+                                <img src={group.picture_url || '/images/no-group-pic.png'} alt={`${group.name} group picture`}></img>
+                                <div className={styles.info}>
+                                    <p>{group.group_name}</p>
+                                    <p>{group.messages[0].senderId === group.participants[0].id ? `${group.participants[0].first_name}: ` : 'You: '} {group.messages[0].content}</p>
+                                </div>
                             </button>
                         </li>
                     ) : view === 'Messages' ? 
@@ -205,7 +208,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                         return (
                         <li key={conversation.id} className={styles.conversation}>
                             <button id={conversation.id} data-func='convo' className={styles.messageButton}>
-                                {conversation.participants[0].picture_url ? <img src={conversation.participants[0].picture_url} alt={`${conversation.participants[0].first_name} ${conversation.participants[1].last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
+                                <img src={conversation.participants[0].picture_url || '/images/no-profile-pic.jpg'} alt={`${conversation.participants[0].first_name} ${conversation.participants[0].last_name} profile picture`}></img>
                                 <div className={styles.info}>
                                     <p>{conversation.participants[0].first_name} {conversation.participants[0].last_name}</p>
                                     <p>{conversation.messages[0].senderId === conversation.participants[0].id ? `${conversation.participants[0].first_name}: ` : 'You: '} {conversation.messages[0].content}</p>
@@ -220,7 +223,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                         return (
                         <li className={styles.conversation} key={user.id}>
                             <div className={styles.friendButton}>
-                                {user.picture_url ? <button id={user.id} data-func="profile"><img src={user.picture_url} alt={`${user.first_name} ${user.last_name} profile picture`}></img></button> : <button id={user.id} data-func="profile"><img data-func="profile" src='/images/no-profile-pic.jpg'></img></button>}
+                                <button id={user.id} data-func="profile"><img src={user.picture_url || '/images/no-profile-pic.jpg'} alt={`${user.first_name} ${user.last_name} profile picture`}></img></button>
                                 <button id={user.id} data-func="profile">{user.first_name} {user.last_name}</button>
                             </div>
                             <div className={styles.buttons}>

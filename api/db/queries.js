@@ -8,7 +8,12 @@ exports.createUser = async(username, first_name, last_name, password) => {
             username,
             first_name,
             last_name,
-            password
+            password,
+            conversations: {
+                connect: {
+                    identifier: "public_group"
+                }
+            }
         }
     })
 }

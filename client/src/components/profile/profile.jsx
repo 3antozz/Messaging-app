@@ -101,7 +101,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
         return <></>
     }
     return (
-        <dialog open={userId} className={styles.backdrop}>
+        <dialog open={userId} className={styles.backdrop} id='backdrop' onClick={(e) => e.target.id === 'backdrop' && setProfileID(null)}>
             <section className={styles.profile}>
                 {loading ? 
                 <>
@@ -110,7 +110,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 </> :
                 <>
                 <div className={styles.top}>
-                    {profile.picture_url ? <img src={profile.picture_url} alt={`${profile.first_name} ${profile.last_name} profile picture`}></img> : <img src='/images/no-profile-pic.jpg'></img>}
+                    <img src={profile.picture_url || '/images/no-profile-pic.jpg' } alt={`${profile.first_name} ${profile.last_name} profile picture`}></img>
                     <h2>{profile.first_name} {profile.last_name}</h2>
                     {(user && user.id == userId) && 
                     <button className={styles.edit}>Edit Profile</button>
@@ -118,7 +118,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 </div>
                 <h3>About Me</h3>
                 <div className={styles.info}>
-                    <p className={styles.bio}>{profile.bio ? `${profile.bio}` : 'User has no bio'}</p>
+                    {profile.bio ? <p className={styles.bio}>{profile.bio}</p> : <p className={styles.bio} style={{textAlign: 'center'}}>User has no bio</p>  }
                     <p className={styles.date}>Join Date: {profile.joinDate}</p>
                 </div>
                 {(user && user.id !== +userId) &&

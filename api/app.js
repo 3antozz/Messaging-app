@@ -11,6 +11,7 @@ const messagesController = require('./controllers/messagesController')
 const fn = require('./routes/fn')
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
+require('./db/populate');
 
 
 const app = express();
