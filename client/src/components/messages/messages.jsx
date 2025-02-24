@@ -3,7 +3,7 @@ import { AuthContext } from '../../contexts'
 import { useContext, useEffect, useState, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useInView } from 'react-intersection-observer';
-import { SendHorizontal, LoaderCircle } from 'lucide-react';
+import { SendHorizontal, LoaderCircle, Image, X } from 'lucide-react';
 
 
 const Message = ({message, index, conversation, user, root}) => {
@@ -33,7 +33,7 @@ const Message = ({message, index, conversation, user, root}) => {
         <div className={!isUserMessage ? null : `${styles.yourDiv}`}>
             {shouldShowPicture ? 
             !isUserMessage && (<img src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`}></img>) : <div className={styles.void}></div>}
-            <div style={{marginBottom: shouldShowPicture ? '0.5rem' : null }}>
+            <div style={{marginBottom: shouldShowPicture ? '0.5rem' : null }} className={styles.msgDiv}>
                 { shouldShowSenderName && <p className={styles.sender}>{message.sender.first_name}</p>}
                 {message.picture_url && <img src={message.picture_url} data-func='img' loading='lazy' className={!isUserMessage ? `${styles.messageImage} ${styles.otherMessage}` : `${styles.messageImage} ${styles.yourMessage}`}/>}
                 { message.content && <p className={!isUserMessage ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>}
@@ -59,6 +59,8 @@ export default function Messages ({conversationID, setProfileID, setImageURL}) {
     const [conversations, setConversations] = useState({})
     const scrollRef = useRef(null);
     const inputRef = useRef(null);
+    const fileRef = useRef(null);
+    const fileDivRef = useRef(null);
     const [loading, setLoading] = useState(false)
     const conversation = useMemo(() => {
         return conversations[conversationID];
@@ -150,13 +152,16 @@ export default function Messages ({conversationID, setProfileID, setImageURL}) {
                 })
                 const response = await request.json();
                 if(!request.ok) {
-                    const error = new Error('An error has occured, please try again later')
+                    const error = new Error(response.message)
                     throw error;
                 }
-                console.log(response.url);
+                console.log(response);
                 socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput, url: response.url, date: new Date()});
                 setMessageInput('');
                 setImage(null)
+                if(fileDivRef.current) {
+                    fileDivRef.current.style.display = 'none'
+                }
             } catch (error) {
                 console.log(error)
             }
@@ -166,6 +171,9 @@ export default function Messages ({conversationID, setProfileID, setImageURL}) {
                 socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput, url: null, date: new Date()});
                 setMessageInput('');
                 setImage(null)
+                if(fileDivRef.current) {
+                    fileDivRef.current.style.display = 'none'
+                }
             } catch (error) {
                 console.log(error)
             }
@@ -188,6 +196,28 @@ export default function Messages ({conversationID, setProfileID, setImageURL}) {
         }
     }
 
+    const cancelFile = () => {
+        setImage(null)
+        if(fileDivRef.current) {
+            fileDivRef.current.style.display = 'none'
+        }
+    }
+
+    const handleFileClick = (e) => {
+        const file = e.target.files[0];
+        if(file) {
+            setImage(e.target.files[0])
+            if(fileDivRef.current) {
+                fileDivRef.current.style.display = 'flex'
+            }
+        } else {
+            setImage(null)
+            if(fileDivRef.current) {
+                fileDivRef.current.style.display = 'none'
+            }
+        }
+    }
+
     if (!conversation || !user || !otherUser || loading) {
         return (
             <section className={styles.messenger}>
@@ -203,11 +233,6 @@ export default function Messages ({conversationID, setProfileID, setImageURL}) {
                     <input name="message" id="message" placeholder='Send a message...' disabled></input>
                     <button disabled><SendHorizontal color='white' /></button>
                 </form>
-                {/* <form className={styles.uploadDiv}>
-                    <label htmlFor="image" hidden></label>
-                    <input type="file" id='image' />
-                    <button>Send Image</button>
-                </form> */}
             </div>
         </section>
         )
@@ -232,11 +257,17 @@ export default function Messages ({conversationID, setProfileID, setImageURL}) {
                 </ul>         
             </div>
             <div className={styles.forms}>
-                <form className={styles.messageDiv} onSubmit={handleMessageSend}>
-                    <label htmlFor="message" hidden></label>
-                    <input name="message" id="message" onChange={(e) => setMessageInput(e.target.value)} placeholder='Send a message...' value={messageInput} ref={inputRef}></input>
-                    <button><SendHorizontal color='white' /></button>
-                    <input type="file" id='image' accept='image/*' onChange={(e) => setImage(e.target.files[0])} />
+                <form onSubmit={handleMessageSend}>
+                    <div className={styles.messageDiv}>
+                        <label htmlFor="message" hidden></label>
+                        <input name="message" id="message" onChange={(e) => setMessageInput(e.target.value)} placeholder='Send a message...' value={messageInput} ref={inputRef}></input>
+                        <button><SendHorizontal color='white' /></button>
+                        <label htmlFor="image" className={styles.label}><Image color='white' size={42} /></label>
+                    </div>
+                    <div className={styles.file} ref={fileDivRef}>
+                        <input type="file" id='image' accept='image/*' ref={fileRef} onChange={handleFileClick} />
+                        <button onClick={cancelFile}><X color='white' size={30} /></button>
+                    </div>
                 </form>
             </div>
         </section>

@@ -108,8 +108,9 @@ app.use((req, res, next) => {
 // eslint-disable-next-line no-unused-vars
 app.use((error, req, res, next) => {
     console.log(error);
+    console.error("Global error handler caught:", error);
     if (Array.isArray(error)) {
-        return res.status(error.code || 500).json({
+        return res.status((typeof(error.code) !== 'string' && error.code) || 500).json({
             errors: error,
             code: error.code || 500
         });
@@ -126,7 +127,7 @@ app.use((error, req, res, next) => {
             code: 400
         });
     }
-    res.status(error.code || 500).json({
+    res.status((typeof(error.code) !== 'string' && error.code) || 500).json({
         message: error.message || 'Internal Server Error',
         code: error.code || 500
     });

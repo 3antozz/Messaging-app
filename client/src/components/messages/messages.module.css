@@ -132,11 +132,15 @@
     border-radius: 15px;
     padding: 0.4rem 0.6rem;
     font-size: 1.1rem;
-    max-width: 230px;
+    max-width: 100%;
+}
+
+.msgDiv {
+    max-width: 75%;
 }
 
 .messageImage {
-    max-width: 230px;
+    max-width: 100%;
     cursor: pointer;
     max-height: 250px;
     object-fit: contain;
@@ -174,7 +178,7 @@
     border: 2px solid grey;
 }
 
-.messageDiv button {
+.messageDiv button, .label svg {
     background-color: #3551ca;
     border: none;
     align-self: stretch;
@@ -184,7 +188,7 @@
     padding: 0 0.5rem;
 }
 
-.messageDiv button:hover {
+.messageDiv button:hover, .label svg:hover {
     cursor: pointer;
     transform: scale(1.2);
     filter: brightness(1.3);
@@ -208,6 +212,42 @@
 
 .message > div {
     position: relative;
+}
+
+.file {
+    display: none;
+    width: 11rem;
+    margin: auto;
+    margin-top: 0.6rem;
+    align-items: center;
+}
+
+.file button {
+    background: none;
+    border: none;
+    transition: transform 150ms ease;
+    padding: 0;
+    margin: 0;
+}
+
+.file button:hover {
+    cursor: pointer;
+    transform: scale(1.8);
+}
+
+.file button svg:hover {
+    stroke: red;
+}
+
+
+input[type="file"] {
+    text-align: center;
+    margin: auto;
+    pointer-events: none;
+    width: 100%;
+}
+input[type="file"]::file-selector-button {
+    display: none;
 }
 
 @keyframes loading {

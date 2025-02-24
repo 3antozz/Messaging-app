@@ -8,7 +8,7 @@ const router = Router();
 
 
 router.post('/:convoId', fn.isAuthenticated, asyncHandler(controller.postMessage))
-router.post('/upload/:convoId', upload.single('image'), async(req, res) => {
+router.post('/upload/:convoId', upload.single('image'), asyncHandler(async(req, res) => {
     const convoId = req.params.convoId;
     const options = {
         use_filename: false,
@@ -25,6 +25,6 @@ router.post('/upload/:convoId', upload.single('image'), async(req, res) => {
     } catch (error) {
         console.log(error);
     }
-})
+}))
 
 module.exports = router;
