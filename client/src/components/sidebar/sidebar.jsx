@@ -4,9 +4,9 @@ import { AuthContext } from '../../contexts'
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
 import { MessageSquare, LoaderCircle, Circle } from 'lucide-react';
 
-const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends}) {
+const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends, setConversationID, conversationID}) {
     const { user, token, socket, socketOn } = useContext(AuthContext)
-    const [view, setView] = useState('Messages')
+    const [view, setView] = useState('Groups')
     const [users, setUsers] = useState([])
     const [isFetched, setFetched] = useState(false)
     const [usersLoading, setUsersLoading] = useState(false)
@@ -22,11 +22,11 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
             return 0
         }
     }), [friends])
-    // useEffect(() => {
-    //     if(user) {
-    //         setID(user.conversations[0].id)
-    //     }
-    // }, [setID, user])
+    useEffect(() => {
+        if(groups.length > 0 && !conversationID ) {
+            setConversationID(groups[0].id)
+        }
+    }, [conversationID, groups, setConversationID])
     useEffect(() => {
         const fetchUsers = async() => {
             setUsersLoading(true)
@@ -199,7 +199,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                                 <img src={group.picture_url || '/images/no-group-pic.png'} alt={`${group.name} group picture`}></img>
                                 <div className={styles.info}>
                                     <p>{group.group_name}</p>
-                                    <p>{group.messages[0].senderId === group.participants[0].id ? `${group.participants[0].first_name}: ` : 'You: '} {group.messages[0].content}</p>
+                                    <p>{group.messages[0].senderId !== user.id ? `${group.messages[0].sender.first_name}: ` : 'You: '} {group.messages[0].content || 'Sent an image'}</p>
                                 </div>
                             </button>
                         </li>
@@ -211,7 +211,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                                 <img src={conversation.participants[0].picture_url || '/images/no-profile-pic.jpg'} alt={`${conversation.participants[0].first_name} ${conversation.participants[0].last_name} profile picture`}></img>
                                 <div className={styles.info}>
                                     <p>{conversation.participants[0].first_name} {conversation.participants[0].last_name}</p>
-                                    <p>{conversation.messages[0].senderId === conversation.participants[0].id ? `${conversation.participants[0].first_name}: ` : 'You: '} {conversation.messages[0].content}</p>
+                                    <p>{conversation.messages[0].senderId !== user.id ? `${conversation.messages[0].sender.first_name}: ` : 'You: '} {conversation.messages[0].content || 'Sent an image'}</p>
                                 </div>
                             </button>
                         </li>
@@ -249,6 +249,8 @@ Sidebar.propTypes = {
     setFriends: PropTypes.func.isRequired,
     onlineFriends: PropTypes.bool.isRequired,
     setOnlineFriends: PropTypes.func.isRequired,
+    setConversationID: PropTypes.func.isRequired,
+    conversationID: PropTypes.number.isRequired
 }
 
 export default Sidebar;

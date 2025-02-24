@@ -134,7 +134,14 @@
     font-size: 1.1rem;
     max-width: 230px;
 }
-.message img, .void {
+
+.messageImage {
+    max-width: 230px;
+    cursor: pointer;
+    max-height: 250px;
+    object-fit: contain;
+}
+.message > div > img, .void {
     width: 2.5rem;
     aspect-ratio: 1/1;
     border-radius: 50%;

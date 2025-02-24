@@ -85,7 +85,12 @@ exports.getUserForClient = async(username) => {
                         select: {
                             senderId: true,
                             content: true,
-                            date: true  
+                            date: true,
+                            sender: {
+                                select: {
+                                    first_name: true
+                                }
+                            }  
                         },
                         orderBy: {
                             date: 'desc'
@@ -245,13 +250,14 @@ exports.getConversation = async(userId, id) => {
 }
 
 
-exports.addMessage = async(convoId, content, senderId, date) => {
+exports.addMessage = async(convoId, content, senderId, date, url) => {
     const result = await prisma.$transaction([
         prisma.message.create({
             data: {
                 conversationId: convoId,
-                content,
-                senderId
+                content: content || null,
+                senderId,
+                picture_url: url
             },
             include: {
                 sender: {

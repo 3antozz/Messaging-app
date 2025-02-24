@@ -12,6 +12,7 @@ const fn = require('./routes/fn')
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
 require('./db/populate');
+require('dotenv');
 
 
 const app = express();
@@ -58,7 +59,7 @@ io.on('connection', (socket) => {
     socket.broadcast.emit('user connected', +socket.handshake.query.userId)
     socket.on('chat message', async(msgData) => {
         try {
-            const message = await messagesController.postMessageSocket(+msgData.convoId, msgData.message, +msgData.senderId, msgData.date)
+            const message = await messagesController.postMessageSocket(+msgData.convoId, msgData.message, +msgData.senderId, msgData.date, msgData.url)
             if (message) {
                 const formattedMessage = {...message, date: fn.formatDate(message.date)}
                 io.to(`${msgData.convoId}`).emit('chat message', formattedMessage);

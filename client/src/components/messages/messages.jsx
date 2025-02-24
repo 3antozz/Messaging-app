@@ -28,14 +28,15 @@ const Message = ({message, index, conversation, user, root}) => {
         return <p>Loading</p>
     }
     return (
-    <li className={styles.message} ref={ref} style={{marginBottom: (shouldShowPictureGroup && !isUserMessage && conversation.isGroup) ? '2rem' : null }}>
+    <li className={styles.message} ref={ref} style={{marginBottom: (shouldShowPictureGroup && conversation.isGroup) ? '2rem' : null }}>
         {inView || !messagesReady ? 
         <div className={!isUserMessage ? null : `${styles.yourDiv}`}>
             {shouldShowPicture ? 
             !isUserMessage && (<img src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`}></img>) : <div className={styles.void}></div>}
             <div style={{marginBottom: shouldShowPicture ? '0.5rem' : null }}>
                 { shouldShowSenderName && <p className={styles.sender}>{message.sender.first_name}</p>}
-                <p className={!isUserMessage ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>
+                {message.picture_url && <img src={message.picture_url} data-func='img' loading='lazy' className={!isUserMessage ? `${styles.messageImage} ${styles.otherMessage}` : `${styles.messageImage} ${styles.yourMessage}`}/>}
+                { message.content && <p className={!isUserMessage ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>}
                 <p className={styles.messageDate}>{message.date}</p>
             </div>
         </div> : <div  style={{ height: "40px" }} className={`${styles.messageContent} ${styles.yourDiv}`}></div>}
@@ -51,9 +52,10 @@ Message.propTypes = {
     root: PropTypes.element
 }
 
-export default function Messages ({conversationID, setProfileID}) {
+export default function Messages ({conversationID, setProfileID, setImageURL}) {
     const { user, token, socket } = useContext(AuthContext)
     const [messageInput, setMessageInput] = useState("");
+    const [image, setImage] = useState(null);
     const [conversations, setConversations] = useState({})
     const scrollRef = useRef(null);
     const inputRef = useRef(null);
@@ -90,18 +92,25 @@ export default function Messages ({conversationID, setProfileID}) {
                 if(inputRef.current) {
                     inputRef.current.focus();
                 }
-                const container = scrollRef.current;
-                if (container) {
-                    container.scrollTop = container.scrollHeight;
-                }
-                setTimeout(() => {
-                    if (container) {
-                        container.scrollTop = container.scrollHeight;
-                    }
-                }, 20)
             }, 10)
         }
     }, [conversationID, conversations, token])
+
+    useEffect(() => {
+        let id;
+        if(conversationID && !loading) {
+            const container = scrollRef.current;
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+            id = setTimeout(() => {
+                if (container) {
+                    container.scrollTop = container.scrollHeight;
+                }
+            }, 300)
+        }
+        return () => clearTimeout(id)
+    }, [conversationID, loading])
     useEffect(() => {
         const handleIncomingMessage = (msg) => {
             if (conversations[msg.conversationId]) {
@@ -125,14 +134,57 @@ export default function Messages ({conversationID, setProfileID}) {
     }, [conversations, socket])
     const handleMessageSend = async(e) => {
         e.preventDefault();
-        if(!messageInput) {
+        if(!messageInput && !image) {
             return;
         }
-        try {
-            socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput, date: new Date()});
-            setMessageInput('');
-        } catch (error) {
-            console.log(error)
+        if(image) {
+            try {
+                const form = new FormData();
+                form.append('image', image)
+                const request = await fetch(`${import.meta.env.VITE_API_URL}/messages/upload/${conversationID}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token.current}`,
+                    },
+                    body: form
+                })
+                const response = await request.json();
+                if(!request.ok) {
+                    const error = new Error('An error has occured, please try again later')
+                    throw error;
+                }
+                console.log(response.url);
+                socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput, url: response.url, date: new Date()});
+                setMessageInput('');
+                setImage(null)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        if(messageInput && !image) {
+            try {
+                socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput, url: null, date: new Date()});
+                setMessageInput('');
+                setImage(null)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        const container = scrollRef.current;
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+        setTimeout(() => {
+            if (container) {
+                container.scrollTop = container.scrollHeight;
+            }
+        }, 300)
+    }
+
+    const handleImageClick = (e) => {
+        const element = e.target;
+        if(element.dataset.func === "img") {
+            setImageURL(e.target.src)
         }
     }
 
@@ -173,7 +225,7 @@ export default function Messages ({conversationID, setProfileID}) {
                 }
             </div>
             <div className={styles.main} ref={scrollRef}>
-                <ul>
+                <ul onClick={handleImageClick}>
                 {conversation.messages.map((message, index) => 
                     <Message key={message.id} root={scrollRef.current} index={index} message={message} conversation={conversation} user={user} />
                 )}
@@ -184,12 +236,8 @@ export default function Messages ({conversationID, setProfileID}) {
                     <label htmlFor="message" hidden></label>
                     <input name="message" id="message" onChange={(e) => setMessageInput(e.target.value)} placeholder='Send a message...' value={messageInput} ref={inputRef}></input>
                     <button><SendHorizontal color='white' /></button>
+                    <input type="file" id='image' accept='image/*' onChange={(e) => setImage(e.target.files[0])} />
                 </form>
-                {/* <form className={styles.uploadDiv}>
-                    <label htmlFor="image" hidden></label>
-                    <input type="file" id='image' />
-                    <button>Send Image</button>
-                </form> */}
             </div>
         </section>
     )
@@ -198,4 +246,5 @@ export default function Messages ({conversationID, setProfileID}) {
 Messages.propTypes = {
     conversationID: PropTypes.number.isRequired,
     setProfileID: PropTypes.func.isRequired,
+    setImageURL: PropTypes.func.isRequired,
 }

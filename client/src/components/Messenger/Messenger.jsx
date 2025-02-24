@@ -4,8 +4,8 @@ import Sidebar from '../sidebar/sidebar'
 import { Link } from 'react-router'
 import { AuthContext } from '../../contexts'
 import { useContext, useState, useEffect } from 'react'
+import Image from '../full-image/image'
 import Profile from '../profile/profile'
-
 
 
 export default function Messenger () {
@@ -15,6 +15,7 @@ export default function Messenger () {
     const [onlineFriends, setOnlineFriends] = useState(false)
     const [conversations, setConversations] = useState([])
     const [profileID, setProfileID] = useState(null)
+    const [imageURL, setImageURL] = useState(null)
     useEffect(() => {
         if(user) {
             setFriends(user.friends)
@@ -65,6 +66,7 @@ export default function Messenger () {
     }
     return (
         <>
+            <Image imageURL={imageURL} setImageURL={setImageURL} />
             <Profile userId={profileID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} handleListClick={handleListClick} setOnlineFriends={setOnlineFriends} />
             <header className={styles.header}>
                 {!user ?
@@ -73,8 +75,8 @@ export default function Messenger () {
                 }
             </header>
                 <main>
-                    <Sidebar setConversationID={setConversationID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} conversations={conversations} setConversations={setConversations} handleListClick={handleListClick} onlineFriends={onlineFriends} setOnlineFriends={setOnlineFriends} />
-                    <Messages conversationID={conversationID} setProfileID={setProfileID} />
+                    <Sidebar setConversationID={setConversationID} conversationID={conversationID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} conversations={conversations} setConversations={setConversations} handleListClick={handleListClick} onlineFriends={onlineFriends} setOnlineFriends={setOnlineFriends} />
+                    <Messages conversationID={conversationID} setProfileID={setProfileID} setImageURL={setImageURL} />
                 </main>
         </>
     )
