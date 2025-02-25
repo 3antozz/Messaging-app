@@ -3,7 +3,7 @@ import { AuthContext } from '../../contexts'
 import { useContext, useEffect, useState, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useInView } from 'react-intersection-observer';
-import { SendHorizontal, LoaderCircle, Image, X } from 'lucide-react';
+import { SendHorizontal, LoaderCircle, Image, X, UserPlus } from 'lucide-react';
 
 
 const Message = ({message, index, conversation, user, root}) => {
@@ -39,7 +39,7 @@ const Message = ({message, index, conversation, user, root}) => {
                 { message.content && <p className={!isUserMessage ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>}
                 <p className={styles.messageDate}>{message.date}</p>
             </div>
-        </div> : <div  style={{ height: "40px" }} className={`${styles.messageContent} ${styles.yourDiv}`}></div>}
+        </div> : <div  style={{ height: message.picture_url ? "100px" : '40px' }} className={`${styles.messageContent} ${styles.yourDiv}`}></div>}
     </li>
     )
 }
@@ -52,7 +52,7 @@ Message.propTypes = {
     root: PropTypes.element
 }
 
-export default function Messages ({conversationID, setProfileID, setImageURL}) {
+export default function Messages ({conversationID, setProfileID, setImageURL, setGroupID, setMembers}) {
     const { user, token, socket } = useContext(AuthContext)
     const [messageInput, setMessageInput] = useState("");
     const [image, setImage] = useState(null);
@@ -65,7 +65,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL}) {
     const conversation = useMemo(() => {
         return conversations[conversationID];
     },  [conversationID, conversations])
-    const otherUser = useMemo(() => conversation && conversation.participants[0], [conversation])
+    const otherUser = useMemo(() => conversation && !conversation.isGroup && conversation.participants[0], [conversation])
     useEffect(() => {
         const fetchConversation = async() => {
             setLoading(true)
@@ -218,7 +218,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL}) {
         }
     }
 
-    if (!conversation || !user || !otherUser || loading) {
+    if (!conversation || !user || (!conversation.isGroup && !otherUser) || loading) {
         return (
             <section className={styles.messenger}>
             <div className={styles.info}>
@@ -242,11 +242,14 @@ export default function Messages ({conversationID, setProfileID, setImageURL}) {
             <div className={styles.info}>
                 {!conversation.isGroup ?
                 <button onClick={() => setProfileID(otherUser.id)}><img src={otherUser.picture_url || '/images/no-profile-pic.jpg'} alt={`${otherUser.first_name} ${otherUser.last_name} profile picture`}></img></button> : 
-                <button onClick={() => setProfileID(conversation.id)}><img src={conversation.picture_url || '/images/no-group-pic.png'} alt={`${conversation.group_name} group picture`}></img></button>
+                <button onClick={() => setGroupID(conversation.id)}><img src={conversation.picture_url || '/images/no-group-pic.png'} alt={`${conversation.group_name} group picture`}></img></button>
                 }
                 {!conversation.isGroup ? 
                 <button onClick={() => setProfileID(otherUser.id)}>{otherUser.first_name} {otherUser.last_name}</button> : 
-                <button onClick={() => setProfileID(conversation.id)}>{conversation.group_name}</button>
+                <>
+                    <button onClick={() => setGroupID(conversation.id)}>{conversation.group_name}</button>
+                    <button onClick={() => setMembers(true)}><UserPlus size={28} /></button>
+                </>
                 }
             </div>
             <div className={styles.main} ref={scrollRef}>
@@ -278,4 +281,6 @@ Messages.propTypes = {
     conversationID: PropTypes.number.isRequired,
     setProfileID: PropTypes.func.isRequired,
     setImageURL: PropTypes.func.isRequired,
+    setGroupID: PropTypes.func.isRequired,
+    setMembers: PropTypes.func.isRequired,
 }

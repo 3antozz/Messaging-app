@@ -13,7 +13,13 @@ router.post('/upload/:convoId', upload.single('image'), asyncHandler(async(req, 
     const options = {
         use_filename: false,
         overwrite: true,
-        asset_folder: `AntodiA/conversations/${convoId}`
+        asset_folder: `AntodiA/conversations/${convoId}`,
+        eager: {
+            width: 1080,
+            crop: 'limit',
+            fetch_format: 'auto',
+            quality: 'auto'
+        }
     };
     try {
         const uploadResult = await new Promise((resolve) => {

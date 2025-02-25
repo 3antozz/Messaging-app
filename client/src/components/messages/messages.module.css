@@ -14,7 +14,12 @@
     align-content: end;
 }
 
-.info > button{
+.info > button:last-of-type {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.info > button {
     background: none;
     border: none;
     color: inherit;
@@ -24,15 +29,16 @@
     padding: 0;
 }
 
+.info > button:first-of-type {
+    flex-shrink: 0;
+}
+
 .info button:hover {
     text-decoration: underline;
     color: red;
     cursor: pointer;
     transform: scale(1.05);
 }
-
-
-
 
 .info {
     display: flex;
@@ -144,6 +150,7 @@
     cursor: pointer;
     max-height: 250px;
     object-fit: contain;
+    margin-bottom: 0.2rem;
 }
 .message > div > img, .void {
     width: 2.5rem;

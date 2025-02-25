@@ -98,9 +98,13 @@ exports.getUserForClient = async(username) => {
                         take: 1
                     }
                 },
-                orderBy: {
-                    lastMessageTime: 'desc'
-                }
+                orderBy: [
+                    {lastMessageTime: {
+                        sort: 'desc',
+                        nulls: 'last'
+                    }},
+                    {creationDate: 'desc'}
+                ]
             }
         }
     })
@@ -249,6 +253,39 @@ exports.getConversation = async(userId, id) => {
     })
 }
 
+exports.getGroup = async(userId, id) => {
+    return await prisma.conversation.findUniqueOrThrow({
+        where:{
+            id
+        },
+        include:{
+            participants: {
+                where: {
+                    NOT: {
+                        id: userId
+                    }
+                },
+                omit: {
+                    password: true,
+                    bio: true,
+                    username: true
+                },
+                orderBy: [
+                    {first_name: 'asc'},
+                    {last_name: 'asc'}
+                ]
+            },
+            admin: {
+                omit: {
+                    password: true,
+                    bio: true,
+                    username: true 
+                }
+            }
+        }
+    })
+}
+
 
 exports.addMessage = async(convoId, content, senderId, date, url) => {
     const result = await prisma.$transaction([
@@ -306,5 +343,37 @@ exports.getUserProfile = async(userId) => {
             password: true,
             username: true,
         },
+    })
+}
+
+exports.createGroup = async(adminId, name) => {
+    return await prisma.conversation.create({
+        data: {
+            admin: {
+                connect: {
+                    id: adminId
+                }
+            },
+            participants: {
+                connect: {
+                    id: adminId
+                }
+            },
+            group_name: name,
+            isGroup: true
+        },
+        include: {
+            messages: {
+                select: {
+                    senderId: true,
+                    content: true,
+                    date: true  
+                },
+                orderBy: {
+                    date: 'desc'
+                },
+                take: 1
+            }
+        }
     })
 }

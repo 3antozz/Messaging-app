@@ -4,14 +4,11 @@ import { AuthContext } from '../../contexts'
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
 import { MessageSquare, LoaderCircle, Circle } from 'lucide-react';
 
-const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends, setConversationID, conversationID}) {
+const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends, setConversationID, conversationID, users, usersLoading, error}) {
     const { user, token, socket, socketOn } = useContext(AuthContext)
     const [view, setView] = useState('Groups')
-    const [users, setUsers] = useState([])
-    const [isFetched, setFetched] = useState(false)
-    const [usersLoading, setUsersLoading] = useState(false)
-    const [error, setError] = useState(false)
-    const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
+    const [groupCreation, setGroupCreation] = useState(false)
+    const [groupName, setGroupName] = useState('')
     const messages = useMemo(() => conversations.filter(conversation => conversation.messages.length > 0 && !conversation.isGroup), [conversations])
     const sortedFriends = useMemo(() => friends.toSorted((friend1, friend2) => {
         if(friend1.isOnline && !friend2.isOnline) {
@@ -27,36 +24,6 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
             setConversationID(groups[0].id)
         }
     }, [conversationID, groups, setConversationID])
-    useEffect(() => {
-        const fetchUsers = async() => {
-            setUsersLoading(true)
-            try {
-                const request = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-                    headers: {
-                        'Authorization': `Bearer ${token.current}`
-                    }
-                })
-                const response = await request.json();
-                console.log(response);
-                if(!request.ok) {
-                    const error = new Error('An error has occured, please try again later')
-                    throw error;
-                }
-                setUsers(response.users)
-                setError(false)
-                setFetched(true)
-            } catch(err) {
-                console.log(err)
-                setError(true)
-            } finally {
-                setUsersLoading(false)
-            }
-        }
-        if(!isFetched && user) {
-            fetchUsers();
-        }
-    }, [token, isFetched, user])
-
     useEffect(() => {
         const displayOnlineFriend = (friendId, bool) => {
             const isFriend = friends.findIndex((friend) => friend.id === friendId)
@@ -141,6 +108,33 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
             return;
         }
     }
+    const createGroup = async(e) => {
+        e.preventDefault();
+        if(!groupName) {
+            return;
+        }
+        try {
+            const request = await fetch(`${import.meta.env.VITE_API_URL}/groups`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token.current}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({name: groupName})
+            })
+            const response = await request.json();
+            console.log(response);
+            if(!request.ok) {
+                const error = new Error('An error has occured, please try again later')
+                throw error;
+            }
+            setConversations((prev) => ([response.group, ...prev]))
+            setGroupName('');
+            setGroupCreation(false)
+        } catch(err) {
+            console.log(err)
+        }
+    }
     if(!user) {
         return (
             <>
@@ -177,6 +171,22 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                 <button className={view === 'Users' ? `${styles.selected}` : ''}>Users</button>
             </nav>
             <section className={styles.conversations}>
+                {(view === 'Groups' && !groupCreation) &&
+                    <button onClick={() => setGroupCreation(true)} className={styles.createGroup}>Create Group</button>
+                }
+                {(view === 'Groups' && groupCreation) &&
+                <form onSubmit={createGroup}>
+                    <label htmlFor="group" hidden>Group name: </label>
+                    <input type="text" id='group' placeholder='Group Name' value={groupName} onChange={(e) => setGroupName(e.target.value)}/>
+                    <div className={styles.formButtons}>
+                        <button>Create</button>
+                        <button type='button' className={styles.close} onClick={() => {
+                            setGroupCreation(false)
+                            setGroupName('');
+                            }}>Cancel</button>
+                    </div>
+                </form>
+                }
                 <ul onClick={handleListClick}>
                     {view === 'Friends' ?
                     sortedFriends.map(friend => 
@@ -199,7 +209,10 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                                 <img src={group.picture_url || '/images/no-group-pic.png'} alt={`${group.name} group picture`}></img>
                                 <div className={styles.info}>
                                     <p>{group.group_name}</p>
-                                    <p>{group.messages[0].senderId !== user.id ? `${group.messages[0].sender.first_name}: ` : 'You: '} {group.messages[0].content || 'Sent an image'}</p>
+                                    {group.messages[0] ?
+                                    <p>{group.messages[0].senderId !== user.id ? `${group.messages[0].sender.first_name}: ` : 'You: '} {group.messages[0].content || 'Sent an image'}</p> :
+                                    <p>No messages yet</p>
+                                    }
                                 </div>
                             </button>
                         </li>
@@ -218,7 +231,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                         )
                     })
                     : usersLoading ? <p>Loading</p> : error ? <p>An Error has occured, please try again later</p> :  
-                    <ul>
+                    <>
                     {users.map((user) => {
                         return (
                         <li className={styles.conversation} key={user.id}>
@@ -232,7 +245,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
                         </li>
                         )
                     })} 
-                    </ul>
+                    </>
                     }
                 </ul>
             </section>
@@ -244,13 +257,17 @@ const Sidebar = memo(function Sidebar ({friends, conversations, setFriends, setC
 Sidebar.propTypes = {
     friends: PropTypes.array.isRequired,
     conversations: PropTypes.array.isRequired,
+    groups: PropTypes.array.isRequired,
     setConversations: PropTypes.func.isRequired,
     handleListClick: PropTypes.func.isRequired,
     setFriends: PropTypes.func.isRequired,
     onlineFriends: PropTypes.bool.isRequired,
     setOnlineFriends: PropTypes.func.isRequired,
     setConversationID: PropTypes.func.isRequired,
-    conversationID: PropTypes.number.isRequired
+    conversationID: PropTypes.number.isRequired,
+    users: PropTypes.array.isRequired,
+    usersLoading: PropTypes.bool.isRequired,
+    error: PropTypes.bool.isRequired
 }
 
 export default Sidebar;

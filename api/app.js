@@ -8,6 +8,7 @@ const convosRouter = require('./routes/conversations')
 const messagesRouter = require('./routes/messages')
 const usersRouter = require('./routes/users')
 const messagesController = require('./controllers/messagesController')
+const groupsRouter = require('./routes/groups')
 const fn = require('./routes/fn')
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
@@ -95,6 +96,7 @@ app.use('/friends', friendsRouter)
 app.use('/conversations', convosRouter)
 app.use('/messages', messagesRouter)
 app.use('/users', usersRouter)
+app.use('/groups', groupsRouter)
 
 
 app.use((req, res, next) => {

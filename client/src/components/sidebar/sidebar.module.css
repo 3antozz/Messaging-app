@@ -118,6 +118,15 @@ nav {
     transform: scale(1.05);
 }
 
+.createGroup {
+    color: inherit;
+    margin: auto;
+    display: block;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 0.3rem 0.7rem !important;
+}
+
 .messageButton, .conversation, .you button, .user button {
     color: inherit;
     background: none;
@@ -131,7 +140,7 @@ nav {
     border: none;
 }
 
-.buttons button {
+.buttons button, .createGroup {
     background-color: #3551ca;
     padding: 0.3rem;
     border: none;
@@ -145,7 +154,7 @@ nav {
     font-weight: bold;
 }
 
-.buttons button:hover, nav > button:hover {
+.buttons button:hover, nav > button:hover, .createGroup:hover, .formButtons button:hover {
     cursor: pointer;
     transform: scale(1.2);
     filter: brightness(1.3);
@@ -166,6 +175,48 @@ nav {
 
 .loading {
     animation: 800ms linear 0s infinite loading;
+}
+
+.conversations form input {
+    resize: none;
+    width: 80%;
+    height: 40px;
+    display: block;
+    margin: auto;
+    background-color: #313338;
+    border-radius: 10px;
+    align-content: center;
+    color: inherit;
+    font-size: 1rem;
+    padding: 0.1rem 0.4rem;
+    flex: 1;
+    border: 2px solid grey;
+}
+
+.formButtons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 0.3rem;
+}
+
+.formButtons button {
+    color: inherit;
+    border-radius: 8px;
+    padding: 0.3rem 0.6rem;
+    border: none;
+    transition: transform 150ms ease;
+    margin: 0;
+}
+
+.formButtons button:last-of-type {
+    background-color: #ca3535;
+}
+
+.formButtons button:first-of-type {
+    background-color: #3551ca;
+    font-weight: bold;
+    padding: 0.3rem 1rem;
 }
 
 @keyframes loading {
