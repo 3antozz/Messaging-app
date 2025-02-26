@@ -14,7 +14,12 @@ exports.createUser = async(username, first_name, last_name, password) => {
                     identifier: "public_group"
                 }
             }
-        }
+        },
+        omit: {
+            password: true,
+            bio: true,
+            username: true
+        },
     })
 }
 
@@ -179,16 +184,11 @@ exports.createConversation = async(user1, user2) => {
         },
         include: {
             participants: {
-                where: {
-                    NOT: {
-                        id: user1
-                    }
-                },
                 omit: {
                     password: true,
                     bio: true,
                     username: true
-                }
+                },
             },
             messages: {
                 select: {
@@ -373,6 +373,44 @@ exports.createGroup = async(adminId, name) => {
                     date: 'desc'
                 },
                 take: 1
+            }
+        }
+    })
+}
+
+exports.addUser = async(groupId, userId) => {
+    return await prisma.conversation.update({
+        where: {
+            id: groupId
+        },
+        data: {
+            participants: {
+                connect: {
+                    id: userId
+                }
+            }
+        },
+        include: {
+            participants: {
+                omit: {
+                    password: true,
+                    bio: true,
+                    username: true
+                }
+            },
+            messages: {
+                include: {
+                    sender: {
+                        omit: {
+                            password: true,
+                            bio: true,
+                            username: true
+                        }
+                    }
+                },
+                orderBy: {
+                    date: "asc"
+                }
             }
         }
     })

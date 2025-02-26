@@ -4,7 +4,7 @@ import { AuthContext } from '../../contexts'
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
 import { MessageSquare, LoaderCircle, Circle } from 'lucide-react';
 
-const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends, setConversationID, conversationID, users, usersLoading, error}) {
+const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends, setConversationID, conversationID, users, usersLoading, error, connectedRooms, setConnectedToRooms}) {
     const { user, token, socket, socketOn } = useContext(AuthContext)
     const [view, setView] = useState('Groups')
     const [groupCreation, setGroupCreation] = useState(false)
@@ -49,6 +49,40 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
     }, [friends, setFriends, socket, socketOn])
 
     useEffect(() => {
+        const addNewGroup = (conversation) => {
+            console.log(conversation)
+            setConversations((prev) => ([conversation, ...prev]))
+            setConnectedToRooms(false)
+        }
+        if(socketOn){
+            socket.current.on('new group', addNewGroup)
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('new group');
+            }
+        };
+    }, [setConnectedToRooms, setConversations, socket, socketOn])
+
+    useEffect(() => {
+        const addNewConversation = (conversation) => {
+            conversation.participants = [conversation.participants[1]]
+            setConversations((prev) => ([conversation, ...prev]))
+            setConnectedToRooms(false)
+        }
+        if(socketOn){
+            socket.current.on('new convo', addNewConversation)
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('new convo');
+            }
+        };
+    }, [setConnectedToRooms, setConversations, socket, socketOn])
+
+    useEffect(() => {
         const displayOnlineFriends = (userIds) => {
             const onlineSet = new Set(userIds);
             const updatedFriends = friends.map(friend => ({
@@ -75,13 +109,14 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
 
     useEffect(() => {
         const connectToRooms = () => {
-            const conversationsIds = conversations.map((conversation) => `${conversation.id}`)
+            const conversationsIds = conversations.map((conversation) => `convo${conversation.id}`)
             socket.current.emit('join rooms', conversationsIds)
+            setConnectedToRooms(true)
         }
-        if(user && conversations.length > 0) {
+        if(user && conversations.length > 0 && !connectedRooms) {
             connectToRooms();
         }
-    }, [socket, user, conversations])
+    }, [socket, user, conversations, connectedRooms, setConnectedToRooms])
     useEffect(() => {
         const updateLastMessage = (msg) => {
             const index = conversations.findIndex(conversation => msg.conversationId === conversation.id);
@@ -128,9 +163,10 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                 const error = new Error('An error has occured, please try again later')
                 throw error;
             }
-            setConversations((prev) => ([response.group, ...prev]))
+            setConversations((prev) => ([{...response.group, participants: []}, ...prev]))
             setGroupName('');
             setGroupCreation(false)
+            setConnectedToRooms(false);
         } catch(err) {
             console.log(err)
         }
@@ -263,6 +299,8 @@ Sidebar.propTypes = {
     setFriends: PropTypes.func.isRequired,
     onlineFriends: PropTypes.bool.isRequired,
     setOnlineFriends: PropTypes.func.isRequired,
+    connectedRooms: PropTypes.bool.isRequired,
+    setConnectedToRooms: PropTypes.func.isRequired,
     setConversationID: PropTypes.func.isRequired,
     conversationID: PropTypes.number.isRequired,
     users: PropTypes.array.isRequired,

@@ -15,7 +15,7 @@
     background-color: #101218;
     width: 400px;
     margin: auto;
-    padding: 1rem;
+    padding: 1rem 0;
     border-radius: 15px;
     border: 2px solid grey;
     color: white;
@@ -26,6 +26,11 @@
 
 .members {
     padding: 0;
+}
+
+.memberButton > button:nth-of-type(3) {
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 .members > div {
@@ -52,18 +57,8 @@
     gap: 0.5rem;
 }
 
-.top {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.3rem;
-    border-bottom: 1px solid grey;
-    padding-bottom: 0.5rem;
-    margin-bottom: 0.5rem !important;
-}
-
 .members li {
-    padding: 0.15rem 0;
+    padding: 0.15rem 1rem;
     list-style: none;
 }
 

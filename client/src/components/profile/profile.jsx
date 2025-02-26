@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { X } from 'lucide-react';
 
-const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends, handleListClick, setOnlineFriends}) {
-    const { user, token } = useContext(AuthContext)
+const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends, handleListClick, setOnlineFriends, users}) {
+    const { user, token, socket, socketOn } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [profiles, setProfiles] = useState({})
     const profile = useMemo(() => {
@@ -32,6 +32,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             setFriends(prev => ([...prev, response.friend]))
             setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: true} }))
             setOnlineFriends(false)
+            socket.current.emit('new friend', response.friend);
         } catch(err) {
             console.log(err)
         }
@@ -96,6 +97,22 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             }
         }
     }, [friends, profiles, userId])
+    useEffect(() => {
+        const addNewFriend = (userId) => {
+            const index = users.findIndex((user) => user.id === userId)
+            setFriends(prev => [users[index], ...prev])
+            setOnlineFriends(false);
+        }
+        if(socketOn){
+            socket.current.on('new friend', addNewFriend)
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('new friend');
+            }
+        };
+    }, [setFriends, setOnlineFriends, socket, socketOn, users])
 
     if(!profile) {
         return <></>
@@ -144,6 +161,7 @@ Profile.propTypes = {
     setFriends: PropTypes.func.isRequired,
     handleListClick: PropTypes.func.isRequired,
     setOnlineFriends: PropTypes.func.isRequired,
+    users: PropTypes.array.isRequired,
 }
 
 export default Profile;

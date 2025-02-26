@@ -21,5 +21,15 @@ router.post('/', fn.isAuthenticated, asyncHandler(async(req, res) => {
     return res.json({group})
 }))
 
+router.put('/:groupId', fn.isAuthenticated, asyncHandler(async(req, res) => {
+    const groupId = +req.params.groupId;
+    const { userId } = req.body;
+    const group = await db.addUser(groupId, +userId)
+    const io = req.app.get('io');
+    io.to(`user${userId}`).emit('new group', group);
+    io.to(`convo${groupId}`).emit('new member', groupId);
+    res.json({group});
+}))
+
 
 module.exports = router;

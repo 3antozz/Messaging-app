@@ -1,16 +1,10 @@
 import styles from './add-members.module.css'
-import { memo, useEffect, useState, useContext, useMemo } from 'react'
+import { memo, useState } from 'react'
 import PropTypes from 'prop-types';
-import { AuthContext } from '../../contexts'
-import { Heading3, X } from 'lucide-react';
+import { X, UserPlus } from 'lucide-react';
 
-const Members = memo(function Members ({addMembers, setMembers, groupID, friends, users, groups, handleListClick}) {
-    const { user, token } = useContext(AuthContext)
+const Members = memo(function Members ({addMembers, setMembers, friends, users, handleListClick, group}) {
     const [searchValue, setSearchValue] = useState('');
-    const group = useMemo(() => {
-        const index = groups.findIndex((group) => group.id === groupID )
-        return groups[index];
-    }, [groups, groupID])
     let filteredUsers = friends;
     if(searchValue) {
         filteredUsers = users.filter((user) => `${user.first_name} ${user.last_name}`.toLowerCase().includes(searchValue.toLowerCase()));
@@ -24,7 +18,7 @@ const Members = memo(function Members ({addMembers, setMembers, groupID, friends
                 <>
                 <div>
                     <label htmlFor="user" hidden>Search for a user</label>
-                    <input type="text" id='user' value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+                    <input type="text" id='user' value={searchValue} placeholder='Search a user' onChange={(e) => setSearchValue(e.target.value)} />
                 </div>
                 {!searchValue && <h3>Friends</h3>}
                 <ul className={styles.members} onClick={handleListClick}>
@@ -34,6 +28,7 @@ const Members = memo(function Members ({addMembers, setMembers, groupID, friends
                                 <div className={styles.memberButton}>
                                     <button id={member.id} data-func="profile"><img src={member.picture_url || '/images/no-profile-pic.jpg'} alt={`${member.first_name} ${member.last_name} profile picture`}></img></button>
                                     <button id={member.id} data-func="profile">{member.first_name} {member.last_name}</button>
+                                    <button id={member.id} data-func="add-group"><UserPlus /></button>
                                 </div>
                             </li>
                         )
@@ -49,12 +44,11 @@ const Members = memo(function Members ({addMembers, setMembers, groupID, friends
 
 
 Members.propTypes = {
-    groupID: PropTypes.number,
+    group: PropTypes.object.isRequired,
     addMembers: PropTypes.bool.isRequired,
     setMembers: PropTypes.func.isRequired,
     friends: PropTypes.array.isRequired,
     users: PropTypes.array.isRequired,
-    groups: PropTypes.array.isRequired,
     handleListClick: PropTypes.func.isRequired,
 }
 

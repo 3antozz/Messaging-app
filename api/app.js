@@ -50,6 +50,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use(express.urlencoded({extended: true}));
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('io', io)
 
 const onlineUsers = new Set();
 
@@ -63,15 +64,19 @@ io.on('connection', (socket) => {
             const message = await messagesController.postMessageSocket(+msgData.convoId, msgData.message, +msgData.senderId, msgData.date, msgData.url)
             if (message) {
                 const formattedMessage = {...message, date: fn.formatDate(message.date)}
-                io.to(`${msgData.convoId}`).emit('chat message', formattedMessage);
+                io.to(`convo${msgData.convoId}`).emit('chat message', formattedMessage);
             }
         } catch(err) {
             console.log(err);
-            io.to(msgData.convoId).emit('error', { message: "Failed to send message" });
+            io.to(`convo${msgData.convoId}`).emit('error', { message: "Failed to send message" });
         }
     });
     socket.on('join rooms', (conversationIds) => {
-        socket.join(conversationIds);
+        console.log('join room called')
+        socket.join([`user${socket.handshake.query.userId}`, ...conversationIds]);
+    })
+    socket.on('new friend', (friend) => {
+        io.to(`user${friend.id}`).emit('new friend', (+socket.handshake.query.userId))
     })
     socket.on('online friends', (friendIds) => {
         const onlineIds = [];

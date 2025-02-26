@@ -11,7 +11,7 @@ import Members from '../add-members/add-members'
 
 
 export default function Messenger () {
-    const { user, logout, token } = useContext(AuthContext)
+    const { user, logout, token, socket, socketOn } = useContext(AuthContext)
     const [conversationID, setConversationID] = useState(null)
     const [friends, setFriends] = useState([])
     const [onlineFriends, setOnlineFriends] = useState(false)
@@ -24,7 +24,13 @@ export default function Messenger () {
     const [groupID, setGroupID] = useState(null);
     const [imageURL, setImageURL] = useState(null)
     const [addMembers, setMembers] = useState(false)
+    const [connectedRooms, setConnectedToRooms] = useState(false)
+    const [refreshGroupID, setRefreshGroup] = useState(null)
     const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
+    const group = useMemo(() => {
+        const index = groups.findIndex((group) => group.id === conversationID)
+        return groups[index];
+    }, [groups, conversationID])
     useEffect(() => {
         if(user) {
             setFriends(user.friends)
@@ -60,6 +66,20 @@ export default function Messenger () {
             fetchUsers();
         }
     }, [token, isFetched, user])
+    useEffect(() => {
+        const addNewUser = (user) => {
+            setUsers((prev) => [...prev, user])
+        }
+        if(socketOn){
+            socket.current.on('new user', addNewUser)
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('new user');
+            }
+        };
+    }, [socket, socketOn])
     const createConversation = async(userId) => {
         try {
             const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/${userId}`, {
@@ -76,10 +96,38 @@ export default function Messenger () {
             console.log(response);
             setConversations((prev) => ([...prev, response.conversation]))
             setConversationID(response.conversation.id);
+            setConnectedToRooms(false)
         } catch(err) {
             console.log(err)
         }
     } 
+    const addMember = async(userId) => {
+        try {
+            const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/${conversationID}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token.current}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({userId})
+            })
+            const response = await request.json();
+            if(!request.ok) {
+                const error = new Error('An error has occured, please try again later')
+                throw error;
+            }
+            console.log(response);
+            setConversations((prev) => {
+                const newConv = prev.slice();
+                const index = newConv.findIndex(group => group.id === response.group.id)
+                newConv[index] = response.group;
+                return newConv
+            })
+            setRefreshGroup(response.group.id)
+        } catch(err) {
+            console.log(err)
+        }
+    }
     const handleListClick = async(e) => {
         const button = e.target.closest('button')
         if (button && button.dataset.func === 'convo') {
@@ -98,16 +146,26 @@ export default function Messenger () {
         } else if (button && button.dataset.func === 'profile') {
             const id = +button.id;
             setProfileID(id)
+        } else if (button && button.dataset.func === 'add-group') {
+            const userId = +button.id;
+            const alreadyMember = group.participants.findIndex((member) => member.id === userId)
+            if (alreadyMember > -1) {
+                console.log('Is already a member')
+            } else {
+                addMember(userId)
+            }
         } else {
             return;
         }
     }
     return (
         <>
-            <Members addMembers={addMembers} setMembers={setMembers} friends={friends} users={users} groups={groups} groupID={conversationID} handleListClick={handleListClick} />
-            <Group groupID={groupID} setGroupID={setGroupID} />
+            <Members addMembers={addMembers} setMembers={setMembers} friends={friends} users={users} groups={groups} groupID={conversationID} handleListClick={handleListClick} group={group} />
+            <Group groupID={groupID} setGroupID={setGroupID} handleListClick={handleListClick} refreshGroupID={refreshGroupID} setRefreshGroup={setRefreshGroup} />
+
             <Image imageURL={imageURL} setImageURL={setImageURL} />
-            <Profile userId={profileID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} handleListClick={handleListClick} setOnlineFriends={setOnlineFriends} />
+
+            <Profile userId={profileID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} handleListClick={handleListClick} setOnlineFriends={setOnlineFriends} users={users} />
             <header className={styles.header}>
                 {!user ?
                 <Link to="/login">Login</Link> :
@@ -115,7 +173,8 @@ export default function Messenger () {
                 }
             </header>
                 <main>
-                    <Sidebar setConversationID={setConversationID} conversationID={conversationID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} conversations={conversations} setConversations={setConversations}  groups={groups} handleListClick={handleListClick} onlineFriends={onlineFriends} setOnlineFriends={setOnlineFriends} users={users} usersLoading={usersLoading} error={error} />
+                    <Sidebar setConversationID={setConversationID} conversationID={conversationID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} conversations={conversations} setConversations={setConversations}  groups={groups} handleListClick={handleListClick} onlineFriends={onlineFriends} setOnlineFriends={setOnlineFriends} users={users} usersLoading={usersLoading} error={error} connectedRooms={connectedRooms} setConnectedToRooms={setConnectedToRooms} />
+
                     <Messages conversationID={conversationID} setProfileID={setProfileID} setImageURL={setImageURL} setGroupID={setGroupID} setMembers={setMembers} />
                 </main>
         </>

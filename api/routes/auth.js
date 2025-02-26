@@ -33,8 +33,10 @@ router.post('/register', validateRegistration, asyncHandler(async(req, res, next
     }
     const { username, first_name, last_name, password } = req.body;
         const hashedPW = await bcrypt.hash(password, 15)
-        await db.createUser(username, first_name, last_name, hashedPW);
-        return res.json({done: true})
+        const user = await db.createUser(username, first_name, last_name, hashedPW);
+        const io = req.app.get('io');
+        io.emit('new user', user);
+        return res.json({done: true});
 }))
 
 router.post('/login', validateLogin, asyncHandler(async(req, res, next) => {

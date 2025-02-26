@@ -14,7 +14,7 @@
     align-content: end;
 }
 
-.info > button:last-of-type {
+.info > button:nth-of-type(3) {
     margin-left: auto;
     flex-shrink: 0;
 }
@@ -203,7 +203,7 @@
 
 
 .forms {
-    padding: 0.8rem 1rem;
+    padding: 0.6rem;
 }
 
 .loading {
@@ -247,13 +247,13 @@
 }
 
 
-input[type="file"] {
+.messenger input[type="file"] {
     text-align: center;
     margin: auto;
     pointer-events: none;
     width: 100%;
 }
-input[type="file"]::file-selector-button {
+.messenger input[type="file"]::file-selector-button {
     display: none;
 }
 
