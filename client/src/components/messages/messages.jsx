@@ -32,7 +32,7 @@ const Message = ({message, index, conversation, user, root}) => {
         {inView || !messagesReady ? 
         <div className={!isUserMessage ? null : `${styles.yourDiv}`}>
             {shouldShowPicture ? 
-            !isUserMessage && (<img src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`}></img>) : <div className={styles.void}></div>}
+            !isUserMessage && (<button><img src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`} data-func='profile' id={message.sender.id}></img></button>) : <div className={styles.void}></div>}
             <div style={{marginBottom: shouldShowPicture ? '0.5rem' : null }} className={styles.msgDiv}>
                 { shouldShowSenderName && <p className={styles.sender}>{message.sender.first_name}</p>}
                 {message.picture_url && <img src={message.picture_url} data-func='img' loading='lazy' className={!isUserMessage ? `${styles.messageImage} ${styles.otherMessage}` : `${styles.messageImage} ${styles.yourMessage}`}/>}
@@ -53,7 +53,7 @@ Message.propTypes = {
 }
 
 export default function Messages ({conversationID, setProfileID, setImageURL, setGroupID, setMembers}) {
-    const { user, token, socket } = useContext(AuthContext)
+    const { user, token, socket, socketOn } = useContext(AuthContext)
     const [messageInput, setMessageInput] = useState("");
     const [image, setImage] = useState(null);
     const [conversations, setConversations] = useState({})
@@ -97,6 +97,21 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             }, 10)
         }
     }, [conversationID, conversations, token])
+
+    useEffect(() => {
+        const updateGroup = (group) => {
+            setConversations(prev => ({...prev, [group.id]: {...prev[group.id], picture_url: group.picture_url, group_name: group.group_name}}))
+        }
+        if(socketOn) {
+            socket.current.on('group update', updateGroup);
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('group update', updateGroup);
+            }
+        };
+    }, [socket, socketOn])
 
     useEffect(() => {
         let id;
@@ -193,6 +208,10 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
         const element = e.target;
         if(element.dataset.func === "img") {
             setImageURL(e.target.src)
+        }
+        if(element.dataset.func === "profile") {
+            const id = +e.target.id;
+            setProfileID(id)
         }
     }
 

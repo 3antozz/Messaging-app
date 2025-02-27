@@ -28,7 +28,7 @@ const Members = memo(function Members ({addMembers, setMembers, friends, users, 
                                 <div className={styles.memberButton}>
                                     <button id={member.id} data-func="profile"><img src={member.picture_url || '/images/no-profile-pic.jpg'} alt={`${member.first_name} ${member.last_name} profile picture`}></img></button>
                                     <button id={member.id} data-func="profile">{member.first_name} {member.last_name}</button>
-                                    <button id={member.id} data-func="add-group"><UserPlus /></button>
+                                    <button id={member.id} data-func="add-member"><UserPlus /></button>
                                 </div>
                             </li>
                         )

@@ -2,17 +2,19 @@ import styles from './group.module.css'
 import { memo, useEffect, useState, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
-import { X } from 'lucide-react';
+import { X, UserX } from 'lucide-react';
 
 const Group = memo(function Group ({groupID, setGroupID, handleListClick, refreshGroupID, setRefreshGroup}) {
     const { user, token, socket, socketOn } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [edit, setEdit] = useState(false);
-    const [groups, setGroups] = useState({})
-    const [groupName, setGroupName] = useState('')
-    const [image, setImage] = useState(null)
+    const [groups, setGroups] = useState({});
+    const [groupName, setGroupName] = useState('');
+    const [image, setImage] = useState(null);
     const group = useMemo(() => {
-        return groups[groupID];
+        const group = groups[groupID];
+        setGroupName(group?.group_name);
+        return group;
     },  [groups, groupID])
     useEffect(() => {
         const fetchGroup = async() => {
@@ -66,10 +68,62 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, refres
         };
     }, [setRefreshGroup, socket, socketOn])
 
-    const editGroup = async() => {
-        
+    const editGroup = async(e) => {
+        e.preventDefault();
+        if(!groupName && !image) {
+            return;
+        }
+        if(image) {
+            try {
+                const form = new FormData();
+                form.append('image', image)
+                if(groupName) {
+                    form.append('name', groupName)
+                }
+                const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/upload/${groupID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token.current}`,
+                    },
+                    body: form
+                })
+                const response = await request.json();
+                if(!request.ok) {
+                    const error = new Error(response.message)
+                    throw error;
+                }
+                console.log(response);
+                setEdit(false)
+                setImage(null)
+                setGroupName('');
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        if(groupName && !image) {
+            try {
+                const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/edit/${groupID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token.current}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({name: groupName})
+                })
+                const response = await request.json();
+                if(!request.ok) {
+                    const error = new Error(response.message)
+                    throw error;
+                }
+                console.log(response);
+                setEdit(false)
+                setImage(null)
+                setGroupName('');
+            } catch (error) {
+                console.log(error)
+            }
+        }
     }
-
     const handleImageInput = (e) => {
         const file = e.target.files[0];
         if(file) {
@@ -77,7 +131,7 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, refres
         }
     }
     return (
-        <dialog open={groupID} className={styles.backdrop} id='backdrop' onClick={(e) => e.target.id === 'backdrop' && setGroupID(null)}>
+        <dialog open={groupID} className={styles.backdrop} id='backdrop'>
             <section className={styles.group}>
                 {loading || !group ? 
                 <>
@@ -95,13 +149,13 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, refres
                     }
                     </> :
                     <form onSubmit={editGroup}>
-                    <img src={group.picture_url || '/images/no-group-pic.png' } alt={`${group.group_name} group picture`}></img>
-                    <label htmlFor="picture" hidden>Group picture</label>
-                    <input type="file" onChange={handleImageInput} />
-                    <label htmlFor="name" hidden>Group name</label>
-                    <input type="text" value={groupName} placeholder='Group name' onChange={(e) => setGroupName(e.target.value)} />
-                    <button className={styles.edit} onClick={() => setEdit(false)}>Submit</button>
-                    <button type='button' className={styles.edit} onClick={() => setEdit(false)}>Cancel</button>
+                        <img src={group.picture_url || '/images/no-group-pic.png' } alt={`${group.group_name} group picture`}></img>
+                        <label htmlFor="picture" hidden>Group picture</label>
+                        <input type="file" id='picture' onChange={handleImageInput} />
+                        <label htmlFor="name" hidden>Group name</label>
+                        <input type="text" id='name' value={groupName} placeholder='Group name' onChange={(e) => setGroupName(e.target.value)} />
+                        <button className={styles.edit}>Submit</button>
+                        <button type='button' className={styles.edit} onClick={() => setEdit(false)}>Cancel</button>
                     </form>
                     }
                 </div>
@@ -112,6 +166,9 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, refres
                                 <div className={styles.memberButton}>
                                     <button id={member.id} data-func="profile"><img src={member.picture_url || '/images/no-profile-pic.jpg'} alt={`${member.first_name} ${member.last_name} profile picture`}></img></button>
                                     <button id={member.id} data-func="profile">{member.first_name} {member.last_name}</button>
+                                    {(user && user.id == group.adminId) && 
+                                    <button className={styles.edit} id={member.id} data-func="remove-member"><UserX /></button>
+                                    }
                                 </div>
                             </li>
                         )

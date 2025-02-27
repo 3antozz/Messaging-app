@@ -8,29 +8,25 @@ const router = Router();
 
 
 router.post('/:convoId', fn.isAuthenticated, asyncHandler(controller.postMessage))
-router.post('/upload/:convoId', upload.single('image'), asyncHandler(async(req, res) => {
+router.post('/upload/:convoId',fn.isAuthenticated, upload.single('image'), asyncHandler(async(req, res) => {
     const convoId = req.params.convoId;
     const options = {
         use_filename: false,
         overwrite: true,
         asset_folder: `AntodiA/conversations/${convoId}`,
-        eager: {
-            width: 1080,
-            crop: 'limit',
-            fetch_format: 'auto',
-            quality: 'auto'
-        }
+        transformation: [
+            {width: req.file.width > 1080 ? 1080 : req.file.width},
+            {crop: 'limit'},
+            {fetch_format: 'auto'},
+            {quality: 'auto'}
+        ]
     };
-    try {
-        const uploadResult = await new Promise((resolve) => {
-            cloudinary.uploader.upload_stream(options, (error, uploadResult) => {
-                return resolve(uploadResult);
-            }).end(req.file.buffer);
-        });
-        return res.json({url: uploadResult.secure_url})
-    } catch (error) {
-        console.log(error);
-    }
+    const uploadResult = await new Promise((resolve) => {
+        cloudinary.uploader.upload_stream(options, (error, uploadResult) => {
+            return resolve(uploadResult);
+        }).end(req.file.buffer);
+    });
+    return res.json({url: uploadResult.secure_url})
 }))
 
 module.exports = router;

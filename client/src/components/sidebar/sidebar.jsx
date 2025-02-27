@@ -49,8 +49,26 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
     }, [friends, setFriends, socket, socketOn])
 
     useEffect(() => {
+        const removeGroup = (groupId) => {
+            const index = conversations.findIndex(conversation => conversation.id === groupId);
+            setConversations((prev) => prev.toSpliced(index, 1));
+            setConnectedToRooms(false)
+            setConversationID(groups[1].id)
+        }
+        if(socketOn){
+            socket.current.on('removed group', removeGroup)
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('removed group');
+            }
+        };
+    }, [conversations, groups, setConnectedToRooms, setConversationID, setConversations, socket, socketOn])
+
+    useEffect(() => {
         const addNewGroup = (conversation) => {
-            console.log(conversation)
+            console.log(conversation);
             setConversations((prev) => ([conversation, ...prev]))
             setConnectedToRooms(false)
         }

@@ -415,3 +415,48 @@ exports.addUser = async(groupId, userId) => {
         }
     })
 }
+
+exports.updateGroup = async(groupId, name = null, url = null) => {
+    const data = {};
+    if(name) data.group_name = name;
+    if(url) data.picture_url = url
+    return prisma.conversation.update({
+        where: {
+            id: groupId
+        },
+        data: data,
+    })
+}
+exports.updateProfile = async(userId, first_name = null, last_name = null, bio = null, url = null) => {
+    const data = {};
+    if(first_name) data.first_name = first_name;
+    if(last_name) data.last_name = last_name;
+    if(bio) data.bio = bio;
+    if(url) data.picture_url = url
+    return prisma.user.update({
+        where: {
+            id: userId
+        },
+        data: data,
+        omit: {
+            password: true,
+            bio: true,
+            username: true
+        }
+    })
+}
+
+exports.removeUser = async(groupId, userId) => {
+    return await prisma.conversation.update({
+        where: {
+            id: groupId
+        },
+        data: {
+            participants: {
+                disconnect: {
+                    id: userId
+                }
+            }
+        }
+    })
+}

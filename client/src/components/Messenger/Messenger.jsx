@@ -26,6 +26,7 @@ export default function Messenger () {
     const [addMembers, setMembers] = useState(false)
     const [connectedRooms, setConnectedToRooms] = useState(false)
     const [refreshGroupID, setRefreshGroup] = useState(null)
+    const [refreshConversationID, setRefreshConversation] = useState(null)
     const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
     const group = useMemo(() => {
         const index = groups.findIndex((group) => group.id === conversationID)
@@ -80,6 +81,25 @@ export default function Messenger () {
             }
         };
     }, [socket, socketOn])
+    useEffect(() => {
+        const updateGroup = (group) => {
+            setConversations(prev => {
+                const newConv = prev.slice();
+                const index = newConv.findIndex(conv => conv.id === group.id)
+                newConv[index] = {...newConv[index], picture_url: group.picture_url, group_name: group.group_name};
+                return newConv
+            })
+        }
+        if(socketOn) {
+            socket.current.on('group update', updateGroup);
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('group update', updateGroup);
+            }
+        };
+    }, [socket, conversations, setConversations, socketOn])
     const createConversation = async(userId) => {
         try {
             const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/${userId}`, {
@@ -103,13 +123,11 @@ export default function Messenger () {
     } 
     const addMember = async(userId) => {
         try {
-            const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/${conversationID}`, {
+            const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/${conversationID}/add-member/${userId}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token.current}`,
-                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({userId})
             })
             const response = await request.json();
             if(!request.ok) {
@@ -123,6 +141,26 @@ export default function Messenger () {
                 newConv[index] = response.group;
                 return newConv
             })
+            setRefreshGroup(response.group.id)
+        } catch(err) {
+            console.log(err)
+        }
+    }
+
+    const removeMember = async(userId) => {
+        try {
+            const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/${conversationID}/remove-member/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token.current}`,
+                },
+            })
+            const response = await request.json();
+            if(!request.ok) {
+                const error = new Error('An error has occured, please try again later')
+                throw error;
+            }
+            console.log(response);
             setRefreshGroup(response.group.id)
         } catch(err) {
             console.log(err)
@@ -146,7 +184,7 @@ export default function Messenger () {
         } else if (button && button.dataset.func === 'profile') {
             const id = +button.id;
             setProfileID(id)
-        } else if (button && button.dataset.func === 'add-group') {
+        } else if (button && button.dataset.func === 'add-member') {
             const userId = +button.id;
             const alreadyMember = group.participants.findIndex((member) => member.id === userId)
             if (alreadyMember > -1) {
@@ -154,6 +192,9 @@ export default function Messenger () {
             } else {
                 addMember(userId)
             }
+        } else if (button && button.dataset.func === 'remove-member') {
+            const userId = +button.id;
+            removeMember(userId)
         } else {
             return;
         }
@@ -175,7 +216,7 @@ export default function Messenger () {
                 <main>
                     <Sidebar setConversationID={setConversationID} conversationID={conversationID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} conversations={conversations} setConversations={setConversations}  groups={groups} handleListClick={handleListClick} onlineFriends={onlineFriends} setOnlineFriends={setOnlineFriends} users={users} usersLoading={usersLoading} error={error} connectedRooms={connectedRooms} setConnectedToRooms={setConnectedToRooms} />
 
-                    <Messages conversationID={conversationID} setProfileID={setProfileID} setImageURL={setImageURL} setGroupID={setGroupID} setMembers={setMembers} />
+                    <Messages conversationID={conversationID} setProfileID={setProfileID} setImageURL={setImageURL} setGroupID={setGroupID} setMembers={setMembers} refreshConversationID={refreshConversationID} setRefreshConversation={setRefreshConversation} />
                 </main>
         </>
     )

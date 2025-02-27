@@ -1,6 +1,6 @@
 const cloudinary = require('cloudinary').v2;
 const multer  = require('multer');
-const imageMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const imageMimeTypes = ["image/jpeg", "image/png", "image/gif", "image/webp", 'image/avif'];
 const upload = multer({
     fileFilter: function fileFilter (req, file, cb) {
         if (imageMimeTypes.includes(file.mimetype)) {

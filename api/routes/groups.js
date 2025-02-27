@@ -2,6 +2,7 @@ const { Router } = require('express')
 const asyncHandler = require('express-async-handler')
 const db = require('../db/queries')
 const fn = require('./fn')
+const { upload, cloudinary } = require('./uploadConfig')
 
 const router = Router();
 
@@ -21,14 +22,61 @@ router.post('/', fn.isAuthenticated, asyncHandler(async(req, res) => {
     return res.json({group})
 }))
 
-router.put('/:groupId', fn.isAuthenticated, asyncHandler(async(req, res) => {
+router.put('/:groupId/add-member/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
     const groupId = +req.params.groupId;
-    const { userId } = req.body;
-    const group = await db.addUser(groupId, +userId)
+    const userId = +req.params.userId;
+    const group = await db.addUser(groupId, userId)
     const io = req.app.get('io');
     io.to(`user${userId}`).emit('new group', group);
     io.to(`convo${groupId}`).emit('new member', groupId);
     res.json({group});
+}))
+
+router.put('/:groupId/remove-member/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
+    const groupId = +req.params.groupId;
+    const userId = +req.params.userId;
+    const group = await db.removeUser(groupId, userId)
+    const io = req.app.get('io');
+    io.to(`user${userId}`).emit('removed group', groupId);
+    io.to(`convo${groupId}`).emit('new member', groupId);
+    res.json({group});
+}))
+
+router.put('/upload/:groupId', fn.isAuthenticated, upload.single('image'), asyncHandler(async(req, res) => {
+    const groupId = +req.params.groupId;
+    const { name } = req.body;
+    const options = {
+        public_id: `${groupId}`,
+        overwrite: true,
+        asset_folder: `AntodiA/profile-pictures/group${groupId}`,
+        transformation: [
+            { width: 300, height: 300, crop: 'thumb', gravity: 'face' }, // Focus on face
+            { quality: 'auto' },
+            { fetch_format: 'auto' }
+        ]
+    };
+    const uploadResult = await new Promise((resolve) => {
+        cloudinary.uploader.upload_stream(options, (error, uploadResult) => {
+            return resolve(uploadResult);
+        }).end(req.file.buffer);
+    });
+    console.log(uploadResult);
+    const group = await db.updateGroup(groupId, name, uploadResult.secure_url)
+    console.log(group);
+    const io = req.app.get('io');
+    io.to(`convo${groupId}`).emit('new member', groupId);
+    io.to(`convo${groupId}`).emit('group update', group);
+    res.send({done: true})
+}))
+
+router.put('/edit/:groupId', fn.isAuthenticated, asyncHandler(async(req, res) => {
+    const groupId = +req.params.groupId;
+    const { name } = req.body;
+    const group = await db.updateGroup(groupId, name)
+    const io = req.app.get('io');
+    io.to(`convo${groupId}`).emit('new member', groupId);
+    io.to(`convo${groupId}`).emit('group update', group);
+    res.send({done: true})
 }))
 
 

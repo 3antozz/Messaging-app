@@ -15,13 +15,18 @@
     background-color: #101218;
     width: 400px;
     margin: auto;
-    padding: 1rem 2rem;
+    padding: 1rem 1.5rem;
     border-radius: 15px;
     border: 2px solid grey;
     color: white;
     display: flex;
     flex-direction: column;
     height: 480px;
+}
+
+.memberButton > button:nth-of-type(3) {
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 .info {

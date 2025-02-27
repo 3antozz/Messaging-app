@@ -8,9 +8,20 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
     const { user, token, socket, socketOn } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [profiles, setProfiles] = useState({})
-    const profile = useMemo(() => {
-        return profiles[userId];
-    },  [profiles, userId])
+    const [edit, setEdit] = useState(false);
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [bio, setBio] = useState('');
+    const [image, setImage] = useState(null);
+    const profile = useMemo(() => profiles[userId], [profiles, userId])
+
+    useEffect(() => {
+        if(edit && !firstName) {
+            setFirstName(profile?.first_name);
+            setLastName(profile?.last_name);
+            setBio(profile?.bio);
+        }
+    }, [edit, firstName, profile])
     const addFriend = async() => {
         try {
             const request = await fetch(`${import.meta.env.VITE_API_URL}/friends/add`, {
@@ -35,6 +46,72 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             socket.current.emit('new friend', response.friend);
         } catch(err) {
             console.log(err)
+        }
+    }
+    const editProfile = async(e) => {
+        e.preventDefault();
+        if((!firstName || !lastName) && !image) {
+            return;
+        }
+        if(image) {
+            try {
+                const form = new FormData();
+                form.append('image', image)
+                form.append('first_name', firstName)
+                form.append('last_name', lastName)
+                if(bio) {
+                    form.append('bio', bio)
+                }
+                const request = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}/upload`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token.current}`,
+                    },
+                    body: form
+                })
+                const response = await request.json();
+                if(!request.ok) {
+                    const error = new Error(response.message)
+                    throw error;
+                }
+                console.log(response);
+                setEdit(false)
+                setImage(null)
+                setFirstName('');
+                setLastName('');
+                setBio('');
+            } catch (error) {
+                console.log(error)
+            }
+        }
+        if((firstName && lastName) && !image) {
+            try {
+                const request = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token.current}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        first_name: firstName,
+                        last_name: lastName,
+                        bio: bio
+                    })
+                })
+                const response = await request.json();
+                if(!request.ok) {
+                    const error = new Error(response.message)
+                    throw error;
+                }
+                console.log(response);
+                setEdit(false)
+                setImage(null)
+                setFirstName('');
+                setLastName('');
+                setBio('');
+            } catch (error) {
+                console.log(error)
+            }
         }
     }
     const removeFriend = async() => {
@@ -70,6 +147,12 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
     const handleMessageButton = (e) => {
         setProfileID(null);
         handleListClick(e)
+    }
+    const handleImageInput = (e) => {
+        const file = e.target.files[0];
+        if(file) {
+            setImage(e.target.files[0])
+        }
     }
     useEffect(() => {
         const fetchProfile = async() => {
@@ -114,28 +197,45 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
         };
     }, [setFriends, setOnlineFriends, socket, socketOn, users])
 
-    if(!profile) {
-        return <></>
-    }
     return (
-        <dialog open={userId} className={styles.backdrop} id='backdrop' onClick={(e) => e.target.id === 'backdrop' && setProfileID(null)}>
+        <dialog open={userId} className={styles.backdrop} id='backdrop'>
             <section className={styles.profile}>
-                {loading ? 
+                {loading || !profile ?
                 <>
                 <p>Loading</p>  
-                <button onClick={() => setProfileID(null)}>Close</button>
+                <button onClick={() => {
+                    setEdit(false);
+                    setProfileID(null);
+                    }}>Close</button>
                 </> :
                 <>
                 <div className={styles.top}>
                     <img src={profile.picture_url || '/images/no-profile-pic.jpg' } alt={`${profile.first_name} ${profile.last_name} profile picture`}></img>
-                    <h2>{profile.first_name} {profile.last_name}</h2>
-                    {(user && user.id == userId) && 
-                    <button className={styles.edit}>Edit Profile</button>
+                    {!edit ? <h2>{profile.first_name} {profile.last_name}</h2> :
+                    <form onSubmit={editProfile}>
+                        <label htmlFor="picture" hidden>Group picture</label>
+                        <input type="file" id='picture' onChange={handleImageInput} />
+                        <label htmlFor="first_name" hidden></label>
+                        <input type="text" id='first_name' value={firstName} placeholder='First Name' onChange={(e) => setFirstName(e.target.value)} />
+                        <label htmlFor="last_name" hidden></label>
+                        <input type="text" id='last_name' value={lastName} placeholder='Last Name' onChange={(e) => setLastName(e.target.value)} />
+                        <button className={styles.edit}>Submit</button>
+                        <button type='button' className={styles.edit} onClick={() => setEdit(false)}>Cancel</button>
+                    </form>
+                    }
+                    {(user && user.id == userId && !edit) && 
+                    <button className={styles.edit} onClick={() => setEdit(true)}>Edit Profile</button>
                     }
                 </div>
                 <h3>About Me</h3>
                 <div className={styles.info}>
-                    {profile.bio ? <p className={styles.bio}>{profile.bio}</p> : <p className={styles.bio} style={{textAlign: 'center'}}>User has no bio</p>  }
+                    {!edit ? 
+                    profile.bio ? <p className={styles.bio}>{profile.bio}</p> : <p className={styles.bio} style={{textAlign: 'center'}}>User has no bio</p> : 
+                    <>
+                    <label htmlFor="bio" hidden></label>
+                    <textarea type="text" id='bio' value={bio || ''} placeholder='Bio' onChange={(e) => setBio(e.target.value)}></textarea>
+                    </>
+                    }
                     <p className={styles.date}>Join Date: {profile.joinDate}</p>
                 </div>
                 {(user && user.id !== +userId) &&
