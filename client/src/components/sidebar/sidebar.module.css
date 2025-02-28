@@ -177,6 +177,17 @@ nav {
     animation: 800ms linear 0s infinite loading;
 }
 
+.search {
+    color: inherit;
+    background-color: #313338;
+    padding: 0.5rem;
+    width: 80%;
+    margin: 0 auto;
+    margin-top: 0.5rem;
+    border-radius: 10px;
+    border: 2px solid grey;
+}
+
 .conversations form input {
     resize: none;
     width: 80%;

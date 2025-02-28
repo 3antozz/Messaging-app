@@ -9,6 +9,8 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
     const [view, setView] = useState('Groups')
     const [groupCreation, setGroupCreation] = useState(false)
     const [groupName, setGroupName] = useState('')
+    const [search, setSearch] = useState('')
+    const [filteredResult, setFilteredResult] = useState([])
     const messages = useMemo(() => conversations.filter(conversation => conversation.messages.length > 0 && !conversation.isGroup), [conversations])
     const sortedFriends = useMemo(() => friends.toSorted((friend1, friend2) => {
         if(friend1.isOnline && !friend2.isOnline) {
@@ -22,6 +24,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
     useEffect(() => {
         if(groups.length > 0 && !conversationID ) {
             setConversationID(groups[0].id)
+            setFilteredResult(groups)
         }
     }, [conversationID, groups, setConversationID])
     useEffect(() => {
@@ -154,9 +157,53 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             }
         };
     }, [socket, conversations, setConversations])
+    const filterSearch = (e) => {
+        const search = e.target.value.toLowerCase();
+        setSearch(search)
+        if(view === 'Messages') {
+            if(search) {
+                const filtered = messages.filter((message) => `${message.participants[0].first_name} ${message.participants[0].last_name}`.toLowerCase().includes(search))
+                setFilteredResult(filtered)
+            } else {
+                setFilteredResult(messages)
+            }
+        } else if(view === 'Friends') {
+            if(search) {
+                const filtered = sortedFriends.filter((friend) => `${friend.first_name} ${friend.last_name}`.toLowerCase().includes(search))
+                setFilteredResult(filtered)
+            } else {
+                setFilteredResult(sortedFriends)
+            }
+        } else if(view === 'Groups') {
+            if(search) {
+                const filtered = groups.filter((group) => group.group_name.toLowerCase().includes(search))
+                setFilteredResult(filtered)
+            } else {
+                setFilteredResult(groups)
+            }
+        } else if(view === 'Users') {
+            if(search) {
+                const filtered = users.filter((user) => `${user.first_name} ${user.last_name}`.toLowerCase().includes(search))
+                setFilteredResult(filtered)
+            } else {
+                setFilteredResult(users)
+            }
+        }
+    }
     const handleViews = (e) => {
         if (e.target.tagName === 'BUTTON') {
-            setView(e.target.textContent); 
+            const view = e.target.textContent;
+            setView(e.target.textContent);
+            setSearch('')
+            if(view === 'Messages') {
+                setFilteredResult(messages)
+            } else if(view === 'Friends') {
+                setFilteredResult(sortedFriends)
+            } else if(view === 'Groups') {
+                setFilteredResult(groups)
+            } else if(view === 'Users') {
+                setFilteredResult(users)
+            }
         } else {
             return;
         }
@@ -215,7 +262,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             <section className={styles.you}>
                 <button onClick={handleListClick} data-func='profile' id={user.id}>
                     <img src={user.picture_url || '/images/no-profile-pic.jpg'} alt={`${user.first_name} ${user.last_name} profile picture`}></img>
-                    <h3>{user.username}</h3>
+                    <h3>{user.first_name} {user.last_name}</h3>
                 </button>
             </section>
             <nav onClick={handleViews}>
@@ -224,6 +271,8 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                 <button className={view === 'Groups' ? `${styles.selected}` : ''}>Groups</button>
                 <button className={view === 'Users' ? `${styles.selected}` : ''}>Users</button>
             </nav>
+            <label htmlFor="search" hidden></label>
+            <input type="text" id='search' className={styles.search} value={search} placeholder='Search for a user or group' onChange={filterSearch} />
             <section className={styles.conversations}>
                 {(view === 'Groups' && !groupCreation) &&
                     <button onClick={() => setGroupCreation(true)} className={styles.createGroup}>Create Group</button>
@@ -243,7 +292,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                 }
                 <ul onClick={handleListClick}>
                     {view === 'Friends' ?
-                    sortedFriends.map(friend => 
+                    filteredResult.map(friend => 
                         <li key={friend.id} className={styles.conversation}>
                             <div className={styles.friendButton}>
                                 <div>
@@ -257,7 +306,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                             </div>
                         </li>
                     ) : view === 'Groups' ?
-                    groups.map(group => 
+                    filteredResult.map(group => 
                         <li key={group.id} className={styles.conversation}>
                             <button id={group.id} data-func='convo' className={styles.messageButton}>
                                 <img src={group.picture_url || '/images/no-group-pic.png'} alt={`${group.name} group picture`}></img>
@@ -271,7 +320,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                             </button>
                         </li>
                     ) : view === 'Messages' ? 
-                    messages.map(conversation => {
+                    filteredResult.map(conversation => {
                         return (
                         <li key={conversation.id} className={styles.conversation}>
                             <button id={conversation.id} data-func='convo' className={styles.messageButton}>
@@ -286,7 +335,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                     })
                     : usersLoading ? <p>Loading</p> : error ? <p>An Error has occured, please try again later</p> :  
                     <>
-                    {users.map((user) => {
+                    {filteredResult.map((user) => {
                         return (
                         <li className={styles.conversation} key={user.id}>
                             <div className={styles.friendButton}>

@@ -50,7 +50,7 @@ router.put('/upload/:groupId', fn.isAuthenticated, upload.single('image'), async
         overwrite: true,
         asset_folder: `AntodiA/profile-pictures/group${groupId}`,
         transformation: [
-            { width: 300, height: 300, crop: 'thumb', gravity: 'face' }, // Focus on face
+            { width: 300, height: 300, crop: 'auto_pad', gravity: 'auto' },
             { quality: 'auto' },
             { fetch_format: 'auto' }
         ]

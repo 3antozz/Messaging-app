@@ -5,7 +5,7 @@ import { AuthContext } from '../../contexts'
 import { X } from 'lucide-react';
 
 const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends, handleListClick, setOnlineFriends, users}) {
-    const { user, token, socket, socketOn } = useContext(AuthContext)
+    const { user, setUser, token, socket, socketOn } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [profiles, setProfiles] = useState({})
     const [edit, setEdit] = useState(false);
@@ -13,6 +13,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
     const [lastName, setLastName] = useState('');
     const [bio, setBio] = useState('');
     const [image, setImage] = useState(null);
+    const [refreshProfileID, setRefreshProfile] = useState(null);
     const profile = useMemo(() => profiles[userId], [profiles, userId])
 
     useEffect(() => {
@@ -22,6 +23,31 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             setBio(profile?.bio);
         }
     }, [edit, firstName, profile])
+    useEffect(() => {
+        if(refreshProfileID) {
+            setProfiles(prev => {
+                // eslint-disable-next-line no-unused-vars
+                const { [refreshProfileID]: removedGroup, ...rest } = prev;
+                return rest;
+            })
+            setRefreshProfile(null)
+        }
+    }, [refreshProfileID])
+
+    useEffect(() => {
+        const refreshProfile = (user) => {
+            setRefreshProfile(user.id)
+        }
+        if(socketOn){
+            socket.current.on('edit user', refreshProfile)
+        }
+        const listener = socket.current;
+        return () => {
+            if(listener) {
+                listener.off('edit user', refreshProfile);
+            }
+        };
+    }, [socket, socketOn, profile])
     const addFriend = async() => {
         try {
             const request = await fetch(`${import.meta.env.VITE_API_URL}/friends/add`, {
@@ -75,6 +101,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     throw error;
                 }
                 console.log(response);
+                setUser(prev => ({...prev, ...response.user}))
                 setEdit(false)
                 setImage(null)
                 setFirstName('');
@@ -104,6 +131,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     throw error;
                 }
                 console.log(response);
+                setUser(prev => ({...prev, ...response.user}))
                 setEdit(false)
                 setImage(null)
                 setFirstName('');
@@ -211,7 +239,15 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 <>
                 <div className={styles.top}>
                     <img src={profile.picture_url || '/images/no-profile-pic.jpg' } alt={`${profile.first_name} ${profile.last_name} profile picture`}></img>
-                    {!edit ? <h2>{profile.first_name} {profile.last_name}</h2> :
+                    {!edit ? 
+                    <>
+                    <h2>{profile.first_name} {profile.last_name}</h2>
+                    {(user && user.id == userId && !edit) && 
+                    <>
+                    <p className={styles.username}>@{user.username}</p>
+                    </>
+                    }
+                    </> :
                     <form onSubmit={editProfile}>
                         <label htmlFor="picture" hidden>Group picture</label>
                         <input type="file" id='picture' onChange={handleImageInput} />
@@ -244,7 +280,10 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     {profile.isFriend ? <button className={styles.removeFriend} onClick={removeFriend}>Remove Friend</button> : <button className={styles.addFriend} onClick={addFriend}>Add friend</button>}
                 </div>
                 }
-                <button className={styles.close} onClick={() => setProfileID(null)}><X size={30} color='white'/></button>
+                <button className={styles.close} onClick={() => {
+                    setEdit(false);
+                    setProfileID(null)
+                    }}><X size={30} color='white'/></button>
                 </>
                 }
             </section>

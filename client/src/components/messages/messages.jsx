@@ -9,7 +9,7 @@ import { SendHorizontal, LoaderCircle, Image, X, UserPlus } from 'lucide-react';
 const Message = ({message, index, conversation, user, root}) => {
     const {ref, inView} = useInView({
         triggerOnce: false,
-        root: root,
+        root: root || document.getElementById('scrl'),
         rootMargin: "150px 150px 4000px 150px",
     })
     const [messagesReady, setMessagesReady] = useState(false);
@@ -271,7 +271,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 </>
                 }
             </div>
-            <div className={styles.main} ref={scrollRef}>
+            <div className={styles.main} ref={scrollRef} id='scrl'>
                 <ul onClick={handleImageClick}>
                 {conversation.messages.map((message, index) => 
                     <Message key={message.id} root={scrollRef.current} index={index} message={message} conversation={conversation} user={user} />

@@ -50,7 +50,7 @@ router.put('/:userId/upload', fn.isAuthenticated, upload.single('image'), asyncH
     console.log(user);
     const io = req.app.get('io');
     io.emit('edit user', user);
-    res.send({done: true})
+    res.send({user})
 }))
 
 router.put('/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
@@ -60,7 +60,7 @@ router.put('/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
     console.log(user);
     const io = req.app.get('io');
     io.emit('edit user', user);
-    res.send({done: true})
+    res.send({user})
 }))
 
 
