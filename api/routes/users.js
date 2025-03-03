@@ -15,7 +15,7 @@ router.get('/', fn.isAuthenticated , asyncHandler(async(req, res) => {
 
 router.get('/user', fn.isAuthenticated, (req, res) => {
     const newUser = fn.mergeFriends(req.user);
-    setTimeout(() => res.json({user: newUser}), 1500)
+    setTimeout(() => res.json({user: newUser}), 2500)
     // res.json({user: newUser})
 })
 
@@ -24,7 +24,8 @@ router.get('/:userId', asyncHandler(async(req, res) => {
     const profile = await db.getUserProfile(userId);
     const formattedDate = fn.formatDateWithoutTime(profile.joinDate);
     const newProfile = {...profile, joinDate: formattedDate}
-    return res.json({profile: newProfile})
+    setTimeout(() => res.json({profile: newProfile}), 2500)
+    // return res.json({profile: newProfile})
 }))
 
 router.put('/:userId/upload', fn.isAuthenticated, upload.single('image'), asyncHandler(async(req, res) => {

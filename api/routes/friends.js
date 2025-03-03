@@ -10,8 +10,10 @@ const router = Router();
 
 router.put('/add', fn.isAuthenticated, asyncHandler(async(req, res) => {
     const { friendId } = req.body;
-    const { conversationId, user2 } = await db.addFriend(req.user.id, +friendId);
-    const friend = {conversationId, ...user2}
+    const { user2 } = await db.addFriend(req.user.id, +friendId);
+    const friend = user2;
+    const io = req.app.get('io');
+    io.to(`user${friendId}`).emit('new friend', (req.user.id))
     return res.json({friend})
 }))
 

@@ -1,7 +1,6 @@
 import styles from './Messenger.module.css'
 import Messages from '../messages/messages'
 import Sidebar from '../sidebar/sidebar'
-import { Link } from 'react-router'
 import { AuthContext } from '../../contexts'
 import { useContext, useState, useEffect, useMemo } from 'react'
 import Image from '../full-image/image'
@@ -11,7 +10,7 @@ import Members from '../add-members/add-members'
 
 
 export default function Messenger () {
-    const { user, logout, token, socket, socketOn } = useContext(AuthContext)
+    const { user, token, socket, socketOn } = useContext(AuthContext)
     const [conversationID, setConversationID] = useState(null)
     const [friends, setFriends] = useState([])
     const [onlineFriends, setOnlineFriends] = useState(false)
@@ -114,7 +113,8 @@ export default function Messenger () {
                 throw error;
             }
             console.log(response);
-            setConversations((prev) => ([...prev, response.conversation]))
+            const conversation = {...response.conversation, participants: [response.conversation.participants[0]]}
+            setConversations((prev) => ([...prev, conversation]))
             setConversationID(response.conversation.id);
             setConnectedToRooms(false)
         } catch(err) {
@@ -207,17 +207,11 @@ export default function Messenger () {
             <Image imageURL={imageURL} setImageURL={setImageURL} />
 
             <Profile userId={profileID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} handleListClick={handleListClick} setOnlineFriends={setOnlineFriends} users={users} />
-            <header className={styles.header}>
-                {!user ?
-                <Link to="/login">Login</Link> :
-                <button onClick={logout}>Logout</button>
-                }
-            </header>
-                <main>
-                    <Sidebar setConversationID={setConversationID} conversationID={conversationID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} conversations={conversations} setConversations={setConversations}  groups={groups} handleListClick={handleListClick} onlineFriends={onlineFriends} setOnlineFriends={setOnlineFriends} users={users} usersLoading={usersLoading} error={error} connectedRooms={connectedRooms} setConnectedToRooms={setConnectedToRooms} />
+            <main className={styles.main}>
+                <Sidebar setConversationID={setConversationID} conversationID={conversationID} setProfileID={setProfileID} friends={friends} setFriends={setFriends} conversations={conversations} setConversations={setConversations}  groups={groups} handleListClick={handleListClick} onlineFriends={onlineFriends} setOnlineFriends={setOnlineFriends} users={users} usersLoading={usersLoading} error={error} connectedRooms={connectedRooms} setConnectedToRooms={setConnectedToRooms} />
 
-                    <Messages conversationID={conversationID} setProfileID={setProfileID} setImageURL={setImageURL} setGroupID={setGroupID} setMembers={setMembers} refreshConversationID={refreshConversationID} setRefreshConversation={setRefreshConversation} />
-                </main>
+                <Messages conversationID={conversationID} setProfileID={setProfileID} setImageURL={setImageURL} setGroupID={setGroupID} setMembers={setMembers} refreshConversationID={refreshConversationID} setRefreshConversation={setRefreshConversation} />
+            </main>
         </>
     )
 }

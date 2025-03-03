@@ -69,7 +69,6 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             setFriends(prev => ([...prev, response.friend]))
             setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: true} }))
             setOnlineFriends(false)
-            socket.current.emit('new friend', response.friend);
         } catch(err) {
             console.log(err)
         }

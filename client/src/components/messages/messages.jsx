@@ -32,10 +32,10 @@ const Message = ({message, index, conversation, user, root}) => {
         {inView || !messagesReady ? 
         <div className={!isUserMessage ? null : `${styles.yourDiv}`}>
             {shouldShowPicture ? 
-            !isUserMessage && (<button><img src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`} data-func='profile' id={message.sender.id}></img></button>) : <div className={styles.void}></div>}
+            !isUserMessage && (<button><img loading='lazy' src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`} data-func='profile' id={message.sender.id}></img></button>) : <div className={styles.void}></div>}
             <div style={{marginBottom: shouldShowPicture ? '0.5rem' : null }} className={styles.msgDiv}>
                 { shouldShowSenderName && <p className={styles.sender}>{message.sender.first_name}</p>}
-                {message.picture_url && <img src={message.picture_url} data-func='img' loading='lazy' className={!isUserMessage ? `${styles.messageImage} ${styles.otherMessage}` : `${styles.messageImage} ${styles.yourMessage}`}/>}
+                {message.picture_url && <img loading='lazy' src={message.picture_url} data-func='img' className={!isUserMessage ? `${styles.messageImage} ${styles.otherMessage}` : `${styles.messageImage} ${styles.yourMessage}`}/>}
                 { message.content && <p className={!isUserMessage ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>}
                 <p className={styles.messageDate}>{message.date}</p>
             </div>

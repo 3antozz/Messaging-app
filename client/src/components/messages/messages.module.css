@@ -9,7 +9,6 @@
     padding: 0.5rem;
     padding-bottom: 0;
     padding-top: 1.4rem;
-    width: 350px;
     flex: 1;
     align-content: end;
 }
@@ -55,10 +54,8 @@
 }
 
 .messenger {
-    border-radius: 15px;
     display: flex;
     flex-direction: column;
-    width: 350px;
 }
 
 .mainLoading {
@@ -115,7 +112,7 @@
 }
 
 .yourMessage {
-    background-color: #3551ca;
+    background-color: #ca3535;
     border-radius: 15px;
     margin-left: auto;
 }
@@ -193,7 +190,7 @@
 }
 
 .messageDiv button, .label svg {
-    background-color: #3551ca;
+    background-color: #ca3535;
     border: none;
     align-self: stretch;
     border-radius: 10px;

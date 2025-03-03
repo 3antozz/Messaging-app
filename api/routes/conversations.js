@@ -10,7 +10,7 @@ router.post('/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
     const user2 = +req.params.userId;
     const conversation = await db.createConversation(user1, user2)
     const io = req.app.get('io');
-    io.to(`user${conversation.participants[0].id}`).emit('new convo', (conversation))
+    io.to(`user${user2}`).emit('new convo', JSON.stringify(JSON.parse(JSON.stringify(conversation))))
     res.json({conversation})
 }))
 

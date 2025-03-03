@@ -39,7 +39,8 @@ p {
 
 body {
   height: 100dvh;
-  background-color: #313338;
+  background-color: #181818;
+  /* #181818 */
   color: white;
   font-family:  "Roboto", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   align-content: center;
@@ -51,12 +52,16 @@ body {
 }
 
 main {
-  border: 2px solid rgb(178, 176, 176);
   border-radius: 15px;
   display: flex;
   justify-content: center;
-  width: fit-content;
   margin: auto;
-  height: 500px;
+  gap: 0.3rem;
+  /* height: 500px; */
+  height: 100%;
 }
+
+
+
+
 

@@ -2,8 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import './App.css'
 import { Routes, Route, useNavigate } from "react-router";
 import AuthLayout from './components/auth/layout.jsx';
-import Login from './components/auth/login/login.jsx';
-import Register from './components/auth/register/register.jsx';
+import Login from './components/auth/login.jsx';
+import Register from './components/auth/register.jsx';
 import Messenger from './components/Messenger/Messenger.jsx';
 import { AuthContext } from './contexts.js';
 import { io } from "socket.io-client";

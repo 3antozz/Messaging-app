@@ -8,9 +8,9 @@ require("dotenv").config();
 
 const router = Router();
 
-const validateLogin = [body("username").trim().notEmpty().withMessage("Username must not be Empty").bail().matches(/^[a-zA-Z0-9_]+$/). 
-withMessage("Incorrect Username").bail().isLength({min: 3, max: 20}).withMessage("Incorrect Usernames"),
-    body("password").trim().notEmpty().withMessage("Password must not be Empty")
+const validateLogin = [body("username").trim().notEmpty().withMessage("Username must not be empty").bail().matches(/^[a-zA-Z0-9_]+$/). 
+withMessage("Incorrect Username").bail().isLength({min: 3, max: 20}).withMessage("Incorrect Username"),
+    body("password").trim().notEmpty().withMessage("Password must not be empty")
 ];
 
 const validateRegistration = [

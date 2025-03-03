@@ -32,6 +32,18 @@ exports.getUser = async(username) => {
 }
 
 exports.getUserForClient = async(username) => {
+    // console.log(await prisma.conversation.findFirst({
+    //     where: {
+    //         isGroup: false,
+    //         AND: [
+    //             { participants: { some: { id: 30 } } },
+    //             { participants: { some: { id: 24 } } },
+    //         ]
+    //     },
+    //     include: {
+    //         participants: true
+    //     }
+    // }))
     return await prisma.user.findUnique({
         where: {
             username
@@ -116,21 +128,6 @@ exports.getUserForClient = async(username) => {
 }
 
 exports.addFriend = async(userId, friendId) => {
-    const existingConversation = await prisma.conversation.findFirst({
-        where: {
-            participants: {
-                every: {
-                    OR: [
-                        {id: userId},
-                        {id: friendId}
-                    ]
-                }
-            }
-        },
-        select: {
-            id: true
-        }
-    })
     return await prisma.friendship.create({
         data: {
             user1: {
@@ -143,21 +140,6 @@ exports.addFriend = async(userId, friendId) => {
                     id: friendId
                 }
             },
-            conversation: {
-                connectOrCreate: {
-                    where: {
-                        id: existingConversation && existingConversation.id || -1
-                    },
-                    create: {
-                        participants: {
-                            connect: [
-                                {id: userId},
-                                {id: friendId}
-                            ]
-                        }
-                    }
-                }
-            }
         },
         select: {
             user2: {
@@ -167,7 +149,6 @@ exports.addFriend = async(userId, friendId) => {
                     username: true,
                 }
             },
-            conversationId: true,
         }
     })
 }
@@ -191,16 +172,20 @@ exports.createConversation = async(user1, user2) => {
                 },
             },
             messages: {
-                select: {
-                    senderId: true,
-                    content: true,
-                    date: true  
+                include: {
+                    sender: {
+                        omit: {
+                            password: true,
+                            bio: true,
+                            username: true
+                        }
+                    }
                 },
                 orderBy: {
-                    date: 'desc'
-                },
-                take: 1
+                    date: "asc"
+                }
             }
+
         },
     })
 }

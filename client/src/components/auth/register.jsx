@@ -1,7 +1,8 @@
-import styles from "./register.module.css"
+import styles from './layout.module.css'
 import { useState } from "react"
-import Popup from "../../popup/popup"
+import Popup from "../popup/popup"
 import { Link } from "react-router"
+import { LoaderCircle } from 'lucide-react'
 export default function Register () {
     const [firstName, setFirstname] = useState("")
     const [lastName, setLastname] = useState("")
@@ -36,11 +37,6 @@ export default function Register () {
             }
             console.log(response)
             setSuccess(true)
-            setTimeout(() => {
-                if(!success) {
-                    setSuccess(false)
-                }
-            }, 10000)
             setErrors(null)
             setUsername("");
             setPassword("");
@@ -55,37 +51,41 @@ export default function Register () {
         }
     }
     return (
-        <form onSubmit={handleSubmit}>
-            <Popup shouldRender={success} close={setSuccess}>
-                <p>Signup Successfull! You can login in from <Link to='/login'>Here</Link></p>
-            </Popup>
-            <p>You have an account already? <Link to='/login'>Login here</Link></p>
+        <>
+        <Popup shouldRender={success} close={setSuccess}>
+            <p>Registration Successful! <Link to='/login'>Login Here</Link></p>
+        </Popup>
+        <form onSubmit={handleSubmit} className={styles.register}>
             {errors && 
             <ul>
-                {errors.map((error, index) => <li key={index}><p>{error}</p></li>)}
+                {errors.map((error, index) => <li key={index}><p>✘ {error}</p></li>)}
             </ul>
             }
             <div className={styles.input}>
-                <label htmlFor="first_name">First Name</label>
-                <input type="text" id="first_name" value={firstName} onChange={(e) => setFirstname(e.target.value)} />
+                <label htmlFor="first_name" hidden>First Name</label>
+                <input type="text" id="first_name" placeholder="First Name" value={firstName} onChange={(e) => setFirstname(e.target.value)} />
             </div>
             <div className={styles.input}>
-                <label htmlFor="last_name">Last Name</label>
-                <input type="text" id="last_name" value={lastName} onChange={(e) => setLastname(e.target.value)} />
+                <label htmlFor="last_name" hidden>Last Name</label>
+                <input type="text" id="last_name" placeholder="Last Name" value={lastName} onChange={(e) => setLastname(e.target.value)} />
             </div>
             <div className={styles.input}>
-                <label htmlFor="username">Username</label>
-                <input type="text" id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                <label htmlFor="username" hidden>Username</label>
+                <input type="text" id="username" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
             </div>
             <div>
-                <label htmlFor="password">Password</label>
-                <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <label htmlFor="password" hidden>Password</label>
+                <input type="password" id="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
             <div>
-                <label htmlFor="confirm_password">Confirm Password</label>
-                <input type="password" id="confirm_password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                <label htmlFor="confirm_password" hidden>Confirm Password</label>
+                <input type="password" id="confirm_password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
             </div>
-            <button disabled={success ? true : loading ? true : false}>{loading ? 'Loading' : 'Sign Up'}</button>
+            <button disabled={success ? true : loading ? true : false}>{loading ? <LoaderCircle size={40} color='white' className={styles.loading}/> : 'Sign Up'}</button>
+            <div>
+                <p>Already have an account? <Link to='/login'>Login here</Link></p>
+            </div>
         </form>
+        </>
     )
 }

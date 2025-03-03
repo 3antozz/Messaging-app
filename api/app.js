@@ -75,9 +75,6 @@ io.on('connection', (socket) => {
         console.log('join room called')
         socket.join([`user${socket.handshake.query.userId}`, ...conversationIds]);
     })
-    socket.on('new friend', (friend) => {
-        io.to(`user${friend.id}`).emit('new friend', (+socket.handshake.query.userId))
-    })
     socket.on('online friends', (friendIds) => {
         const onlineIds = [];
         friendIds.forEach(id => {
@@ -134,7 +131,7 @@ app.use((error, req, res, next) => {
             code: 400
         });
     }
-    res.status((typeof(error.code) !== 'string' && error.code) || 500).json({
+    return res.status((typeof(error.code) !== 'string' && error.code) || 500).json({
         message: error.message || 'Internal Server Error',
         code: error.code || 500
     });

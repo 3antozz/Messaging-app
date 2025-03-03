@@ -1,9 +1,10 @@
-import styles from "./login.module.css"
+import styles from './layout.module.css'
 import { useState } from "react"
 import { useNavigate, Link } from "react-router"
 import { useContext } from 'react'
-import { AuthContext } from "../../../contexts"
-import Popup from "../../popup/popup"
+import { AuthContext } from "../../contexts"
+import Popup from "../popup/popup"
+import { LoaderCircle } from 'lucide-react'
 export default function Login () {
     const navigate = useNavigate();
     const { token, timeoutRef, fetchToken, setAuthentication } = useContext(AuthContext)
@@ -61,25 +62,29 @@ export default function Login () {
         }
     }
     return (
-        <form onSubmit={handleSubmit}>
-            <Popup shouldRender={success} close={setSuccess}>
-                <p>Login successful!</p>
-            </Popup>
-            <p>You don&apos;t have an account? <Link to='/register'>Register here</Link></p>
+        <>
+        <Popup shouldRender={success} close={setSuccess}>
+            <p>Login successful!...</p>
+        </Popup>
+        <form onSubmit={handleSubmit} className={styles.login}>
             {errors && 
             <ul>
-                {errors.map((error, index) => <li key={index}><p>{error}</p></li>)}
+                {errors.map((error, index) => <li key={index}><p>✘ {error}</p></li>)}
             </ul>
             }
             <div className={styles.input}>
-                <label htmlFor="username">Username</label>
-                <input type="text" id="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                <label htmlFor="username" hidden>Username</label>
+                <input type="text" id="username" value={username} placeholder="Username" onChange={(e) => setUsername(e.target.value)}  />
             </div>
             <div>
-                <label htmlFor="password">Password</label>
-                <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <label htmlFor="password" hidden>Password</label>
+                <input type="password" id="password" value={password} placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
             </div>
-            <button disabled={success ? true : loading ? true : false}>{loading ? 'Loading' : 'Login'}</button>
+            <button disabled={success ? true : loading ? true : false}>{loading ? <LoaderCircle size={40} color='white' className={styles.loading}/> : 'Log in'}</button>
+            <div>
+                <Link to='/register'>Create an Account</Link>  
+            </div>
         </form>
+        </>
     )
 }
