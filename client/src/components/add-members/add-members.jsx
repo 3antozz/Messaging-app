@@ -1,9 +1,9 @@
 import styles from './add-members.module.css'
 import { memo, useState } from 'react'
 import PropTypes from 'prop-types';
-import { X, UserPlus } from 'lucide-react';
+import { X, UserPlus, LoaderCircle } from 'lucide-react';
 
-const Members = memo(function Members ({addMembers, setMembers, friends, users, handleListClick, group}) {
+const Members = memo(function Members ({addMembers, setMembers, friends, users, handleListClick, group, addingMember}) {
     const [searchValue, setSearchValue] = useState('');
     let filteredUsers = friends;
     if(searchValue) {
@@ -28,7 +28,7 @@ const Members = memo(function Members ({addMembers, setMembers, friends, users, 
                                 <div className={styles.memberButton}>
                                     <button id={member.id} data-func="profile"><img src={member.picture_url || '/images/no-profile-pic.jpg'} alt={`${member.first_name} ${member.last_name} profile picture`}></img></button>
                                     <button id={member.id} data-func="profile">{member.first_name} {member.last_name}</button>
-                                    <button id={member.id} data-func="add-member"><UserPlus /></button>
+                                    <button id={member.id} disabled={addingMember} data-func="add-member">{addingMember !== member.id ? <UserPlus /> : <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                                 </div>
                             </li>
                         )
@@ -50,6 +50,7 @@ Members.propTypes = {
     friends: PropTypes.array.isRequired,
     users: PropTypes.array.isRequired,
     handleListClick: PropTypes.func.isRequired,
+    addingMember: PropTypes.number.isRequired
 }
 
 export default Members;

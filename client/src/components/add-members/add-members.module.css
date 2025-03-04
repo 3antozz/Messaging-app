@@ -21,7 +21,7 @@
     color: white;
     display: flex;
     flex-direction: column;
-    height: 480px;
+    height: 500px;
 }
 
 .members {
@@ -116,3 +116,17 @@
 .close svg:hover {
     stroke: red;
 }
+
+.loading {
+    animation: 800ms linear 0s infinite loading;
+}
+
+@keyframes loading {
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(1turn);
+    }
+}
+

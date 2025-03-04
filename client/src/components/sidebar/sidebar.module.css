@@ -33,7 +33,7 @@
 .conversations {
     padding: 0.5rem 0.1rem;
     overflow-y: auto;
-    padding: 0.5rem 1rem;
+    overflow-x: hidden;
 }
 
 .conversationsLoading {
@@ -59,7 +59,7 @@
     padding-top: 1rem;
 }
 
-nav > button {
+nav > button, nav > a {
     font-size: 1.2rem;
     background-color: inherit;
     color: inherit;
@@ -71,9 +71,10 @@ nav > button {
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    text-decoration: none;
 }
 
-nav > button:last-of-type {
+nav > *:last-child {
     margin-top: auto;
 }
 
@@ -81,7 +82,7 @@ nav > button svg {
     flex-shrink: 0;
 }
 
-nav > button:hover {
+nav > button:hover, nav > a:hover {
     background-color: #ca3535 ;
 }
 
@@ -173,7 +174,7 @@ nav {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    padding: 0.3rem 0;
+    padding: 0.3rem 0.5rem;
     transition: transform 200ms ease;
     border-radius: 10px;
     border: none;
@@ -220,25 +221,24 @@ nav {
     color: inherit;
     background-color: #313338;
     padding: 0.5rem;
-    width: 80%;
+    width: 100%;
     margin: 0 auto;
     margin-top: 0.5rem;
+    padding-left: 2.2rem;
     border-radius: 10px;
     border: 2px solid grey;
 }
 
 .conversations form input {
     resize: none;
-    width: 80%;
-    height: 40px;
+    width: 90%;
     display: block;
     margin: auto;
     background-color: #313338;
     border-radius: 10px;
     align-content: center;
     color: inherit;
-    font-size: 1rem;
-    padding: 0.1rem 0.4rem;
+    padding: 0.5rem;
     flex: 1;
     border: 2px solid grey;
 }
@@ -260,7 +260,21 @@ nav {
 }
 
 .formButtons button:last-of-type {
-    background-color: #ca3535;
+    background-color: grey;
+}
+
+.searchDiv {
+    position: relative;
+    display: flex;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 2%;
+    top: 55%;
+    transform: translateY(-50%);
 }
 
 .formButtons button:first-of-type {

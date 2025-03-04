@@ -2,7 +2,7 @@ import styles from './profile.module.css'
 import { memo, useEffect, useState, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
-import { X } from 'lucide-react';
+import { X, LoaderCircle } from 'lucide-react';
 
 const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends, handleListClick, setOnlineFriends, users}) {
     const { user, setUser, token, socket, socketOn } = useContext(AuthContext)
@@ -229,11 +229,13 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             <section className={styles.profile}>
                 {loading || !profile ?
                 <>
-                <p>Loading</p>  
-                <button onClick={() => {
+                <section className={styles.conversationsLoading}>
+                    <LoaderCircle  size={40} color='white' className={styles.loading}/>
+                </section>
+                <button className={styles.close} onClick={() => {
                     setEdit(false);
-                    setProfileID(null);
-                    }}>Close</button>
+                    setProfileID(null)
+                    }}><X size={30} color='white'/></button>
                 </> :
                 <>
                 <div className={styles.top}>
@@ -247,15 +249,17 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     </>
                     }
                     </> :
-                    <form onSubmit={editProfile}>
+                    <form onSubmit={editProfile} className={styles.profileForm}>
                         <label htmlFor="picture" hidden>Group picture</label>
                         <input type="file" id='picture' onChange={handleImageInput} />
                         <label htmlFor="first_name" hidden></label>
                         <input type="text" id='first_name' value={firstName} placeholder='First Name' onChange={(e) => setFirstName(e.target.value)} />
                         <label htmlFor="last_name" hidden></label>
                         <input type="text" id='last_name' value={lastName} placeholder='Last Name' onChange={(e) => setLastName(e.target.value)} />
-                        <button className={styles.edit}>Submit</button>
-                        <button type='button' className={styles.edit} onClick={() => setEdit(false)}>Cancel</button>
+                        <div>
+                            <button className={styles.edit}>Submit</button>
+                            <button type='button' className={styles.cancel} onClick={() => setEdit(false)}>Cancel</button>
+                        </div>
                     </form>
                     }
                     {(user && user.id == userId && !edit) && 

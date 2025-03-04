@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { Link } from 'react-router';
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
-import { MessageSquare, LoaderCircle, Circle, MessageCircleMore, Handshake, Users, UserRoundSearch, LogOut } from 'lucide-react';
+import { MessageSquare, LoaderCircle, Circle, MessageCircleMore, Handshake, Users, UserRoundSearch, LogOut, LogIn, Search } from 'lucide-react';
 
-const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends, setConversationID, conversationID, users, usersLoading, error, connectedRooms, setConnectedToRooms}) {
+const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends, setConversationID, conversationID, users, usersLoading, error, connectedRooms, setConnectedToRooms, loadingConversation}) {
     const { user, token, socket, socketOn, logout } = useContext(AuthContext)
     const [view, setView] = useState('Groups')
     const [groupCreation, setGroupCreation] = useState(false)
@@ -58,39 +58,6 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             }
         } else return [];
     }, [groups, messages, search, sortedFriends, users, view])
-    // useEffect(() => {
-    //     const query = search.toLowerCase();
-    //     if(view === 'Messages') {
-    //         if(query) {
-    //             const filtered = messages.filter((message) => `${message.participants[0].first_name} ${message.participants[0].last_name}`.toLowerCase().includes(query))
-    //             setFilteredResult(filtered)
-    //         } else {
-    //             console.log(messages);
-    //             setFilteredResult(messages)
-    //         }
-    //     } else if(view === 'Friends') {
-    //         if(query) {
-    //             const filtered = sortedFriends.filter((friend) => `${friend.first_name} ${friend.last_name}`.toLowerCase().includes(query))
-    //             setFilteredResult(filtered)
-    //         } else {
-    //             setFilteredResult(sortedFriends)
-    //         }
-    //     } else if(view === 'Groups') {
-    //         if(query) {
-    //             const filtered = groups.filter((group) => group.group_name.toLowerCase().includes(query))
-    //             setFilteredResult(filtered)
-    //         } else {
-    //             setFilteredResult(groups)
-    //         }
-    //     } else if(view === 'Users') {
-    //         if(query) {
-    //             const filtered = users.filter((user) => `${user.first_name} ${user.last_name}`.toLowerCase().includes(query))
-    //             setFilteredResult(filtered)
-    //         } else {
-    //             setFilteredResult(users)
-    //         }
-    //     }
-    // }, [groups, messages, search, sortedFriends, users, view])
     useEffect(() => {
         const displayOnlineFriend = (friendId, bool) => {
             const isFriend = friends.findIndex((friend) => friend.id === friendId)
@@ -200,10 +167,10 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             socket.current.emit('join rooms', conversationsIds)
             setConnectedToRooms(true)
         }
-        if(user && conversations.length > 0 && !connectedRooms) {
+        if(socketOn && conversations.length > 0 && !connectedRooms) {
             connectToRooms();
         }
-    }, [socket, user, conversations, connectedRooms, setConnectedToRooms])
+    }, [socket, socketOn, conversations, connectedRooms, setConnectedToRooms])
     useEffect(() => {
         const updateLastMessage = (msg) => {
             setConversations(prev => {
@@ -266,20 +233,50 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             <>
             <aside>
                 <section className={styles.you}>
-                        <button disabled><img src='/images/no-profile-pic.jpg'></img></button>
-                        <nav onClick={handleViews}>
+                        <button disabled>
+                            <img src='/images/no-profile-pic.jpg'></img>
+                            <h3>Guest</h3>
+                        </button>
+                </section>
+                <nav>
                         <button disabled><MessageCircleMore size={30}/>Messages</button>
                         <button disabled><Users size={30} />Groups</button>
                         <button disabled><Handshake size={30} />Friends</button>
                         <button disabled><UserRoundSearch size={30} />Users</button>
-                        </nav>
-                </section>
+                        <Link to="/login"><LogIn size={30}/>Login</Link>
+                </nav>
             </aside>
-            <aside className={`${styles.sidebar} ${styles.sidebarLoading}`}>
-                <section className={styles.conversationsLoading}>
-                    <LoaderCircle  size={40} color='white' className={styles.loading}/>
-                </section>
-            </aside>
+            <aside className={styles.sidebar}>
+            <h2 className={styles.view}>{view}</h2>
+            <div className={styles.searchDiv}>
+                <label htmlFor="search" hidden></label>
+                <input type="text" id='search' disabled className={styles.search} value={search} placeholder='Login to search' />
+                <Search  className={styles.searchIcon}/>
+            </div>
+            {filteredArray.length > 0 ?
+            <section className={styles.conversations}>
+                <ul>
+                {filteredArray.map(group => 
+                <li key={group.id} className={styles.conversation}>
+                    <button id={group.id} data-func='convo' disabled className={styles.messageButton}>
+                        <img src={group.picture_url || '/images/no-group-pic.png'} alt={`${group.name} group picture`}></img>
+                        <div className={styles.info}>
+                            <p>{group.group_name}</p>
+                            {group.messages[0] ?
+                            <p>{group.messages[0].sender.first_name} {group.messages[0].content || 'Sent an image'}</p> :
+                            <p>No messages yet</p>
+                            }
+                        </div>
+                    </button>
+                </li>
+                    )}
+                </ul>
+            </section> :
+            <section className={styles.conversationsLoading}>
+                <LoaderCircle  size={40} color='white' className={styles.loading}/>
+            </section>
+            }
+        </aside>
             </>
         )
     }
@@ -306,10 +303,11 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
         <aside className={styles.sidebar}>
             <h2 className={styles.view}>{view}</h2>
             {!groupCreation &&
-            <>
+            <div className={styles.searchDiv}>
             <label htmlFor="search" hidden></label>
             <input type="text" id='search' className={styles.search} value={search} placeholder='Search for a user or group' onChange={(e) => setSearch(e.target.value)} />
-            </>
+            <Search className={styles.searchIcon}/>
+            </div>
             }
             <section className={styles.conversations}>
                 {(view === 'Groups' && !groupCreation) &&
@@ -340,7 +338,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                                 <button id={friend.id} data-func="profile">{friend.first_name} {friend.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={friend.id} data-func='new-convo'><MessageSquare size={24} color='white' /></button>
+                                <button id={friend.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== friend.id ? <MessageSquare size={24} color='white' /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                             </div>
                         </li>
                     ) : view === 'Groups' ?
@@ -381,7 +379,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                                 <button id={user.id} data-func="profile">{user.first_name} {user.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={user.id} data-func='new-convo'><MessageSquare size={24} color='white' /></button>
+                                <button id={user.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== user.id ? <MessageSquare size={24} color='white' /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                             </div>
                         </li>
                         )
@@ -410,7 +408,8 @@ Sidebar.propTypes = {
     conversationID: PropTypes.number.isRequired,
     users: PropTypes.array.isRequired,
     usersLoading: PropTypes.bool.isRequired,
-    error: PropTypes.bool.isRequired
+    error: PropTypes.bool.isRequired,
+    loadingConversation: PropTypes.number.isRequired,
 }
 
 export default Sidebar;

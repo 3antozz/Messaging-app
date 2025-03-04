@@ -13,10 +13,16 @@ const Message = ({message, index, conversation, user, root}) => {
         rootMargin: "150px 150px 4000px 150px",
     })
     const [messagesReady, setMessagesReady] = useState(false);
-
-    const shouldShowPictureGroup = index === conversation.messages.length-1 || conversation.messages[index+1].senderId !== message.senderId && conversation.messages[index+1].senderId !== user.id;
+    let isUserMessage;
+    let shouldShowPictureGroup;
+    if(user) {
+        isUserMessage = message.senderId === user.id;
+        shouldShowPictureGroup = index === conversation.messages.length-1 || conversation.messages[index+1].senderId !== message.senderId && conversation.messages[index+1].senderId !== user.id;
+    } else {
+        isUserMessage = false
+        shouldShowPictureGroup = index === conversation.messages.length-1 || conversation.messages[index+1].senderId !== message.senderId;
+    }
     const shouldShowPicture = index === conversation.messages.length-1 || conversation.messages[index+1].senderId !== message.senderId;
-    const isUserMessage = message.senderId === user.id;
     const shouldShowSenderName = (index === 0 || conversation.messages[index-1].senderId !== message.senderId) && !isUserMessage && conversation.isGroup
     useEffect(() => {
         setMessagesReady(false);
@@ -85,7 +91,21 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 setLoading(false)
             }
         }
-        if(conversationID) {
+        const fetchPublicGroup = async () => {
+            setLoading(true)
+            console.log('conversation fetched!');
+            try {
+                const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/public`)
+                const response = await request.json();
+                console.log(response);
+                setConversations((prev) => ({...prev, [response.conversation.id]: response.conversation}))
+            } catch(err) {
+                console.log(err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        if(conversationID && user) {
             const convo = conversations[conversationID];
             if(!convo) {
                 fetchConversation();
@@ -96,7 +116,13 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 }
             }, 10)
         }
-    }, [conversationID, conversations, token])
+        if(conversationID && !user) {
+            const convo = conversations[conversationID];
+            if(!convo) {
+                fetchPublicGroup();
+            }
+        }
+    }, [conversationID, conversations, token, user])
 
     useEffect(() => {
         const updateGroup = (group) => {
@@ -237,7 +263,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
         }
     }
 
-    if (!conversation || !user || (!conversation.isGroup && !otherUser) || loading) {
+    if (!conversation) {
         return (
             <section className={styles.messenger}>
             <div className={styles.info}>
@@ -249,8 +275,33 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             </div>
             <div className={styles.forms}>
                 <form className={styles.messageDiv}>
-                    <input name="message" id="message" placeholder='Send a message...' disabled></input>
-                    <button disabled><SendHorizontal color='white' /></button>
+                    <input name="message" id="message" placeholder='Login to send messages' disabled></input>
+                    <button disabled><SendHorizontal color='white' size={28} /></button>
+                    <button disabled><Image color='white' size={28} /></button>
+                </form>
+            </div>
+        </section>
+        )
+    }
+    if (conversation && !user) {
+        return (
+            <section className={styles.messenger}>
+            <div className={styles.info}> 
+                <button disabled><img src={conversation.picture_url || '/images/no-group-pic.png'} alt={`${conversation.group_name} group picture`}></img></button>
+                <button disabled>{conversation.group_name}</button>
+            </div>
+            <div className={styles.main} ref={scrollRef} id='scrl'>
+                <ul onClick={handleImageClick}>
+                {conversation.messages.map((message, index) => 
+                    <Message key={message.id} root={scrollRef.current} index={index} message={message} conversation={conversation} user={user} />
+                )}
+                </ul>         
+            </div>
+            <div className={styles.forms}>
+                <form className={styles.messageDiv}>
+                    <input name="message" id="message" placeholder='Login to send messages' disabled></input>
+                    <button disabled><SendHorizontal color='white' size={28} /></button>
+                    <button disabled><Image color='white' size={28} /></button>
                 </form>
             </div>
         </section>

@@ -31,19 +31,57 @@ exports.getUser = async(username) => {
     })
 }
 
+exports.getPublicGroup = async () => {
+    return await prisma.conversation.findUnique({
+        where: {
+            identifier: 'public_group'
+        },
+        include: {
+            messages: {
+                select: {
+                    senderId: true,
+                    content: true,
+                    date: true,
+                    sender: {
+                        select: {
+                            first_name: true
+                        }
+                    }  
+                },
+                orderBy: {
+                    date: 'desc'
+                },
+                take: 1
+            }
+        }
+    })
+}
+
+exports.getPublicConversation = async () => {
+    return await prisma.conversation.findUniqueOrThrow({
+        where:{
+            identifier: 'public_group'
+        },
+        include:{
+            messages: {
+                include: {
+                    sender: {
+                        omit: {
+                            password: true,
+                            bio: true,
+                            username: true
+                        }
+                    }
+                },
+                orderBy: {
+                    date: "asc"
+                }
+            }
+        }
+    })
+}
+
 exports.getUserForClient = async(username) => {
-    // console.log(await prisma.conversation.findFirst({
-    //     where: {
-    //         isGroup: false,
-    //         AND: [
-    //             { participants: { some: { id: 30 } } },
-    //             { participants: { some: { id: 24 } } },
-    //         ]
-    //     },
-    //     include: {
-    //         participants: true
-    //     }
-    // }))
     return await prisma.user.findUnique({
         where: {
             username

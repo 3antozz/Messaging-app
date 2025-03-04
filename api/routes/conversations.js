@@ -11,7 +11,16 @@ router.post('/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
     const conversation = await db.createConversation(user1, user2)
     const io = req.app.get('io');
     io.to(`user${user2}`).emit('new convo', JSON.stringify(JSON.parse(JSON.stringify(conversation))))
-    res.json({conversation})
+    setTimeout(() => res.json({conversation}), 2500)
+    // res.json({conversation})
+}))
+
+router.get('/public', asyncHandler(async(req, res) => {
+    const convo = await db.getPublicConversation();
+    const formattedMessages = convo.messages.map((message) => ({ ...message, date: fn.formatDate(message.date)}))
+    const conversation = { ...convo, messages: formattedMessages}
+    setTimeout(() => res.json({conversation}), 2500)
+    // res.json({conversation})
 }))
 
 

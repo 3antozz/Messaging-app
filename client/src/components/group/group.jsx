@@ -2,15 +2,16 @@ import styles from './group.module.css'
 import { memo, useEffect, useState, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
-import { X, UserX } from 'lucide-react';
+import { X, UserX, LoaderCircle } from 'lucide-react';
 
-const Group = memo(function Group ({groupID, setGroupID, handleListClick, refreshGroupID, setRefreshGroup}) {
+const Group = memo(function Group ({groupID, setGroupID, handleListClick, removingMember}) {
     const { user, token, socket, socketOn } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [edit, setEdit] = useState(false);
     const [groups, setGroups] = useState({});
     const [groupName, setGroupName] = useState('');
     const [image, setImage] = useState(null);
+    const [refreshGroupID, setRefreshGroup] = useState(null)
     const group = useMemo(() => {
         const group = groups[groupID];
         setGroupName(group?.group_name);
@@ -67,6 +68,7 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, refres
             }
         };
     }, [setRefreshGroup, socket, socketOn])
+    
 
     const editGroup = async(e) => {
         e.preventDefault();
@@ -135,7 +137,9 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, refres
             <section className={styles.group}>
                 {loading || !group ? 
                 <>
-                <p>Loading</p>  
+                <section className={styles.conversationsLoading}>
+                    <LoaderCircle  size={40} color='white' className={styles.loading}/>
+                </section>
                 <button className={styles.close} onClick={() => setGroupID(null)}><X size={30} color='white'/></button>
                 </> :
                 <>
@@ -148,17 +152,20 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, refres
                     <button className={styles.edit} onClick={() => setEdit(true)}>Edit group</button>
                     }
                     </> :
-                    <form onSubmit={editGroup}>
+                    <form onSubmit={editGroup} className={styles.groupForm}>
                         <img src={group.picture_url || '/images/no-group-pic.png' } alt={`${group.group_name} group picture`}></img>
                         <label htmlFor="picture" hidden>Group picture</label>
                         <input type="file" id='picture' onChange={handleImageInput} />
                         <label htmlFor="name" hidden>Group name</label>
                         <input type="text" id='name' value={groupName} placeholder='Group name' onChange={(e) => setGroupName(e.target.value)} />
-                        <button className={styles.edit}>Submit</button>
-                        <button type='button' className={styles.edit} onClick={() => setEdit(false)}>Cancel</button>
+                        <div>
+                            <button className={styles.confirm}>Submit</button>
+                            <button type='button' className={styles.cancel} onClick={() => setEdit(false)}>Cancel</button>
+                        </div>
                     </form>
                     }
                 </div>
+                <h3>Members</h3>
                 <ul className={styles.members} onClick={handleListClick}>
                     {group.participants.map((member) => {
                         return (
@@ -167,14 +174,16 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, refres
                                     <button id={member.id} data-func="profile"><img src={member.picture_url || '/images/no-profile-pic.jpg'} alt={`${member.first_name} ${member.last_name} profile picture`}></img></button>
                                     <button id={member.id} data-func="profile">{member.first_name} {member.last_name}</button>
                                     {(user && user.id == group.adminId) && 
-                                    <button className={styles.edit} id={member.id} data-func="remove-member"><UserX /></button>
+                                    <button className={styles.edit} disabled={removingMember} id={member.id} data-func="remove-member">{removingMember !== member.id ? <UserX /> : <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                                     }
                                 </div>
                             </li>
                         )
                     })}
                 </ul>
-                <button className={styles.close} onClick={() => setGroupID(null)}><X size={30} color='white'/></button>
+                <button className={styles.close} onClick={() => {
+                    setEdit(false);
+                    setGroupID(null)}}><X size={30} color='white'/></button>
                 </>
                 }
             </section>
@@ -188,8 +197,7 @@ Group.propTypes = {
     groupID: PropTypes.number,
     setGroupID: PropTypes.func.isRequired,
     handleListClick: PropTypes.func.isRequired,
-    refreshGroupID: PropTypes.number,
-    setRefreshGroup: PropTypes.func.isRequired,
+    removingMember: PropTypes.number.isRequired
 }
 
 export default Group;

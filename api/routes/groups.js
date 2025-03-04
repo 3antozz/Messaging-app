@@ -7,6 +7,12 @@ const { upload, cloudinary } = require('./uploadConfig')
 const router = Router();
 
 
+router.get('/public', asyncHandler(async(req, res) => {
+    const group = await db.getPublicGroup();
+    setTimeout(() => res.json({group}), 2000)
+    // res.json({group})
+}))
+
 router.get('/:groupId', fn.isAuthenticated, asyncHandler(async(req, res) => {
     const groupId = +req.params.groupId;
     const group = await db.getGroup(req.user.id, groupId);
@@ -14,6 +20,7 @@ router.get('/:groupId', fn.isAuthenticated, asyncHandler(async(req, res) => {
     setTimeout(() => res.json({group: newGroup}), 1500)
     // return res.json({conversation: newgroup});
 }))
+
 
 router.post('/', fn.isAuthenticated, asyncHandler(async(req, res) => {
     const { name } = req.body;
@@ -27,9 +34,13 @@ router.put('/:groupId/add-member/:userId', fn.isAuthenticated, asyncHandler(asyn
     const userId = +req.params.userId;
     const group = await db.addUser(groupId, userId)
     const io = req.app.get('io');
-    io.to(`user${userId}`).emit('new group', group);
-    io.to(`convo${groupId}`).emit('new member', groupId);
-    res.json({group});
+    // io.to(`user${userId}`).emit('new group', group);
+    // io.to(`convo${groupId}`).emit('new member', groupId);
+    setTimeout(() => {
+        io.to(`convo${groupId}`).emit('new member', groupId);
+        res.json({group})
+    }, 2500)
+    // res.json({group});
 }))
 
 router.put('/:groupId/remove-member/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
@@ -37,9 +48,13 @@ router.put('/:groupId/remove-member/:userId', fn.isAuthenticated, asyncHandler(a
     const userId = +req.params.userId;
     const group = await db.removeUser(groupId, userId)
     const io = req.app.get('io');
-    io.to(`user${userId}`).emit('removed group', groupId);
-    io.to(`convo${groupId}`).emit('new member', groupId);
-    res.json({group});
+    // io.to(`user${userId}`).emit('removed group', groupId);
+    // io.to(`convo${groupId}`).emit('new member', groupId);
+    setTimeout(() => {
+        io.to(`convo${groupId}`).emit('new member', groupId);
+        res.json({done: true})
+    }, 2500)
+    // res.json({group});
 }))
 
 router.put('/upload/:groupId', fn.isAuthenticated, upload.single('image'), asyncHandler(async(req, res) => {
