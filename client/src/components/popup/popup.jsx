@@ -3,7 +3,7 @@ import styles from "./popup.module.css"
 import PropTypes from 'prop-types';
 import { X } from 'lucide-react';
 
-export default function Popup ({children, shouldRender, close}) {
+export default function Popup ({children, shouldRender, close, borderColor = 'grey'}) {
     const [isVisible, setVisible] = useState(false);
     const [exiting, setExiting] = useState(false)
     const closePopup = () => {
@@ -24,9 +24,9 @@ export default function Popup ({children, shouldRender, close}) {
     return (
         <>
         {isVisible &&
-            <section className={!exiting ? `${styles.container} ${styles.visible}` : `${styles.container} ${styles.exit}` } onAnimationEnd={closePopup}>
+            <section className={!exiting ? `${styles.container} ${styles.visible}` : `${styles.container} ${styles.exit}` } onAnimationEnd={closePopup} style={{border: `3px solid ${borderColor}`}}>
                 {children}
-                <button onClick={() => setExiting(true)}><X size={15} /></button>
+                <button onClick={() => setExiting(true)}><X size={20} /></button>
             </section>
         }
         </>
@@ -36,6 +36,7 @@ export default function Popup ({children, shouldRender, close}) {
 
 Popup.propTypes = {
     children: PropTypes.element,
-    shouldRender: PropTypes.bool,
-    close: PropTypes.func,
+    shouldRender: PropTypes.bool.isRequired,
+    close: PropTypes.func.isRequired,
+    borderColor: PropTypes.string,
 }

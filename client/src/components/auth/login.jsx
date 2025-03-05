@@ -63,8 +63,8 @@ export default function Login () {
     }
     return (
         <>
-        <Popup shouldRender={success} close={setSuccess}>
-            <p>Login successful!...</p>
+        <Popup shouldRender={success} close={setSuccess} borderColor='#00d846'>
+            <p>Login successful...</p>
         </Popup>
         <form onSubmit={handleSubmit} className={styles.login}>
             {errors && 

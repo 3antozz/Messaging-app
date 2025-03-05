@@ -1,5 +1,6 @@
 import styles from './sidebar.module.css'
 import PropTypes from 'prop-types';
+import Popup from "../popup/popup"
 import { AuthContext } from '../../contexts'
 import { Link } from 'react-router';
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
@@ -11,6 +12,9 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
     const [groupCreation, setGroupCreation] = useState(false)
     const [groupName, setGroupName] = useState('')
     const [search, setSearch] = useState('')
+    const [groupError, setGroupError] = useState(null);
+    const [groupSuccess, setGroupSuccess] = useState(false)
+    const [creatingGroup, setCreatingGroup] = useState(false)
     const messages = useMemo(() => conversations.filter(conversation => conversation.messages.length > 0 && !conversation.isGroup), [conversations])
     const sortedFriends = useMemo(() => friends.toSorted((friend1, friend2) => {
         if(friend1.isOnline && !friend2.isOnline) {
@@ -203,9 +207,10 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
     const createGroup = async(e) => {
         e.preventDefault();
         if(!groupName) {
-            return;
+            return setGroupError(['Group name must not be empty']);
         }
         try {
+            setCreatingGroup(true)
             const request = await fetch(`${import.meta.env.VITE_API_URL}/groups`, {
                 method: 'POST',
                 headers: {
@@ -217,21 +222,32 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             const response = await request.json();
             console.log(response);
             if(!request.ok) {
-                const error = new Error('An error has occured, please try again later')
-                throw error;
+                const error = new Error(response.message || 'Invalid Request')
+                error.errors = response.errors;
+                throw error
             }
+            setGroupSuccess(true)
+            setTimeout(() => setGroupSuccess(false), 3500)
+            setGroupError(null)
             setConversations((prev) => ([{...response.group, participants: []}, ...prev]))
             setGroupName('');
             setGroupCreation(false)
             setConnectedToRooms(false);
         } catch(err) {
             console.log(err)
+            if(err.errors) {
+                setGroupError(err.errors)
+            } else {
+                setGroupError([err.message])
+            }
+        } finally {
+            setCreatingGroup(true)
         }
     }
     if(!user) {
         return (
             <>
-            <aside>
+            <aside className={styles.navButtons}>
                 <section className={styles.you}>
                         <button disabled>
                             <img src='/images/no-profile-pic.jpg'></img>
@@ -282,7 +298,10 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
     }
     return (
         <>
-        <aside>
+        <Popup shouldRender={groupSuccess} close={setGroupSuccess} borderColor='#00d846'>
+            <p>Group Created Successfully</p>
+        </Popup>
+        <aside className={styles.navButtons}>
             <section className={styles.you}>
                 <button onClick={handleListClick} data-func='profile' id={user.id}>
                     <img src={user.picture_url || '/images/no-profile-pic.jpg'} alt={`${user.first_name} ${user.last_name} profile picture`}></img>
@@ -314,12 +333,17 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                     <button onClick={() => setGroupCreation(true)} className={styles.createGroup}>Create Group</button>
                 }
                 {(view === 'Groups' && groupCreation) &&
-                <form onSubmit={createGroup}>
+                <form onSubmit={createGroup} className={styles.createForm}>
+                    {groupError && 
+                    <ul>
+                        {groupError.map((error, index) => <li key={index}><p>✘ {error}</p></li>)}
+                    </ul>
+                    }
                     <label htmlFor="group" hidden>Group name: </label>
                     <input type="text" id='group' placeholder='Group Name' value={groupName} onChange={(e) => setGroupName(e.target.value)}/>
                     <div className={styles.formButtons}>
-                        <button>Create</button>
-                        <button type='button' className={styles.close} onClick={() => {
+                        <button disabled={creatingGroup} >{creatingGroup ? <LoaderCircle  size={28} color='white' className={styles.loading}/> : 'Create'}</button>
+                        <button disabled={creatingGroup} type='button' className={styles.close} onClick={() => {
                             setGroupCreation(false)
                             setGroupName('');
                             }}>Cancel</button>
@@ -338,7 +362,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                                 <button id={friend.id} data-func="profile">{friend.first_name} {friend.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={friend.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== friend.id ? <MessageSquare size={24} color='white' /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
+                                <button id={friend.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== friend.id ? <MessageSquare size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                             </div>
                         </li>
                     ) : view === 'Groups' ?
@@ -379,7 +403,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                                 <button id={user.id} data-func="profile">{user.first_name} {user.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={user.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== user.id ? <MessageSquare size={24} color='white' /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
+                                <button id={user.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== user.id ? <MessageSquare size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                             </div>
                         </li>
                         )

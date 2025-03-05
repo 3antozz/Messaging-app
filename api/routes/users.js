@@ -2,9 +2,14 @@ const { Router } = require('express')
 const asyncHandler = require('express-async-handler')
 const db = require('../db/queries')
 const fn = require('./fn')
+const {body, validationResult} = require('express-validator');
 const { upload, cloudinary } = require('./uploadConfig')
 
-
+const validateProfileEdit = [
+    body("first_name").trim().notEmpty().withMessage("First Name must not be empty").bail().isAlpha().withMessage("First Name must only contain alphabet and no spaces").isLength({min: 2, max: 20}).withMessage("First name must be between 2 and 20 characters"),
+    body("last_name").trim().notEmpty().withMessage("Last Name must not be empty").bail().isAlpha().withMessage("Last Name must only contain alphabet and no spaces").isLength({min: 2, max: 20}).withMessage("Last name must be between 2 and 20 characters"),
+    body("bio").trim().isLength({max: 300}).withMessage("Bio must not be more than 300 characters")
+];
 
 const router = Router();
 
@@ -28,7 +33,13 @@ router.get('/:userId', asyncHandler(async(req, res) => {
     // return res.json({profile: newProfile})
 }))
 
-router.put('/:userId/upload', fn.isAuthenticated, upload.single('image'), asyncHandler(async(req, res) => {
+router.put('/:userId/upload', fn.isAuthenticated, upload.single('image'), validateProfileEdit, asyncHandler(async(req, res, next) => {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+        const errors = result.errors.map(err => err.msg);
+        errors.code = 400;
+        return next(errors)
+    }
     const userId = +req.params.userId;
     const { first_name, last_name, bio } = req.body;
     const options = {
@@ -46,22 +57,30 @@ router.put('/:userId/upload', fn.isAuthenticated, upload.single('image'), asyncH
             return resolve(uploadResult);
         }).end(req.file.buffer);
     });
-    console.log(uploadResult);
     const user = await db.updateProfile(userId, first_name, last_name, bio, uploadResult.secure_url)
-    console.log(user);
     const io = req.app.get('io');
     io.emit('edit user', user);
     res.send({user})
 }))
 
-router.put('/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
+router.put('/:userId', fn.isAuthenticated, validateProfileEdit, asyncHandler(async(req, res, next) => {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+        const errors = result.errors.map(err => err.msg);
+        errors.code = 400;
+        return next(errors)
+    }
     const userId = +req.params.userId;
     const { first_name, last_name, bio } = req.body;
     const user = await db.updateProfile(userId, first_name, last_name, bio)
     console.log(user);
     const io = req.app.get('io');
-    io.emit('edit user', user);
-    res.send({user})
+    setTimeout(() => {
+        io.emit('edit user', user);
+        res.send({user})
+    }, 2500)
+    // io.emit('edit user', user);
+    // res.send({user})
 }))
 
 

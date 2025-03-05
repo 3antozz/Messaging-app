@@ -1,3 +1,6 @@
+.messenger {
+    flex: 2;
+}
 .info, .main {
     border-bottom: 2px solid rgb(178, 176, 176);
 }

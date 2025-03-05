@@ -168,6 +168,14 @@ input::file-selector-button:hover {
     transform: scale(1.05);
 }
 
+.memberButton > button:disabled {
+    color: rgba(255, 255, 255, 0);
+}
+
+.memberButton > button:disabled:hover {
+    color: rgba(255, 255, 255, 0);
+}
+
 .close {
     position: absolute;
     top: 5px;
@@ -199,6 +207,17 @@ input::file-selector-button:hover {
 
 .memberButton:hover {
     box-shadow: 0px 1px 0px 0px red;
+}
+
+.groupForm ul {
+    background-color: red;
+    border-radius: 5px;
+    padding: 0.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.groupForm ul li {
+    list-style-type: none;
 }
 
 .confirm, .edit {

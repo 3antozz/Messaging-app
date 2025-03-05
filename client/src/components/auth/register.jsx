@@ -52,8 +52,8 @@ export default function Register () {
     }
     return (
         <>
-        <Popup shouldRender={success} close={setSuccess}>
-            <p>Registration Successful! <Link to='/login'>Login Here</Link></p>
+        <Popup shouldRender={success} close={setSuccess} borderColor='#00d846'>
+            <p>Registration Successful. <Link to='/login'>Login Here</Link></p>
         </Popup>
         <form onSubmit={handleSubmit} className={styles.register}>
             {errors && 

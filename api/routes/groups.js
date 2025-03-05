@@ -2,10 +2,12 @@ const { Router } = require('express')
 const asyncHandler = require('express-async-handler')
 const db = require('../db/queries')
 const fn = require('./fn')
+const {body, validationResult} = require('express-validator');
 const { upload, cloudinary } = require('./uploadConfig')
 
 const router = Router();
 
+const validateGroupName = body("name").trim().notEmpty().withMessage("Name must not be empty").bail().isLength({min: 3, max: 30}).withMessage("Group name must be between 3 and 30 characters");
 
 router.get('/public', asyncHandler(async(req, res) => {
     const group = await db.getPublicGroup();
@@ -22,11 +24,18 @@ router.get('/:groupId', fn.isAuthenticated, asyncHandler(async(req, res) => {
 }))
 
 
-router.post('/', fn.isAuthenticated, asyncHandler(async(req, res) => {
+router.post('/', fn.isAuthenticated, validateGroupName, asyncHandler(async(req, res, next) => {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+        const errors = result.errors.map(err => err.msg);
+        errors.code = 400;
+        return next(errors)
+    }
     const { name } = req.body;
     const userId = req.user.id;
     const group = await db.createGroup(userId, name);
-    return res.json({group})
+    setTimeout(() => res.json({group}), 2500)
+    // return res.json({group})
 }))
 
 router.put('/:groupId/add-member/:userId', fn.isAuthenticated, asyncHandler(async(req, res) => {
@@ -57,7 +66,13 @@ router.put('/:groupId/remove-member/:userId', fn.isAuthenticated, asyncHandler(a
     // res.json({group});
 }))
 
-router.put('/upload/:groupId', fn.isAuthenticated, upload.single('image'), asyncHandler(async(req, res) => {
+router.put('/upload/:groupId', fn.isAuthenticated, upload.single('image'), validateGroupName, asyncHandler(async(req, res, next) => {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+        const errors = result.errors.map(err => err.msg);
+        errors.code = 400;
+        return next(errors)
+    }
     const groupId = +req.params.groupId;
     const { name } = req.body;
     const options = {
@@ -75,23 +90,32 @@ router.put('/upload/:groupId', fn.isAuthenticated, upload.single('image'), async
             return resolve(uploadResult);
         }).end(req.file.buffer);
     });
-    console.log(uploadResult);
     const group = await db.updateGroup(groupId, name, uploadResult.secure_url)
-    console.log(group);
     const io = req.app.get('io');
     io.to(`convo${groupId}`).emit('new member', groupId);
     io.to(`convo${groupId}`).emit('group update', group);
     res.send({done: true})
 }))
 
-router.put('/edit/:groupId', fn.isAuthenticated, asyncHandler(async(req, res) => {
+router.put('/edit/:groupId', fn.isAuthenticated, validateGroupName, asyncHandler(async(req, res, next) => {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+        const errors = result.errors.map(err => err.msg);
+        errors.code = 400;
+        return next(errors)
+    }
     const groupId = +req.params.groupId;
     const { name } = req.body;
     const group = await db.updateGroup(groupId, name)
     const io = req.app.get('io');
-    io.to(`convo${groupId}`).emit('new member', groupId);
-    io.to(`convo${groupId}`).emit('group update', group);
-    res.send({done: true})
+    setTimeout(() => {
+        io.to(`convo${groupId}`).emit('new member', groupId);
+        io.to(`convo${groupId}`).emit('group update', group);
+        res.send({done: true})
+    }, 2500)
+    // io.to(`convo${groupId}`).emit('new member', groupId);
+    // io.to(`convo${groupId}`).emit('group update', group);
+    // res.send({done: true})
 }))
 
 

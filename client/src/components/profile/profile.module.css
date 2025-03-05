@@ -28,9 +28,6 @@
     padding-bottom: 0.5rem;
 }
 
-.profile > div {
-    margin-bottom: 1rem;
-}
 
 .profile h3 {
     text-align: center;
@@ -78,12 +75,22 @@
     margin: auto;
     background-color: #313338;
     border-radius: 10px;
-    align-content: center;
     font-size: 1.1rem;
     color: inherit;
     padding: 0.3rem 0.5rem;
     flex: 1;
     border: 2px solid grey;
+}
+
+.profileForm ul {
+    background-color: red;
+    border-radius: 5px;
+    padding: 0.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.profileForm ul li {
+    list-style-type: none;
 }
 
 .profile textarea {
@@ -147,9 +154,14 @@
     background-color: #ca3535;
 }
 
-.edit, .messageBtn {
-    background-color: rgb(84, 84, 235);
+.edit {
+    background-color: #ca3535;
+    /* rgb(84, 84, 235) */
     font-weight: bold;
+}
+
+.messageBtn {
+    background-color: rgb(84, 84, 235);
 }
 
 .profileForm input[type='file'] {

@@ -1,10 +1,11 @@
 import styles from './group.module.css'
 import { memo, useEffect, useState, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types';
+import Popup from "../popup/popup"
 import { AuthContext } from '../../contexts'
 import { X, UserX, LoaderCircle } from 'lucide-react';
 
-const Group = memo(function Group ({groupID, setGroupID, handleListClick, removingMember}) {
+const Group = memo(function Group ({groupID, setGroupID, conversations, setConversations}) {
     const { user, token, socket, socketOn } = useContext(AuthContext)
     const [loading, setLoading] = useState(false)
     const [edit, setEdit] = useState(false);
@@ -12,6 +13,11 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, removi
     const [groupName, setGroupName] = useState('');
     const [image, setImage] = useState(null);
     const [refreshGroupID, setRefreshGroup] = useState(null)
+    const [groupError, setGroupError] = useState(null);
+    const [groupSuccess, setGroupSuccess] = useState(false)
+    const [memberRemoved, setMemberRemoved] = useState(false)
+    const [removingMember, setRemovingMember] = useState(0)
+    const [editing, setEditng] = useState(false)
     const group = useMemo(() => {
         const group = groups[groupID];
         setGroupName(group?.group_name);
@@ -68,14 +74,55 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, removi
             }
         };
     }, [setRefreshGroup, socket, socketOn])
+
+    const handleMemberRemoval = (e) => {
+        const button = e.target.closest('button')
+        if (button && button.dataset.func === 'remove-member') {
+            const userId = +button.id;
+            removeMember(userId)
+        }
+    }
+
+    const removeMember = async(userId) => {
+        setRemovingMember(userId)
+        try {
+            const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/${groupID}/remove-member/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token.current}`,
+                },
+            })
+            const response = await request.json();
+            if(!request.ok) {
+                const error = new Error('An error has occured, please try again later')
+                throw error;
+            }
+            console.log(response);
+            const index = conversations.findIndex((conv) => conv.id === groupID)
+            setConversations(prev => {
+                const convos = prev.slice();
+                const memberIndex = convos[index].participants.findIndex((membr) => membr.id === userId)
+                convos[index].participants.splice(memberIndex, 1);
+                return convos
+            })
+            setMemberRemoved(true)
+        } catch(err) {
+            console.log(err)
+            setMemberRemoved('error')
+        } finally {
+            setRemovingMember(0)
+            setTimeout(() => setMemberRemoved(false), 3500)
+        }
+    }
     
 
     const editGroup = async(e) => {
         e.preventDefault();
         if(!groupName && !image) {
-            return;
+            return setGroupError(['Group name must not be empty']);
         }
         if(image) {
+            setEditng(true)
             try {
                 const form = new FormData();
                 form.append('image', image)
@@ -91,18 +138,30 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, removi
                 })
                 const response = await request.json();
                 if(!request.ok) {
-                    const error = new Error(response.message)
-                    throw error;
+                    const error = new Error(response.message || 'Invalid Request')
+                    error.errors = response.errors;
+                    throw error
                 }
                 console.log(response);
+                setGroupSuccess(true)
+                setTimeout(() => setGroupSuccess(false), 3500)
+                setGroupError(null)
                 setEdit(false)
                 setImage(null)
                 setGroupName('');
-            } catch (error) {
-                console.log(error)
+            } catch (err) {
+                console.log(err)
+                if(err.errors) {
+                    setGroupError(err.errors)
+                } else {
+                    setGroupError([err.message])
+                }
+            } finally {
+                setEditng(false)
             }
         }
         if(groupName && !image) {
+            setEditng(true)
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/edit/${groupID}`, {
                     method: 'PUT',
@@ -114,15 +173,26 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, removi
                 })
                 const response = await request.json();
                 if(!request.ok) {
-                    const error = new Error(response.message)
-                    throw error;
+                    const error = new Error(response.message || 'Invalid Request')
+                    error.errors = response.errors;
+                    throw error
                 }
                 console.log(response);
+                setGroupSuccess(true)
+                setTimeout(() => setGroupSuccess(false), 3500)
+                setGroupError(null)
                 setEdit(false)
                 setImage(null)
                 setGroupName('');
-            } catch (error) {
-                console.log(error)
+            } catch (err) {
+                console.log(err)
+                if(err.errors) {
+                    setGroupError(err.errors)
+                } else {
+                    setGroupError([err.message])
+                }
+            } finally {
+                setEditng(false)
             }
         }
     }
@@ -134,13 +204,19 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, removi
     }
     return (
         <dialog open={groupID} className={styles.backdrop} id='backdrop'>
+            <Popup shouldRender={memberRemoved} close={setMemberRemoved} borderColor={memberRemoved === 'error' ? 'red' : '#00d846'}>
+                <p>{memberRemoved === 'error' ? 'An error has Occured, please try again later' : 'Member Removed'}</p>
+            </Popup>
+            <Popup shouldRender={groupSuccess} close={setGroupSuccess} borderColor='#00d846'>
+                <p>Group Edited Successfully</p>
+            </Popup>
             <section className={styles.group}>
                 {loading || !group ? 
                 <>
                 <section className={styles.conversationsLoading}>
                     <LoaderCircle  size={40} color='white' className={styles.loading}/>
                 </section>
-                <button className={styles.close} onClick={() => setGroupID(null)}><X size={30} color='white'/></button>
+                <button className={styles.close} onClick={() => setGroupID(null)}><X size={38} color='white'/></button>
                 </> :
                 <>
                 <div className={styles.top}>
@@ -154,19 +230,24 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, removi
                     </> :
                     <form onSubmit={editGroup} className={styles.groupForm}>
                         <img src={group.picture_url || '/images/no-group-pic.png' } alt={`${group.group_name} group picture`}></img>
+                        {groupError && 
+                        <ul>
+                            {groupError.map((error, index) => <li key={index}><p>✘ {error}</p></li>)}
+                        </ul>
+                        }
                         <label htmlFor="picture" hidden>Group picture</label>
                         <input type="file" id='picture' onChange={handleImageInput} />
                         <label htmlFor="name" hidden>Group name</label>
                         <input type="text" id='name' value={groupName} placeholder='Group name' onChange={(e) => setGroupName(e.target.value)} />
                         <div>
-                            <button className={styles.confirm}>Submit</button>
-                            <button type='button' className={styles.cancel} onClick={() => setEdit(false)}>Cancel</button>
+                            <button className={styles.confirm} disabled={editing}>{editing ? <LoaderCircle  size={28} color='white' className={styles.loading}/> : 'Submit'}</button>
+                            <button type='button' className={styles.cancel} disabled={editing} onClick={() => setEdit(false)}>Cancel</button>
                         </div>
                     </form>
                     }
                 </div>
                 <h3>Members</h3>
-                <ul className={styles.members} onClick={handleListClick}>
+                <ul className={styles.members} onClick={handleMemberRemoval}>
                     {group.participants.map((member) => {
                         return (
                             <li className={styles.member} key={member.id}>
@@ -183,7 +264,7 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, removi
                 </ul>
                 <button className={styles.close} onClick={() => {
                     setEdit(false);
-                    setGroupID(null)}}><X size={30} color='white'/></button>
+                    setGroupID(null)}}><X size={38} color='white'/></button>
                 </>
                 }
             </section>
@@ -196,8 +277,8 @@ const Group = memo(function Group ({groupID, setGroupID, handleListClick, removi
 Group.propTypes = {
     groupID: PropTypes.number,
     setGroupID: PropTypes.func.isRequired,
-    handleListClick: PropTypes.func.isRequired,
-    removingMember: PropTypes.number.isRequired
+    conversations: PropTypes.array.isRequired,
+    setConversations: PropTypes.func.isRequired,
 }
 
 export default Group;

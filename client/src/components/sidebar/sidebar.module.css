@@ -1,4 +1,15 @@
 .sidebar {
+    flex: 1;
+    min-width: 320px;
+}
+
+.navButtons {
+    width: 225px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar {
     display: flex;
     flex-direction: column;
 }
@@ -17,7 +28,7 @@
 }
 
 .you img {
-    width: 4rem;
+    width: 3.2rem;
     aspect-ratio: 1/1;
     border-radius: 50%;
 }
@@ -44,7 +55,7 @@
     flex: 1;
 }
 
-.sidebar p {
+.conversation p {
     font-size: 1.2rem;
 }
 
@@ -84,6 +95,14 @@ nav > button svg {
 
 nav > button:hover, nav > a:hover {
     background-color: #ca3535 ;
+}
+
+nav > button:disabled {
+    color: grey;
+}
+
+nav > button:disabled:hover {
+    background-color: rgba(72, 65, 65, 0) ;
 }
 
 nav {
@@ -167,6 +186,14 @@ nav {
     padding: 0.3rem 0.7rem !important;
 }
 
+.buttons button:disabled {
+    background-color: #ffffff00;
+}
+
+.buttons button:disabled:hover {
+    background-color: rgba(255, 255, 255, 0);
+}
+
 .messageButton, .conversation, .you button, .user button {
     color: inherit;
     background: none;
@@ -229,9 +256,16 @@ nav {
     border: 2px solid grey;
 }
 
+.createForm ul {
+    background-color: red;
+    border-radius: 5px;
+    padding: 0.3rem;
+    margin-bottom: 0.5rem;
+}
+
 .conversations form input {
     resize: none;
-    width: 90%;
+    width: 85%;
     display: block;
     margin: auto;
     background-color: #313338;

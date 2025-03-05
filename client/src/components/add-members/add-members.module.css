@@ -24,6 +24,44 @@
     height: 500px;
 }
 
+.addUsers input {
+    color: inherit;
+    background-color: #313338;
+    padding: 0.5rem;
+    width: 100%;
+    margin: 0 auto;
+    margin-top: 0.5rem;
+    padding-left: 2.2rem;
+    border-radius: 10px;
+    border: 2px solid grey;
+}
+
+.memberButton:hover {
+    box-shadow: 0px 1px 0px 0px red;
+}
+
+.addUsers h2, .addUsers h3 {
+    text-align: center;
+}
+
+.addUsers h3 {
+    padding-top: 0.5rem;
+}
+
+.searchDiv {
+    position: relative;
+    display: flex;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.searchIcon {
+    position: absolute;
+    left: 2%;
+    top: 55%;
+    transform: translateY(-50%);
+}
+
 .members {
     padding: 0;
 }
@@ -64,6 +102,15 @@
 
 .members {
     overflow-y: auto;
+    padding-top: 0.4rem;
+}
+
+.memberButton > button:disabled {
+    color: rgba(255, 255, 255, 0);
+}
+
+.memberButton > button:disabled:hover {
+    color: rgba(255, 255, 255, 0);
 }
 
 .memberButton {
@@ -71,6 +118,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
+    border-radius: 10px;
 }
 
 .member img{

@@ -450,11 +450,12 @@ exports.updateGroup = async(groupId, name = null, url = null) => {
         data: data,
     })
 }
-exports.updateProfile = async(userId, first_name = null, last_name = null, bio = null, url = null) => {
-    const data = {};
+exports.updateProfile = async(userId, first_name = null, last_name = null, bio = '', url = null) => {
+    const data = {
+        bio
+    };
     if(first_name) data.first_name = first_name;
     if(last_name) data.last_name = last_name;
-    if(bio) data.bio = bio;
     if(url) data.picture_url = url
     return prisma.user.update({
         where: {

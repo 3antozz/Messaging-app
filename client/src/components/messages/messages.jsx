@@ -41,7 +41,7 @@ const Message = ({message, index, conversation, user, root}) => {
             !isUserMessage && (<button><img loading='lazy' src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`} data-func='profile' id={message.sender.id}></img></button>) : <div className={styles.void}></div>}
             <div style={{marginBottom: shouldShowPicture ? '0.5rem' : null }} className={styles.msgDiv}>
                 { shouldShowSenderName && <p className={styles.sender}>{message.sender.first_name}</p>}
-                {message.picture_url && <img loading='lazy' src={message.picture_url} data-func='img' className={!isUserMessage ? `${styles.messageImage} ${styles.otherMessage}` : `${styles.messageImage} ${styles.yourMessage}`}/>}
+                {message.picture_url && <img loading='lazy' style={{backgroundColor: '#ffffff00'}} src={message.picture_url} data-func='img' className={!isUserMessage ? `${styles.messageImage} ${styles.otherMessage}` : `${styles.messageImage} ${styles.yourMessage}`}/>}
                 { message.content && <p className={!isUserMessage ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>}
                 <p className={styles.messageDate}>{message.date}</p>
             </div>
@@ -292,7 +292,10 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             </div>
             <div className={styles.main} ref={scrollRef} id='scrl'>
                 <ul onClick={handleImageClick}>
-                {conversation.messages.map((message, index) => 
+                {conversation.messages.length < 0 ?
+                <p>Start this conversation!</p>
+                :
+                conversation.messages.map((message, index) => 
                     <Message key={message.id} root={scrollRef.current} index={index} message={message} conversation={conversation} user={user} />
                 )}
                 </ul>         
@@ -318,7 +321,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 <button onClick={() => setProfileID(otherUser.id)}>{otherUser.first_name} {otherUser.last_name}</button> : 
                 <>
                     <button onClick={() => setGroupID(conversation.id)}>{conversation.group_name}</button>
-                    <button onClick={() => setMembers(true)}><UserPlus size={28} /></button>
+                    {!conversation.isPublic && <button onClick={() => setMembers(true)}><UserPlus size={28} /></button>}
                 </>
                 }
             </div>

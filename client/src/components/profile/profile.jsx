@@ -3,6 +3,7 @@ import { memo, useEffect, useState, useContext, useMemo } from 'react'
 import PropTypes from 'prop-types';
 import { AuthContext } from '../../contexts'
 import { X, LoaderCircle } from 'lucide-react';
+import Popup from "../popup/popup"
 
 const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends, handleListClick, setOnlineFriends, users}) {
     const { user, setUser, token, socket, socketOn } = useContext(AuthContext)
@@ -14,15 +15,21 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
     const [bio, setBio] = useState('');
     const [image, setImage] = useState(null);
     const [refreshProfileID, setRefreshProfile] = useState(null);
+    const [profileError, setProfileError] = useState(null);
+    const [profileSuccess, setProfileSuccess] = useState(false)
+    const [friendAdded, setFriendAdded] = useState(false)
+    const [friendRemoved, setFriendRemoved] = useState(false)
+    const [friendshipLoading, setFriendshipLoading] = useState(false);
+    const [editingProfile, setEditingProfile] = useState(false)
     const profile = useMemo(() => profiles[userId], [profiles, userId])
 
     useEffect(() => {
-        if(edit && !firstName) {
+        if(edit) {
             setFirstName(profile?.first_name);
             setLastName(profile?.last_name);
             setBio(profile?.bio);
         }
-    }, [edit, firstName, profile])
+    }, [edit, profile])
     useEffect(() => {
         if(refreshProfileID) {
             setProfiles(prev => {
@@ -49,6 +56,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
         };
     }, [socket, socketOn, profile])
     const addFriend = async() => {
+        setFriendshipLoading(true);
         try {
             const request = await fetch(`${import.meta.env.VITE_API_URL}/friends/add`, {
                 method: 'PUT',
@@ -66,19 +74,25 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 const error = new Error('An error has occured, please try again later')
                 throw error;
             }
-            setFriends(prev => ([...prev, response.friend]))
+            setFriends(prev => ([response.friend, ...prev]))
             setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: true} }))
             setOnlineFriends(false)
+            setFriendAdded(true)
         } catch(err) {
             console.log(err)
+            setFriendAdded('error')
+        } finally {
+            setTimeout(() => setFriendAdded(false), 3500)
+            setFriendshipLoading(false)
         }
     }
     const editProfile = async(e) => {
         e.preventDefault();
         if((!firstName || !lastName) && !image) {
-            return;
+            return setProfileError(['First or Last name must not be empty']);
         }
         if(image) {
+            setEditingProfile(true)
             try {
                 const form = new FormData();
                 form.append('image', image)
@@ -96,21 +110,33 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 })
                 const response = await request.json();
                 if(!request.ok) {
-                    const error = new Error(response.message)
-                    throw error;
+                    const error = new Error(response.message || 'Invalid Request')
+                    error.errors = response.errors;
+                    throw error
                 }
                 console.log(response);
                 setUser(prev => ({...prev, ...response.user}))
+                setProfileSuccess(true)
+                setTimeout(() => setProfileSuccess(false), 3500)
+                setProfileError(null)
                 setEdit(false)
                 setImage(null)
                 setFirstName('');
                 setLastName('');
                 setBio('');
-            } catch (error) {
-                console.log(error)
+            } catch (err) {
+                console.log(err)
+                if(err.errors) {
+                    setProfileError(err.errors)
+                } else {
+                    setProfileError([err.message])
+                }
+            } finally {
+                setEditingProfile(false)
             }
         }
         if((firstName && lastName) && !image) {
+            setEditingProfile(true)
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`, {
                     method: 'PUT',
@@ -126,22 +152,34 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 })
                 const response = await request.json();
                 if(!request.ok) {
-                    const error = new Error(response.message)
-                    throw error;
+                    const error = new Error(response.message || 'Invalid Request')
+                    error.errors = response.errors;
+                    throw error
                 }
                 console.log(response);
                 setUser(prev => ({...prev, ...response.user}))
+                setProfileSuccess(true)
+                setTimeout(() => setProfileSuccess(false), 3500)
+                setProfileError(null)
                 setEdit(false)
                 setImage(null)
                 setFirstName('');
                 setLastName('');
                 setBio('');
-            } catch (error) {
-                console.log(error)
+            } catch (err) {
+                console.log(err)
+                if(err.errors) {
+                    setProfileError(err.errors)
+                } else {
+                    setProfileError([err.message])
+                }
+            } finally {
+                setEditingProfile(false)
             }
         }
     }
     const removeFriend = async() => {
+        setFriendshipLoading(true);
         try {
             const request = await fetch(`${import.meta.env.VITE_API_URL}/friends/remove`, {
                 method: 'PUT',
@@ -167,8 +205,13 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             })
             setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: false} }))
             setOnlineFriends(false)
+            setFriendRemoved(true)
         } catch(err) {
             console.log(err)
+            setFriendRemoved('error')
+        } finally {
+            setTimeout(() => setFriendRemoved(false), 3500)
+            setFriendshipLoading(false);
         }
     }
     const handleMessageButton = (e) => {
@@ -213,19 +256,36 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             setFriends(prev => [users[index], ...prev])
             setOnlineFriends(false);
         }
+        const removeFriend = (userId) => {
+            console.log(userId);
+            const index = friends.findIndex((user) => user.id === userId)
+            setFriends(prev => prev.toSpliced(index, 1))
+            setOnlineFriends(false);
+        }
         if(socketOn){
             socket.current.on('new friend', addNewFriend)
+            socket.current.on('remove friend', removeFriend)
         }
         const listener = socket.current;
         return () => {
             if(listener) {
                 listener.off('new friend');
+                listener.off('remove friend');
             }
         };
-    }, [setFriends, setOnlineFriends, socket, socketOn, users])
+    }, [friends, setFriends, setOnlineFriends, socket, socketOn, users])
 
     return (
         <dialog open={userId} className={styles.backdrop} id='backdrop'>
+            <Popup shouldRender={friendAdded} close={setFriendAdded} borderColor={friendAdded === 'error' ? 'red' : '#00d846'}>
+                <p>{friendAdded === 'error' ? 'An error has Occured, please try again later' : 'Friend Added'}</p>
+            </Popup>
+            <Popup shouldRender={friendRemoved} close={setFriendRemoved} borderColor={friendRemoved === 'error' ? 'red' : '#00d846'}>
+                <p>{friendRemoved === 'error' ? 'An error has Occured, please try again later' : 'Friend Removed'}</p>
+            </Popup>
+            <Popup shouldRender={profileSuccess} close={setProfileSuccess} borderColor='#00d846'>
+                <p>Group Edited Successfully</p>
+            </Popup>
             <section className={styles.profile}>
                 {loading || !profile ?
                 <>
@@ -235,7 +295,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 <button className={styles.close} onClick={() => {
                     setEdit(false);
                     setProfileID(null)
-                    }}><X size={30} color='white'/></button>
+                    }}><X size={38} color='white'/></button>
                 </> :
                 <>
                 <div className={styles.top}>
@@ -250,6 +310,11 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     }
                     </> :
                     <form onSubmit={editProfile} className={styles.profileForm}>
+                        {profileError && 
+                        <ul>
+                            {profileError.map((error, index) => <li key={index}><p>✘ {error}</p></li>)}
+                        </ul>
+                        }
                         <label htmlFor="picture" hidden>Group picture</label>
                         <input type="file" id='picture' onChange={handleImageInput} />
                         <label htmlFor="first_name" hidden></label>
@@ -257,8 +322,8 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                         <label htmlFor="last_name" hidden></label>
                         <input type="text" id='last_name' value={lastName} placeholder='Last Name' onChange={(e) => setLastName(e.target.value)} />
                         <div>
-                            <button className={styles.edit}>Submit</button>
-                            <button type='button' className={styles.cancel} onClick={() => setEdit(false)}>Cancel</button>
+                            <button className={styles.edit} disabled={editingProfile}>{editingProfile ? <LoaderCircle  size={28} color='white' className={styles.loading}/> : 'Submit'}</button>
+                            <button type='button' className={styles.cancel} disabled={editingProfile} onClick={() => setEdit(false)}>Cancel</button>
                         </div>
                     </form>
                     }
@@ -280,13 +345,13 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 {(user && user.id !== +userId) &&
                 <div className={styles.buttons}>
                     <button className={styles.messageBtn} data-func="new-convo" id={profile.id} onClick={handleMessageButton}>Message</button>
-                    {profile.isFriend ? <button className={styles.removeFriend} onClick={removeFriend}>Remove Friend</button> : <button className={styles.addFriend} onClick={addFriend}>Add friend</button>}
+                    {profile.isFriend ? <button className={styles.removeFriend} disabled={friendshipLoading} onClick={removeFriend}>{friendshipLoading ? <LoaderCircle  size={28} color='white' className={styles.loading}/> : 'Remove Friend'}</button> : <button className={styles.addFriend} disabled={friendshipLoading} onClick={addFriend}>{friendshipLoading ? <LoaderCircle  size={28} color='white' className={styles.loading}/> : 'Add Friend'}</button>}
                 </div>
                 }
                 <button className={styles.close} onClick={() => {
                     setEdit(false);
                     setProfileID(null)
-                    }}><X size={30} color='white'/></button>
+                    }}><X size={38} color='white'/></button>
                 </>
                 }
             </section>

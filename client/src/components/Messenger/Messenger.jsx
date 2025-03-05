@@ -3,6 +3,7 @@ import Messages from '../messages/messages'
 import Sidebar from '../sidebar/sidebar'
 import { AuthContext } from '../../contexts'
 import { useContext, useState, useEffect, useMemo } from 'react'
+import Popup from '../popup/popup'
 import Image from '../full-image/image'
 import Profile from '../profile/profile'
 import Group from '../group/group'
@@ -10,24 +11,23 @@ import Members from '../add-members/add-members'
 
 
 export default function Messenger () {
-    const { user, token, socket, socketOn } = useContext(AuthContext)
-    const [conversationID, setConversationID] = useState(null)
-    const [friends, setFriends] = useState([])
-    const [onlineFriends, setOnlineFriends] = useState(false)
-    const [conversations, setConversations] = useState([])
-    const [users, setUsers] = useState([])
-    const [usersLoading, setUsersLoading] = useState(false)
-    const [error, setError] = useState(false)
-    const [isFetched, setFetched] = useState(false)
-    const [profileID, setProfileID] = useState(null)
+    const { user, token, socket, socketOn } = useContext(AuthContext);
+    const [conversationID, setConversationID] = useState(null);
+    const [friends, setFriends] = useState([]);
+    const [onlineFriends, setOnlineFriends] = useState(false);
+    const [conversations, setConversations] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [usersLoading, setUsersLoading] = useState(false);
+    const [error, setError] = useState(false);
+    const [isFetched, setFetched] = useState(false);
+    const [profileID, setProfileID] = useState(null);
     const [groupID, setGroupID] = useState(null);
-    const [imageURL, setImageURL] = useState(null)
-    const [addMembers, setMembers] = useState(false)
-    const [connectedRooms, setConnectedToRooms] = useState(false)
-    const [refreshConversationID, setRefreshConversation] = useState(null)
-    const [loadingConversation, setLoadingConversation] = useState(0)
-    const [removingMember, setRemovingMember] = useState(0)
-    const [addingMember, setAddingMember] = useState(0)
+    const [imageURL, setImageURL] = useState(null);
+    const [addMembers, setMembers] = useState(false);
+    const [connectedRooms, setConnectedToRooms] = useState(false);
+    const [refreshConversationID, setRefreshConversation] = useState(null);
+    const [loadingConversation, setLoadingConversation] = useState(0);
+    const [conversationError, setConversationError] = useState(false);
     const groups = useMemo(() => conversations.filter(group => group.isGroup), [conversations])
     const group = useMemo(() => {
         const index = groups.findIndex((group) => group.id === conversationID)
@@ -143,66 +143,12 @@ export default function Messenger () {
             setConnectedToRooms(false)
         } catch(err) {
             console.log(err)
+            setConversationError(err.message)
+            setTimeout(() => setConversationError(false), 3500)
         } finally {
             setLoadingConversation(0)
         }
     } 
-    const addMember = async(userId) => {
-        setAddingMember(userId)
-        try {
-            const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/${conversationID}/add-member/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token.current}`,
-                },
-            })
-            const response = await request.json();
-            if(!request.ok) {
-                const error = new Error('An error has occured, please try again later')
-                throw error;
-            }
-            console.log(response);
-            setConversations((prev) => {
-                const newConv = prev.slice();
-                const index = newConv.findIndex(group => group.id === response.group.id)
-                newConv[index] = response.group;
-                return newConv
-            })
-        } catch(err) {
-            console.log(err)
-        } finally {
-            setAddingMember(0);
-        }
-    }
-
-    const removeMember = async(userId) => {
-        setRemovingMember(userId)
-        try {
-            const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/${conversationID}/remove-member/${userId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token.current}`,
-                },
-            })
-            const response = await request.json();
-            if(!request.ok) {
-                const error = new Error('An error has occured, please try again later')
-                throw error;
-            }
-            console.log(response);
-            const index = conversations.findIndex((conv) => conv.id === conversationID)
-            setConversations(prev => {
-                const convos = prev.slice();
-                const memberIndex = convos[index].participants.findIndex((membr) => membr.id === userId)
-                convos[index].participants.splice(memberIndex, 1);
-                return convos
-            })
-        } catch(err) {
-            console.log(err)
-        } finally {
-            setRemovingMember(0)
-        }
-    }
     const handleListClick = async(e) => {
         const button = e.target.closest('button')
         if (button && button.dataset.func === 'convo') {
@@ -221,26 +167,18 @@ export default function Messenger () {
         } else if (button && button.dataset.func === 'profile') {
             const id = +button.id;
             setProfileID(id)
-        } else if (button && button.dataset.func === 'add-member') {
-            const userId = +button.id;
-            const alreadyMember = group.participants.findIndex((member) => member.id === userId)
-            if (alreadyMember > -1) {
-                console.log('Is already a member')
-            } else {
-                addMember(userId)
-            }
-        } else if (button && button.dataset.func === 'remove-member') {
-            const userId = +button.id;
-            removeMember(userId)
         } else {
             return;
         }
     }
     return (
         <>
-            <Members addMembers={addMembers} setMembers={setMembers} friends={friends} users={users} groups={groups} groupID={conversationID} handleListClick={handleListClick} group={group} addingMember={addingMember} />
+            <Popup shouldRender={conversationError} close={setConversationError} borderColor='red'>
+                <p>An error has occured, please try again later</p>
+            </Popup>
+            <Members addMembers={addMembers} setMembers={setMembers} friends={friends} users={users} groups={groups} groupID={conversationID} group={group} setConversations={setConversations} />
 
-            <Group groupID={groupID} setGroupID={setGroupID} handleListClick={handleListClick} removingMember={removingMember} />
+            <Group groupID={groupID} setGroupID={setGroupID} conversations={conversations} setConversations={setConversations} />
 
             <Image imageURL={imageURL} setImageURL={setImageURL} />
 
