@@ -24,10 +24,10 @@ export default function Popup ({children, shouldRender, close, borderColor = 'gr
     return (
         <>
         {isVisible &&
-            <section className={!exiting ? `${styles.container} ${styles.visible}` : `${styles.container} ${styles.exit}` } onAnimationEnd={closePopup} style={{border: `3px solid ${borderColor}`}}>
+            <div className={!exiting ? `${styles.container} ${styles.visible}` : `${styles.container} ${styles.exit}` } onAnimationEnd={closePopup} style={{border: `3px solid ${borderColor}`}}>
                 {children}
                 <button onClick={() => setExiting(true)}><X size={20} /></button>
-            </section>
+            </div>
         }
         </>
     )

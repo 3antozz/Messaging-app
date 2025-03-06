@@ -1,5 +1,6 @@
 .messenger {
     flex: 2;
+    /* min-width: 300px; */
 }
 .info, .main {
     border-bottom: 2px solid rgb(178, 176, 176);
@@ -92,14 +93,22 @@
     margin-bottom: 0.2rem;
 }
 
+.message > .yourDiv > div .messageDate {
+    transform: translateX(-90%);
+}
+
+.message > :not(.yourDiv) > div .messageDate {
+    transform: translateX(50%);
+}
+
 .messageDate {
     width: max-content;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     padding-left: 0.2rem;
     visibility: hidden;
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    /* left: 50%;
+    transform: translateX(-50%); */
     background-color: rgb(90, 88, 88);
     padding: 0.2rem 0.8rem;
     border-radius: 10px;
@@ -174,35 +183,53 @@
 .messageDiv {
     display: flex;
     align-items: center;
-    gap: 0.2rem;
+    gap: 0.3rem;
     padding: 0;
 }
 
 .messageDiv input {
     resize: none;
     width: 100%;
-    height: 40px;
+    height: 45px;
     background-color: #313338;
     border-radius: 10px;
     align-content: center;
     color: inherit;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     padding: 0.2rem 0.4rem;
     flex: 1;
     border: 2px solid grey;
 }
 
-.messageDiv button, .label svg {
+.messageDiv button, .label {
     background-color: #ca3535;
     border: none;
     align-self: stretch;
     border-radius: 10px;
     cursor: pointer;
+    flex-shrink: 0;
     transition: transform 200ms ease;
     padding: 0 0.5rem;
 }
 
-.messageDiv button:hover, .label svg:hover {
+.messageDiv button:disabled {
+    background-color: grey;
+}
+
+.file > div {
+    display: flex;
+    gap: 2rem;
+}
+
+.label {
+    align-content: center;
+}
+
+.label svg {
+    margin: auto;
+}
+
+.messageDiv button:hover, .label:hover {
     cursor: pointer;
     transform: scale(1.2);
     filter: brightness(1.3);
@@ -210,7 +237,7 @@
 
 
 .forms {
-    padding: 0.6rem;
+    padding: 1rem 0.6rem;
 }
 
 .loading {
@@ -230,10 +257,18 @@
 
 .file {
     display: none;
-    width: 11rem;
+    width: 20rem;
+    flex-direction: column;
     margin: auto;
     margin-top: 0.6rem;
     align-items: center;
+}
+
+.fileError {
+    background-color: red;
+    font-weight: bold;
+    padding: 0.2rem 0.5rem;
+    border-radius: 5px;
 }
 
 .file button {
@@ -253,6 +288,15 @@
     stroke: red;
 }
 
+.empty {
+    height: 100%;
+    display: flex;
+    font-size: 1.2rem;
+    font-weight: bold;
+    justify-content: center;
+    align-items: center;
+}
+
 
 .messenger input[type="file"] {
     text-align: center;
@@ -270,6 +314,24 @@
     }
     100% {
         transform: rotate(1turn);
+    }
+}
+
+@media (max-width: 1000px) {
+    .messenger {
+        height: 600px;
+        flex: auto;
+    }
+}
+
+@media (max-width: 750px) {
+    .messageDate {
+        font-size: 1rem;
+        left: 50%;
+        transform: translateX(-50%) !important;
+    }
+    .messageDiv button svg, .label svg {
+        width: 25px;
     }
 }
 

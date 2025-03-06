@@ -83,6 +83,7 @@ export default function Login () {
             <button disabled={success ? true : loading ? true : false}>{loading ? <LoaderCircle size={40} color='white' className={styles.loading}/> : 'Log in'}</button>
             <div>
                 <Link to='/register'>Create an Account</Link>  
+                <Link to='/'>Public Chat</Link>  
             </div>
         </form>
         </>

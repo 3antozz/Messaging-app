@@ -331,7 +331,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     <button className={styles.edit} onClick={() => setEdit(true)}>Edit Profile</button>
                     }
                 </div>
-                <h3>About Me</h3>
+                <h3>About</h3>
                 <div className={styles.info}>
                     {!edit ? 
                     profile.bio ? <p className={styles.bio}>{profile.bio}</p> : <p className={styles.bio} style={{textAlign: 'center'}}>User has no bio</p> : 

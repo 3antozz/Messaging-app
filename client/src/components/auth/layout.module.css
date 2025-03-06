@@ -1,9 +1,9 @@
 .container {
-    height: 100%;
     display: flex;
-    gap: 10rem;
+    gap: 15vw;
     justify-content: center;
     position: relative;
+    min-height: 100%;
     padding: 2rem 1rem;
 }
 
@@ -69,7 +69,7 @@
     margin-bottom: 2rem;
 }
 
-.login a {
+.login a:first-of-type {
     width: 80%;
     margin-top: 0.8rem !important;
 }
@@ -93,7 +93,7 @@
     border-radius: 15px;
 }
 
-.login a, .register a {
+.login a:first-of-type, .register a:first-of-type {
     background-color: #379524;
     text-decoration: none;
     text-align: center;
@@ -113,7 +113,7 @@
     border: 2px solid rgba(255, 255, 255, 0);
 }
 
-.form > form button, .login a {
+.form > form button, .login a:first-of-type {
     color: inherit;
     font-size: 1.5rem;
     font-family: inherit;
@@ -124,6 +124,22 @@
     border: none;
     padding: 0.3rem 1rem;
     transition: transform 200ms ease;
+}
+
+.login a:last-of-type {
+    color: inherit;
+    font-size: 1.2rem;
+    font-family: inherit;
+    margin: 0 auto;
+    display: block;
+    border-radius: 8px;
+    text-decoration: none;
+    border: 2px solid grey;
+    padding: 0.3rem 1rem;
+    transition: transform 200ms ease;
+    background-color: #2e3034;
+    margin-top: 1rem;
+    width: 50%;
 }
 
 

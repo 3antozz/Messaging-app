@@ -197,8 +197,8 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
         };
     }, [socket, conversations, setConversations, socketOn])
     const handleViews = (e) => {
-        if (e.target.tagName === 'BUTTON') {
-            setView(e.target.textContent);
+        if (e.target.closest('button')) {
+            setView(e.target.closest('button').textContent);
             setSearch('')
         } else {
             return;
@@ -249,17 +249,17 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             <>
             <aside className={styles.navButtons}>
                 <section className={styles.you}>
-                        <button disabled>
+                        <Link to='/login'>
                             <img src='/images/no-profile-pic.jpg'></img>
                             <h3>Guest</h3>
-                        </button>
+                        </Link>
                 </section>
                 <nav>
-                        <button disabled><MessageCircleMore size={30}/>Messages</button>
-                        <button disabled><Users size={30} />Groups</button>
-                        <button disabled><Handshake size={30} />Friends</button>
-                        <button disabled><UserRoundSearch size={30} />Users</button>
-                        <Link to="/login"><LogIn size={30}/>Login</Link>
+                        <button disabled><MessageCircleMore size={30}/><p>Messages</p></button>
+                        <button disabled><Users size={30} /><p>Groups</p></button>
+                        <button disabled><Handshake size={30} /><p>Friends</p></button>
+                        <button disabled><UserRoundSearch size={30} /><p>Users</p></button>
+                        <Link to="/login"><LogIn size={30}/><p>Login</p></Link>
                 </nav>
             </aside>
             <aside className={styles.sidebar}>
@@ -309,13 +309,13 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                 </button>
             </section>
             <nav onClick={handleViews}>
-                <button className={view === 'Messages' ? `${styles.selected}` : ''}><MessageCircleMore size={30}/>Messages</button>
-                <button className={view === 'Groups' ? `${styles.selected}` : ''}><Users size={30} />Groups</button>
-                <button className={view === 'Friends' ? `${styles.selected}` : ''}><Handshake size={30} />Friends</button>
-                <button className={view === 'Users' ? `${styles.selected}` : ''}><UserRoundSearch size={30} />Users</button>
+                <button className={view === 'Messages' ? `${styles.selected}` : ''}><MessageCircleMore size={30}/><p>Messages</p></button>
+                <button className={view === 'Groups' ? `${styles.selected}` : ''}><Users size={30} /><p>Groups</p></button>
+                <button className={view === 'Friends' ? `${styles.selected}` : ''}><Handshake size={30} /><p>Friends</p></button>
+                <button className={view === 'Users' ? `${styles.selected}` : ''}><UserRoundSearch size={30} /><p>Users</p></button>
                 {!user ?
-                <Link to="/login">Login</Link> :
-                <button onClick={logout}><LogOut size={30} /> Logout</button>
+                <Link to="/login"><p>Login</p></Link> :
+                <button onClick={logout}><LogOut size={30} /><p>Logout</p></button>
                 }
             </nav>
         </aside>

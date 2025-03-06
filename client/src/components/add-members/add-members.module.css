@@ -57,8 +57,8 @@
 
 .searchIcon {
     position: absolute;
-    left: 2%;
-    top: 55%;
+    left: 8px;
+    top: 28px;
     transform: translateY(-50%);
 }
 

@@ -68,6 +68,8 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
     const fileRef = useRef(null);
     const fileDivRef = useRef(null);
     const [loading, setLoading] = useState(false)
+    const [uploadError, setUploadError] = useState(false)
+    const [isUploading, setUploading] = useState(false)
     const conversation = useMemo(() => {
         return conversations[conversationID];
     },  [conversationID, conversations])
@@ -181,6 +183,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             return;
         }
         if(image) {
+            setUploading(true)
             try {
                 const form = new FormData();
                 form.append('image', image)
@@ -199,12 +202,16 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 console.log(response);
                 socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput, url: response.url, date: new Date()});
                 setMessageInput('');
+                setUploadError(false)
                 setImage(null)
                 if(fileDivRef.current) {
                     fileDivRef.current.style.display = 'none'
                 }
             } catch (error) {
                 console.log(error)
+                setUploadError(error.message)
+            } finally {
+                setUploading(false)
             }
         }
         if(messageInput && !image) {
@@ -242,7 +249,8 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
     }
 
     const cancelFile = () => {
-        setImage(null)
+        setImage(null);
+        setUploadError(false);
         if(fileDivRef.current) {
             fileDivRef.current.style.display = 'none'
         }
@@ -257,6 +265,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             }
         } else {
             setImage(null)
+            setUploadError(false)
             if(fileDivRef.current) {
                 fileDivRef.current.style.display = 'none'
             }
@@ -276,8 +285,8 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             <div className={styles.forms}>
                 <form className={styles.messageDiv}>
                     <input name="message" id="message" placeholder='Login to send messages' disabled></input>
-                    <button disabled><SendHorizontal color='white' size={28} /></button>
-                    <button disabled><Image color='white' size={28} /></button>
+                    <button disabled><SendHorizontal color='white' size={30} /></button>
+                    <button disabled><Image color='white' size={35} /></button>
                 </form>
             </div>
         </section>
@@ -292,8 +301,10 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             </div>
             <div className={styles.main} ref={scrollRef} id='scrl'>
                 <ul onClick={handleImageClick}>
-                {conversation.messages.length < 0 ?
-                <p>Start this conversation!</p>
+                {conversation.messages.length === 0 ?
+                <div className={styles.empty}>
+                    <p>Start this conversation!</p>
+                </div>
                 :
                 conversation.messages.map((message, index) => 
                     <Message key={message.id} root={scrollRef.current} index={index} message={message} conversation={conversation} user={user} />
@@ -303,8 +314,8 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             <div className={styles.forms}>
                 <form className={styles.messageDiv}>
                     <input name="message" id="message" placeholder='Login to send messages' disabled></input>
-                    <button disabled><SendHorizontal color='white' size={28} /></button>
-                    <button disabled><Image color='white' size={28} /></button>
+                    <button disabled><SendHorizontal color='white' size={30} /></button>
+                    <button disabled><Image color='white' size={35} /></button>
                 </form>
             </div>
         </section>
@@ -326,8 +337,13 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 }
             </div>
             <div className={styles.main} ref={scrollRef} id='scrl'>
-                <ul onClick={handleImageClick}>
-                {conversation.messages.map((message, index) => 
+                <ul onClick={handleImageClick} style={{height: conversation.messages.length === 0 ? '100%' : null}}>
+                {conversation.messages.length === 0 ?
+                <div className={styles.empty}>
+                    <p>Send a message to start this conversation</p>
+                </div>
+                :
+                conversation.messages.map((message, index) => 
                     <Message key={message.id} root={scrollRef.current} index={index} message={message} conversation={conversation} user={user} />
                 )}
                 </ul>         
@@ -337,12 +353,15 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                     <div className={styles.messageDiv}>
                         <label htmlFor="message" hidden></label>
                         <input name="message" id="message" onChange={(e) => setMessageInput(e.target.value)} placeholder='Send a message...' value={messageInput} ref={inputRef}></input>
-                        <button><SendHorizontal color='white' /></button>
-                        <label htmlFor="image" className={styles.label}><Image color='white' size={42} /></label>
+                        <button><SendHorizontal size={30} color='white' /></button>
+                        <label htmlFor="image" disabled={isUploading} className={styles.label}>{!isUploading ? <Image color='white' size={35} /> : <LoaderCircle  size={40} color='white' className={styles.loading}/>}</label>
                     </div>
                     <div className={styles.file} ref={fileDivRef}>
-                        <input type="file" id='image' accept='image/*' ref={fileRef} onChange={handleFileClick} />
-                        <button onClick={cancelFile}><X color='white' size={30} /></button>
+                        {uploadError ? <p className={styles.fileError}>{uploadError}</p> : <p>Max size: 5 MB</p>}
+                        <div>
+                            <input type="file" id='image' accept='image/*' ref={fileRef} onChange={handleFileClick} />
+                            <button onClick={cancelFile}><X color='white' size={30} /></button>
+                        </div>
                     </div>
                 </form>
             </div>
