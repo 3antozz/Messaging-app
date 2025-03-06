@@ -35,7 +35,6 @@ export default function Register () {
                 error.errors = response.errors;
                 throw error
             }
-            console.log(response)
             setSuccess(true)
             setErrors(null)
             setUsername("");
@@ -44,7 +43,6 @@ export default function Register () {
             setLastname("")
             setConfirmPassword("")
         } catch(err) {
-            console.log(err)
             setErrors(err.errors)
         } finally {
             setLoading(false)
@@ -63,23 +61,23 @@ export default function Register () {
             }
             <div className={styles.input}>
                 <label htmlFor="first_name" hidden>First Name</label>
-                <input type="text" id="first_name" placeholder="First Name" value={firstName} onChange={(e) => setFirstname(e.target.value)} />
+                <input type="text" id="first_name" required minLength={2} maxLength={20} placeholder="First Name" value={firstName} onChange={(e) => setFirstname(e.target.value)} />
             </div>
             <div className={styles.input}>
                 <label htmlFor="last_name" hidden>Last Name</label>
-                <input type="text" id="last_name" placeholder="Last Name" value={lastName} onChange={(e) => setLastname(e.target.value)} />
+                <input type="text" id="last_name" placeholder="Last Name" required minLength={2} maxLength={20} value={lastName} onChange={(e) => setLastname(e.target.value)} />
             </div>
             <div className={styles.input}>
                 <label htmlFor="username" hidden>Username</label>
-                <input type="text" id="username" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />
+                <input type="text" id="username" placeholder="Username" required minLength={3} maxLength={15} value={username} onChange={(e) => setUsername(e.target.value)} />
             </div>
             <div>
                 <label htmlFor="password" hidden>Password</label>
-                <input type="password" id="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+                <input type="password" id="password" placeholder="Password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
             </div>
             <div>
                 <label htmlFor="confirm_password" hidden>Confirm Password</label>
-                <input type="password" id="confirm_password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                <input type="password" id="confirm_password" placeholder="Confirm Password" required minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
             </div>
             <button disabled={success ? true : loading ? true : false}>{loading ? <LoaderCircle size={40} color='white' className={styles.loading}/> : 'Sign Up'}</button>
             <div>

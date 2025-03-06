@@ -7,7 +7,7 @@ import Popup from "../popup/popup"
 
 const Profile = memo(function Profile ({userId, setProfileID, friends, setFriends, handleListClick, setOnlineFriends, users}) {
     const { user, setUser, token, socket, socketOn } = useContext(AuthContext)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [profiles, setProfiles] = useState({})
     const [edit, setEdit] = useState(false);
     const [firstName, setFirstName] = useState('');
@@ -21,6 +21,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
     const [friendRemoved, setFriendRemoved] = useState(false)
     const [friendshipLoading, setFriendshipLoading] = useState(false);
     const [editingProfile, setEditingProfile] = useState(false)
+    const [loadingError, setLoadingError] = useState(false)
     const profile = useMemo(() => profiles[userId], [profiles, userId])
 
     useEffect(() => {
@@ -69,7 +70,6 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 })
             })
             const response = await request.json();
-            console.log(response);
             if(!request.ok) {
                 const error = new Error('An error has occured, please try again later')
                 throw error;
@@ -78,8 +78,8 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: true} }))
             setOnlineFriends(false)
             setFriendAdded(true)
+        // eslint-disable-next-line no-unused-vars
         } catch(err) {
-            console.log(err)
             setFriendAdded('error')
         } finally {
             setTimeout(() => setFriendAdded(false), 3500)
@@ -114,7 +114,6 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     error.errors = response.errors;
                     throw error
                 }
-                console.log(response);
                 setUser(prev => ({...prev, ...response.user}))
                 setProfileSuccess(true)
                 setTimeout(() => setProfileSuccess(false), 3500)
@@ -125,7 +124,6 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 setLastName('');
                 setBio('');
             } catch (err) {
-                console.log(err)
                 if(err.errors) {
                     setProfileError(err.errors)
                 } else {
@@ -156,7 +154,6 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     error.errors = response.errors;
                     throw error
                 }
-                console.log(response);
                 setUser(prev => ({...prev, ...response.user}))
                 setProfileSuccess(true)
                 setTimeout(() => setProfileSuccess(false), 3500)
@@ -167,7 +164,6 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 setLastName('');
                 setBio('');
             } catch (err) {
-                console.log(err)
                 if(err.errors) {
                     setProfileError(err.errors)
                 } else {
@@ -191,8 +187,6 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     friendId: profile.id
                 })
             })
-            const response = await request.json();
-            console.log(response);
             if(!request.ok) {
                 const error = new Error('An error has occured, please try again later')
                 throw error;
@@ -206,8 +200,8 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             setProfiles(prev => ({...prev, [profile.id]: {...prev[profile.id], isFriend: false} }))
             setOnlineFriends(false)
             setFriendRemoved(true)
+        // eslint-disable-next-line no-unused-vars
         } catch(err) {
-            console.log(err)
             setFriendRemoved('error')
         } finally {
             setTimeout(() => setFriendRemoved(false), 3500)
@@ -226,19 +220,23 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
     }
     useEffect(() => {
         const fetchProfile = async() => {
-            console.log('profile fetched!')
             try {
                 setLoading(true)
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/users/${userId}`)
+                if(!request.ok) {
+                    const error = new Error('An error has occured, please try again later')
+                    throw error;
+                }
                 const response = await request.json();
-                console.log(response);
                 const isFriend = friends.findIndex((friend) => friend.id === response.profile.id)
                 if (isFriend > -1) {
                     response.profile = {...response.profile, isFriend: true}
                 }
                 setProfiles((prev) => ({...prev, [response.profile.id]: response.profile}))
+                setLoadingError(false)
+            // eslint-disable-next-line no-unused-vars
             } catch(err) {
-                console.log(err)
+                setLoadingError(true);
             } finally {
                 setLoading(false)
             }
@@ -257,7 +255,6 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
             setOnlineFriends(false);
         }
         const removeFriend = (userId) => {
-            console.log(userId);
             const index = friends.findIndex((user) => user.id === userId)
             setFriends(prev => prev.toSpliced(index, 1))
             setOnlineFriends(false);
@@ -287,7 +284,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 <p>Group Edited Successfully</p>
             </Popup>
             <section className={styles.profile}>
-                {loading || !profile ?
+                {loading ?
                 <>
                 <section className={styles.conversationsLoading}>
                     <LoaderCircle  size={40} color='white' className={styles.loading}/>
@@ -296,7 +293,14 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     setEdit(false);
                     setProfileID(null)
                     }}><X size={38} color='white'/></button>
-                </> :
+                </> : loadingError || !profile ?       
+                <section className={styles.conversationsLoading}>
+                    <p style={{fontSize: '1.1rem', fontWeight: 'bold', textAlign: 'center'}}>An Error has Occured, please try again later</p>
+                    <button className={styles.close} onClick={() => {
+                    setEdit(false);
+                    setProfileID(null)
+                    }}><X size={38} color='white'/></button>
+                </section> :
                 <>
                 <div className={styles.top}>
                     <img src={profile.picture_url || '/images/no-profile-pic.jpg' } alt={`${profile.first_name} ${profile.last_name} profile picture`}></img>
@@ -318,9 +322,9 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                         <label htmlFor="picture" hidden>Group picture</label>
                         <input type="file" id='picture' onChange={handleImageInput} />
                         <label htmlFor="first_name" hidden></label>
-                        <input type="text" id='first_name' value={firstName} placeholder='First Name' onChange={(e) => setFirstName(e.target.value)} />
+                        <input type="text" id='first_name' value={firstName} required minLength={2} maxLength={20} placeholder='First Name' onChange={(e) => setFirstName(e.target.value)} />
                         <label htmlFor="last_name" hidden></label>
-                        <input type="text" id='last_name' value={lastName} placeholder='Last Name' onChange={(e) => setLastName(e.target.value)} />
+                        <input type="text" id='last_name' value={lastName} required minLength={2} maxLength={20}  placeholder='Last Name' onChange={(e) => setLastName(e.target.value)} />
                         <div>
                             <button className={styles.edit} disabled={editingProfile}>{editingProfile ? <LoaderCircle  size={28} color='white' className={styles.loading}/> : 'Submit'}</button>
                             <button type='button' className={styles.cancel} disabled={editingProfile} onClick={() => setEdit(false)}>Cancel</button>
@@ -337,7 +341,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                     profile.bio ? <p className={styles.bio}>{profile.bio}</p> : <p className={styles.bio} style={{textAlign: 'center'}}>User has no bio</p> : 
                     <>
                     <label htmlFor="bio" hidden></label>
-                    <textarea type="text" id='bio' value={bio || ''} placeholder='Bio' onChange={(e) => setBio(e.target.value)}></textarea>
+                    <textarea type="text" id='bio' value={bio || ''} maxLength={300} placeholder='Bio' onChange={(e) => setBio(e.target.value)}></textarea>
                     </>
                     }
                     <p className={styles.date}>Join Date: {profile.joinDate}</p>

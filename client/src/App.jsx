@@ -18,16 +18,18 @@ function App() {
   const [socketOn, setSocket] = useState(false)
   const navigate = useNavigate();
   const logout = useCallback(async() => {
-    console.log('logout called!')
     try {
       const request = await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
         method: 'POST',
         credentials: 'include'
       })
-      const response = await request.json();
-      console.log(response);
+      if(!request.ok) {
+        const error = new Error('An error has occured, please try again later')
+        throw error;
+      }
+    // eslint-disable-next-line no-unused-vars
     } catch(err) {
-      console.log(err)
+      navigate('/login')
     } finally {
       token.current = null;
       setUser(null)
@@ -43,7 +45,6 @@ function App() {
         credentials: 'include'
       })
       const response = await request.json();
-      console.log(response);
       if(response.message === 'jwt expired') {
         const error = new Error('Please login in')
         throw error
@@ -56,17 +57,16 @@ function App() {
         token.current = response.accessToken;
         setAuthentication(true);
         clearTimeout(timeoutRef.current);
-        timeoutRef.current = setTimeout(fetchToken,  1000 * 60 * 4);
+        timeoutRef.current = setTimeout(fetchToken,  1000 * 60 * 14); // 14 minutes
       }
+    // eslint-disable-next-line no-unused-vars
     } catch(err) {
-      console.log('refresh error');
       setAuthentication(prev => {
         if(prev) {
           logout();
         }
         return false;
       })
-      console.log(err);
     }
   }, [logout])
 
@@ -83,9 +83,6 @@ function App() {
           userId: user.id
         }
       });
-      socket.current.on("connect", () => {
-        console.log("Connected:", socket.current.id);
-      });
       setSocket(true)
     }
     return () => socket.current && socket.current.disconnect()
@@ -100,12 +97,15 @@ function App() {
             'Authorization': `Bearer ${token.current}`
           }
         })
+        if(!request.ok) {
+          const error = new Error('An error has occured, please try again later')
+          throw error;
+        }
         const response = await request.json();
-        console.log(response);
         setUser(response.user);
         setFetched(true)
+      // eslint-disable-next-line no-unused-vars
       } catch(err) {
-        console.log(err)
         setFetched(false)
       }
     }

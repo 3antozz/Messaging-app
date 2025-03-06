@@ -68,6 +68,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
     const fileRef = useRef(null);
     const fileDivRef = useRef(null);
     const [loading, setLoading] = useState(false)
+    const [loadingError, setLoadingError] = useState(false)
     const [uploadError, setUploadError] = useState(false)
     const [isUploading, setUploading] = useState(false)
     const conversation = useMemo(() => {
@@ -77,32 +78,40 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
     useEffect(() => {
         const fetchConversation = async() => {
             setLoading(true)
-            console.log('conversation fetched!');
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/${conversationID}`, {
                     headers: {
                         'Authorization': `Bearer ${token.current}`
                     }
                 })
+                if(!request.ok) {
+                    const error = new Error('An error has occured, please try again later')
+                    throw error;
+                  }
                 const response = await request.json();
-                console.log(response);
                 setConversations((prev) => ({...prev, [response.conversation.id]: response.conversation}))
+                setLoadingError(false)
+            // eslint-disable-next-line no-unused-vars
             } catch(err) {
-                console.log(err)
+                setLoadingError(true);
             } finally {
                 setLoading(false)
             }
         }
         const fetchPublicGroup = async () => {
             setLoading(true)
-            console.log('conversation fetched!');
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/public`)
                 const response = await request.json();
-                console.log(response);
+                if(!request.ok) {
+                    const error = new Error('An error has occured, please try again later')
+                    throw error;
+                }
                 setConversations((prev) => ({...prev, [response.conversation.id]: response.conversation}))
+                setLoadingError(false)
+            // eslint-disable-next-line no-unused-vars
             } catch(err) {
-                console.log(err)
+                setLoadingError(true);
             } finally {
                 setLoading(false)
             }
@@ -199,7 +208,6 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                     const error = new Error(response.message)
                     throw error;
                 }
-                console.log(response);
                 socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput, url: response.url, date: new Date()});
                 setMessageInput('');
                 setUploadError(false)
@@ -208,7 +216,6 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                     fileDivRef.current.style.display = 'none'
                 }
             } catch (error) {
-                console.log(error)
                 setUploadError(error.message)
             } finally {
                 setUploading(false)
@@ -222,8 +229,9 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 if(fileDivRef.current) {
                     fileDivRef.current.style.display = 'none'
                 }
+            // eslint-disable-next-line no-unused-vars
             } catch (error) {
-                console.log(error)
+                console.log('Error')
             }
         }
         const container = scrollRef.current;
@@ -234,7 +242,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             if (container) {
                 container.scrollTop = container.scrollHeight;
             }
-        }, 300)
+        }, 150)
     }
 
     const handleImageClick = (e) => {
@@ -280,7 +288,9 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 <button></button>
             </div>
             <div className={`${styles.mainLoading} ${styles.main}`}>
-                <LoaderCircle  size={40} color='white' className={styles.loading}/>
+                {loading && <LoaderCircle  size={40} color='white' className={styles.loading}/>}
+                {loadingError && <p style={{fontSize: '1.1rem', fontWeight: 'bold'}}>An Error has Occured, please try again later</p>}
+
             </div>
             <div className={styles.forms}>
                 <form className={styles.messageDiv}>
@@ -352,7 +362,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 <form onSubmit={handleMessageSend}>
                     <div className={styles.messageDiv}>
                         <label htmlFor="message" hidden></label>
-                        <input name="message" id="message" onChange={(e) => setMessageInput(e.target.value)} placeholder='Send a message...' value={messageInput} ref={inputRef}></input>
+                        <input name="message" id="message" maxLength={200} onChange={(e) => setMessageInput(e.target.value)} placeholder='Send a message...' value={messageInput} ref={inputRef}></input>
                         <button><SendHorizontal size={30} color='white' /></button>
                         <label htmlFor="image" disabled={isUploading} className={styles.label}>{!isUploading ? <Image color='white' size={35} /> : <LoaderCircle  size={40} color='white' className={styles.loading}/>}</label>
                     </div>

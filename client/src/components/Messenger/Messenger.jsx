@@ -39,7 +39,6 @@ export default function Messenger () {
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/public`)
                 const response = await request.json();
-                console.log(response);
                 if(!request.ok) {
                     const error = new Error('An error has occured, please try again later')
                     throw error;
@@ -47,8 +46,9 @@ export default function Messenger () {
                 if(!ignore) {
                     setConversations([response.group])
                 }
+            // eslint-disable-next-line no-unused-vars
             } catch(err) {
-                console.log(err)
+                console.log('Error')
             }
         }
         if(user) {
@@ -69,7 +69,6 @@ export default function Messenger () {
                     }
                 })
                 const response = await request.json();
-                console.log(response);
                 if(!request.ok) {
                     const error = new Error('An error has occured, please try again later')
                     throw error;
@@ -77,8 +76,8 @@ export default function Messenger () {
                 setUsers(response.users)
                 setError(false)
                 setFetched(true)
+            // eslint-disable-next-line no-unused-vars
             } catch(err) {
-                console.log(err)
                 setError(true)
             } finally {
                 setUsersLoading(false)
@@ -122,7 +121,6 @@ export default function Messenger () {
         };
     }, [socket, conversations, setConversations, socketOn])
     const createConversation = async(userId) => {
-        console.log('creating convo');
         setLoadingConversation(userId)
         try {
             const request = await fetch(`${import.meta.env.VITE_API_URL}/conversations/${userId}`, {
@@ -136,13 +134,11 @@ export default function Messenger () {
                 const error = new Error('An error has occured, please try again later')
                 throw error;
             }
-            console.log(response);
             const conversation = {...response.conversation, participants: [response.conversation.participants[0]]}
             setConversations((prev) => ([...prev, conversation]))
             setConversationID(response.conversation.id);
             setConnectedToRooms(false)
         } catch(err) {
-            console.log(err)
             setConversationError(err.message)
             setTimeout(() => setConversationError(false), 3500)
         } finally {

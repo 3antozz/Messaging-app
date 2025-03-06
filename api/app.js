@@ -20,9 +20,9 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:5173"],
+        origin: ["http://localhost:5173", process.env.FRONTEND_URL],
         allowedHeaders: ['Content-Type', 'Authorization'],
-        credentials: true
+        credentials: true,
     },
     
 });
@@ -56,7 +56,6 @@ const onlineUsers = new Set();
 
 
 io.on('connection', (socket) => {
-    console.log('a user connected');
     onlineUsers.add(+socket.handshake.query.userId);
     socket.broadcast.emit('user connected', +socket.handshake.query.userId)
     socket.on('chat message', async(msgData) => {
@@ -72,7 +71,6 @@ io.on('connection', (socket) => {
         }
     });
     socket.on('join rooms', (conversationIds) => {
-        console.log('join room called')
         socket.join([`user${socket.handshake.query.userId}`, ...conversationIds]);
     })
     socket.on('online friends', (friendIds) => {
@@ -86,7 +84,6 @@ io.on('connection', (socket) => {
         socket.emit('online friends', onlineIds)
     })
     socket.on("disconnect", () => {
-        console.log("User disconnected:", socket.id);
         onlineUsers.delete(+socket.handshake.query.userId);
         socket.broadcast.emit('user disconnected', +socket.handshake.query.userId)
     });

@@ -31,6 +31,8 @@ export default function Login () {
             const response = await request.json();
             if(!request.ok) {
                 const error = new Error(response.message || 'Invalid Request')
+                console.log(typeof response)
+                console.log(response)
                 error.errors = response.errors;
                 throw error
             }
@@ -43,14 +45,12 @@ export default function Login () {
             setErrors(null)
             token.current = response.accessToken;
             setAuthentication(true)
-            timeoutRef.current = setTimeout(fetchToken, 1000 * 60 * 4);
-            console.log(response)
+            timeoutRef.current = setTimeout(fetchToken, 1000 * 60 * 14); // 14 minutes
             setTimeout(() => {
                 navigate('/')
                 setLoading(false)
             }, 3000)
         } catch(err) {
-            console.log(err)
             if(err.errors) {
                 setErrors(err.errors)
             } else {
@@ -74,11 +74,11 @@ export default function Login () {
             }
             <div className={styles.input}>
                 <label htmlFor="username" hidden>Username</label>
-                <input type="text" id="username" value={username} placeholder="Username" onChange={(e) => setUsername(e.target.value)}  />
+                <input type="text" id="username" required value={username} placeholder="Username" onChange={(e) => setUsername(e.target.value)}  />
             </div>
             <div>
                 <label htmlFor="password" hidden>Password</label>
-                <input type="password" id="password" value={password} placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
+                <input type="password" id="password" required value={password} placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
             </div>
             <button disabled={success ? true : loading ? true : false}>{loading ? <LoaderCircle size={40} color='white' className={styles.loading}/> : 'Log in'}</button>
             <div>

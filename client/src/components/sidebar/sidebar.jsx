@@ -106,7 +106,6 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
 
     useEffect(() => {
         const addNewGroup = (conversation) => {
-            console.log(conversation);
             setConversations((prev) => ([conversation, ...prev]))
             setConnectedToRooms(false)
         }
@@ -124,7 +123,6 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
     useEffect(() => {
         const addNewConversation = (convo) => {
             const conversation = JSON.parse(convo);
-            console.log(conversation);
             const conver = {...conversation, participants: [conversation.participants[1]]}
             setConversations((prev) => ([conver, ...prev]))
             setConnectedToRooms(false)
@@ -220,7 +218,6 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                 body: JSON.stringify({name: groupName})
             })
             const response = await request.json();
-            console.log(response);
             if(!request.ok) {
                 const error = new Error(response.message || 'Invalid Request')
                 error.errors = response.errors;
@@ -234,14 +231,13 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             setGroupCreation(false)
             setConnectedToRooms(false);
         } catch(err) {
-            console.log(err)
             if(err.errors) {
                 setGroupError(err.errors)
             } else {
                 setGroupError([err.message])
             }
         } finally {
-            setCreatingGroup(true)
+            setCreatingGroup(false)
         }
     }
     if(!user) {
@@ -340,7 +336,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                     </ul>
                     }
                     <label htmlFor="group" hidden>Group name: </label>
-                    <input type="text" id='group' placeholder='Group Name' value={groupName} onChange={(e) => setGroupName(e.target.value)}/>
+                    <input type="text" id='group' placeholder='Group Name' value={groupName} required minLength={2} maxLength={20} onChange={(e) => setGroupName(e.target.value)}/>
                     <div className={styles.formButtons}>
                         <button disabled={creatingGroup} >{creatingGroup ? <LoaderCircle  size={28} color='white' className={styles.loading}/> : 'Create'}</button>
                         <button disabled={creatingGroup} type='button' className={styles.close} onClick={() => {
@@ -393,7 +389,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                         </li>
                         )
                     })
-                    : usersLoading ? <p>Loading</p> : error ? <p>An Error has occured, please try again later</p> :  
+                    : usersLoading ? <p>Loading</p> : error ? <p style={{fontSize: '1.1rem', fontWeight: 'bold', textAlign: 'center'}}>An Error has occured, please try again later</p> :  
                     <>
                     {filteredArray.map((user) => {
                         return (

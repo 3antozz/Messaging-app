@@ -7,12 +7,13 @@ import { X, UserX, LoaderCircle } from 'lucide-react';
 
 const Group = memo(function Group ({groupID, setGroupID, conversations, setConversations}) {
     const { user, token, socket, socketOn } = useContext(AuthContext)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [edit, setEdit] = useState(false);
     const [groups, setGroups] = useState({});
     const [groupName, setGroupName] = useState('');
     const [image, setImage] = useState(null);
     const [refreshGroupID, setRefreshGroup] = useState(null)
+    const [loadingError, setLoadingError] = useState(false)
     const [groupError, setGroupError] = useState(null);
     const [groupSuccess, setGroupSuccess] = useState(false)
     const [memberRemoved, setMemberRemoved] = useState(false)
@@ -26,18 +27,22 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
     useEffect(() => {
         const fetchGroup = async() => {
             setLoading(true)
-            console.log('group fetched!');
             try {
                 const request = await fetch(`${import.meta.env.VITE_API_URL}/groups/${groupID}`, {
                     headers: {
                         'Authorization': `Bearer ${token.current}`
                     }
                 })
+                if(!request.ok) {
+                    const error = new Error('An error has occured, please try again later')
+                    throw error;
+                }
                 const response = await request.json();
-                console.log(response);
                 setGroups((prev) => ({...prev, [response.group.id]: response.group}))
-            } catch(err) {
-                console.log(err)
+                setLoadingError(false)
+            // eslint-disable-next-line no-unused-vars
+            } catch (err) {
+                setLoadingError(true);
             } finally {
                 setLoading(false)
             }
@@ -92,12 +97,10 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
                     'Authorization': `Bearer ${token.current}`,
                 },
             })
-            const response = await request.json();
             if(!request.ok) {
                 const error = new Error('An error has occured, please try again later')
                 throw error;
             }
-            console.log(response);
             const index = conversations.findIndex((conv) => conv.id === groupID)
             setConversations(prev => {
                 const convos = prev.slice();
@@ -106,8 +109,8 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
                 return convos
             })
             setMemberRemoved(true)
+        // eslint-disable-next-line no-unused-vars
         } catch(err) {
-            console.log(err)
             setMemberRemoved('error')
         } finally {
             setRemovingMember(0)
@@ -142,7 +145,6 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
                     error.errors = response.errors;
                     throw error
                 }
-                console.log(response);
                 setGroupSuccess(true)
                 setTimeout(() => setGroupSuccess(false), 3500)
                 setGroupError(null)
@@ -150,7 +152,6 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
                 setImage(null)
                 setGroupName('');
             } catch (err) {
-                console.log(err)
                 if(err.errors) {
                     setGroupError(err.errors)
                 } else {
@@ -177,7 +178,6 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
                     error.errors = response.errors;
                     throw error
                 }
-                console.log(response);
                 setGroupSuccess(true)
                 setTimeout(() => setGroupSuccess(false), 3500)
                 setGroupError(null)
@@ -185,7 +185,6 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
                 setImage(null)
                 setGroupName('');
             } catch (err) {
-                console.log(err)
                 if(err.errors) {
                     setGroupError(err.errors)
                 } else {
@@ -211,13 +210,17 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
                 <p>Group Edited Successfully</p>
             </Popup>
             <section className={styles.group}>
-                {loading || !group ? 
+                {loading ? 
                 <>
                 <section className={styles.conversationsLoading}>
                     <LoaderCircle  size={40} color='white' className={styles.loading}/>
                 </section>
                 <button className={styles.close} onClick={() => setGroupID(null)}><X size={38} color='white'/></button>
-                </> :
+                </> : loadingError || !group ? 
+                <section className={styles.conversationsLoading}>
+                    <p style={{fontSize: '1.1rem', fontWeight: 'bold', textAlign: 'center'}}>An Error has Occured, please try again later</p>
+                    <button className={styles.close} onClick={() => setGroupID(null)}><X size={38} color='white'/></button>
+                </section> :
                 <>
                 <div className={styles.top}>
                     {!edit ? 
@@ -238,7 +241,7 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
                         <label htmlFor="picture" hidden>Group picture</label>
                         <input type="file" id='picture' onChange={handleImageInput} />
                         <label htmlFor="name" hidden>Group name</label>
-                        <input type="text" id='name' value={groupName} placeholder='Group name' onChange={(e) => setGroupName(e.target.value)} />
+                        <input type="text" id='name' value={groupName} required minLength={3} maxLength={20} placeholder='Group name' onChange={(e) => setGroupName(e.target.value)} />
                         <div>
                             <button className={styles.confirm} disabled={editing}>{editing ? <LoaderCircle  size={28} color='white' className={styles.loading}/> : 'Submit'}</button>
                             <button type='button' className={styles.cancel} disabled={editing} onClick={() => setEdit(false)}>Cancel</button>

@@ -14,24 +14,3 @@ const prisma = require('./client');
     });
     return;
 })();
-
-
-// async function everyone () {
-//     const users = await prisma.user.findMany();
-//     for(const user of users) {
-//         await prisma.user.update({
-//             where: {
-//                 id: user.id
-//             },
-//             data: {
-//                 conversations: {
-//                     connect: {
-//                         identifier: "public_group",
-//                     }
-//                 }
-//             }
-//         })
-//     }
-// }
-
-// everyone();

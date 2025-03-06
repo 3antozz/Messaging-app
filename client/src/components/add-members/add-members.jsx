@@ -25,7 +25,6 @@ const Members = memo(function Members ({addMembers, setMembers, friends, users, 
                 const error = new Error('An error has occured, please try again later')
                 throw error;
             }
-            console.log(response);
             setConversations((prev) => {
                 const newConv = prev.slice();
                 const index = newConv.findIndex(group => group.id === response.group.id)
@@ -33,8 +32,8 @@ const Members = memo(function Members ({addMembers, setMembers, friends, users, 
                 return newConv
             })
             setMemberAdded(true);
+        // eslint-disable-next-line no-unused-vars
         } catch(err) {
-            console.log(err)
             setMemberAdded('error');
         } finally {
             setAddingMember(0);
