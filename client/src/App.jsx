@@ -5,6 +5,7 @@ import AuthLayout from './components/auth/layout.jsx';
 import Login from './components/auth/login.jsx';
 import Register from './components/auth/register.jsx';
 import Messenger from './components/Messenger/Messenger.jsx';
+import ErrorPage from './components/error/Error.jsx'
 import { AuthContext } from './contexts.js';
 import { io } from "socket.io-client";
 
@@ -125,6 +126,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
             </Route>
+            <Route path="*" element={<ErrorPage />} />
         </Routes>
     </AuthContext.Provider>
   )
