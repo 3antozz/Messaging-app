@@ -281,7 +281,7 @@ const Profile = memo(function Profile ({userId, setProfileID, friends, setFriend
                 <p>{friendRemoved === 'error' ? 'An error has Occured, please try again later' : 'Friend Removed'}</p>
             </Popup>
             <Popup shouldRender={profileSuccess} close={setProfileSuccess} borderColor='#00d846'>
-                <p>Group Edited Successfully</p>
+                <p>Profile Edited Successfully</p>
             </Popup>
             <section className={styles.profile}>
                 {loading ?
