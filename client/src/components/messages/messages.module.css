@@ -317,7 +317,7 @@
     }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 800px) {
     .messenger {
         height: 600px;
         flex: auto;

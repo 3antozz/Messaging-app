@@ -5,7 +5,7 @@
 
 .navButtons {
     flex: 0.5;
-    min-width: 160px;
+    /* min-width: 160px; */
     display: flex;
     flex-direction: column;
 }
@@ -327,8 +327,31 @@ nav {
         transform: rotate(1turn);
     }
 }
+@media (min-width: 800px) AND (max-width: 1000px) {
+    nav > button > p, nav > a > p {
+        display: none;
+    }
+    .navButtons {
+        flex: 0 1 auto;
+    }
+    nav {
+        align-items: center;
+    }
+    /* nav > button > svg, nav > a > svg {
+        width: 25px;
+    } */
+    .you a h3 {
+        display: none;
+    }
+    .you a img {
+        width: 2.8rem;
+    }
+    .you {
+        padding: 0.8rem 0.2rem;
+    }
+}
 
-@media (max-width: 1000px) {
+@media (max-width: 800px) {
     .navButtons {
         flex-direction: row;
         align-items: center;
@@ -337,6 +360,10 @@ nav {
         flex-direction: row;
         justify-content: center;
         gap: 2vw;
+    }
+
+    nav > button > svg, nav > a > svg {
+        width: 25px;
     }
 
     nav > *:last-child {
@@ -380,13 +407,10 @@ nav {
     nav > button > p, nav > a > p {
         display: none;
     }
-    nav > button > svg, nav > a > svg {
-        width: 25px;
-    }
-    .you button h3 {
+    .you a h3 {
         display: none;
     }
-    .you button img {
+    .you a img {
         width: 2.8rem;
     }
     .you {

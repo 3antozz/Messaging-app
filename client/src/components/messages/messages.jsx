@@ -312,7 +312,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 <ul onClick={handleImageClick} style={{height: conversation.messages.length === 0 ? '100%' : null}}>
                 {conversation.messages.length === 0 ?
                 <div className={styles.empty}>
-                    <p>Start this conversation!</p>
+                    <p>Send a message to start this conversation</p>
                 </div>
                 :
                 conversation.messages.map((message, index) => 
