@@ -12,6 +12,7 @@ import Members from '../add-members/add-members'
 
 export default function Messenger () {
     const { user, token, socket, socketOn } = useContext(AuthContext);
+    const [userSet , setUserSet] = useState(false);
     const [conversationID, setConversationID] = useState(null);
     const [friends, setFriends] = useState([]);
     const [onlineFriends, setOnlineFriends] = useState(false);
@@ -51,14 +52,15 @@ export default function Messenger () {
                 console.log('Error')
             }
         }
-        if(user) {
+        if(user && !userSet) {
             setFriends(user.friends)
             setConversations(user.conversations)
+            setUserSet(true)
         } else {
             fetchPublicGroup();
         }
         return () => ignore = true
-    }, [user])
+    }, [user, userSet])
     useEffect(() => {
         const fetchUsers = async() => {
             setUsersLoading(true)
