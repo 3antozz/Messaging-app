@@ -177,7 +177,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             }
         }
         const listener = socket.current;
-        if(socket.current) {
+        if(socketOn) {
             socket.current.on('chat message', handleIncomingMessage)
         }
         return () => {
@@ -185,7 +185,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                 listener.off('chat message', handleIncomingMessage);
             }
         };
-    }, [conversations, socket])
+    }, [conversations, socket, socketOn])
     const handleMessageSend = async(e) => {
         e.preventDefault();
         if(!messageInput && !image) {
