@@ -86,7 +86,6 @@ function App() {
       });
       setSocket(true)
     }
-    return () => socket.current && socket.current.disconnect()
   }, [isAuthenticated, socketOn, user])
 
 
