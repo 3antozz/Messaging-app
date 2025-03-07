@@ -56,7 +56,7 @@ export default function Messenger () {
             setFriends(user.friends)
             setConversations(user.conversations)
             setUserSet(true)
-        } else {
+        } else if (!user && !userSet) {
             fetchPublicGroup();
         }
         return () => ignore = true
