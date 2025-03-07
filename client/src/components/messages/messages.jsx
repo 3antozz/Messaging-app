@@ -220,8 +220,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             } finally {
                 setUploading(false)
             }
-        }
-        if(messageInput && !image) {
+        } else if(messageInput && !image) {
             try {
                 socket.current.emit('chat message', {senderId: user.id, convoId: conversationID, message: messageInput, url: null, date: new Date()});
                 setMessageInput('');
@@ -242,7 +241,7 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             if (container) {
                 container.scrollTop = container.scrollHeight;
             }
-        }, 150)
+        }, 250)
     }
 
     const handleImageClick = (e) => {

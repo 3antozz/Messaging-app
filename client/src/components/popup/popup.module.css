@@ -1,5 +1,5 @@
 .container {
-    position: absolute;
+    position: fixed;
     top: 5%;
     left: 50%;
     transform: translateX(-50%);
@@ -18,8 +18,8 @@
 
 .container button {
     position: absolute;
-    top: -20%;
-    right: -5px;
+    top: -12px;
+    right: -6px;
     border-radius: 50%;
     padding: 0.1rem;
     border: none;

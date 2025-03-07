@@ -28,14 +28,17 @@ function App() {
         const error = new Error('An error has occured, please try again later')
         throw error;
       }
-    // eslint-disable-next-line no-unused-vars
     } catch(err) {
+      console.log(err);
       navigate('/login')
     } finally {
       token.current = null;
+      socket.current.disconnect();
+      socket.current = null;
       setUser(null)
       setFetched(false)
       setAuthentication(false);
+      setSocket(false);
       navigate('/login')
     }
   }, [navigate])
@@ -104,6 +107,7 @@ function App() {
         const response = await request.json();
         setUser(response.user);
         setFetched(true)
+        setAuthentication(true)
       // eslint-disable-next-line no-unused-vars
       } catch(err) {
         setFetched(false)

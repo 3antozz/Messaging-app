@@ -58,6 +58,7 @@ const onlineUsers = new Set();
 
 
 io.on('connection', (socket) => {
+    console.log('user connected')
     onlineUsers.add(+socket.handshake.query.userId);
     socket.broadcast.emit('user connected', +socket.handshake.query.userId)
     socket.on('chat message', async(msgData) => {
@@ -86,6 +87,7 @@ io.on('connection', (socket) => {
         socket.emit('online friends', onlineIds)
     })
     socket.on("disconnect", () => {
+        console.log('user disconnected')
         onlineUsers.delete(+socket.handshake.query.userId);
         socket.broadcast.emit('user disconnected', +socket.handshake.query.userId)
     });
@@ -110,7 +112,6 @@ app.use((req, res, next) => {
 
 // eslint-disable-next-line no-unused-vars
 app.use((error, req, res, next) => {
-    console.log(error);
     console.error("Global error handler caught:", error);
     if (Array.isArray(error)) {
         return res.status((typeof(error.code) !== 'string' && error.code) || 500).json({
