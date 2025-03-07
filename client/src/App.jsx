@@ -78,7 +78,7 @@ function App() {
   }, [fetchToken])
 
   useEffect(() => {
-    if(user && isAuthenticated) {
+    if(user && isAuthenticated && !socketOn) {
       socket.current = io(`${import.meta.env.VITE_API_URL}`, {
         query: {
           userId: user.id
@@ -87,7 +87,7 @@ function App() {
       setSocket(true)
     }
     return () => socket.current && socket.current.disconnect()
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, socketOn, user])
 
 
   useEffect(() => {

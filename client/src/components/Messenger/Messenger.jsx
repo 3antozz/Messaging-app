@@ -172,9 +172,9 @@ export default function Messenger () {
             <Popup shouldRender={conversationError} close={setConversationError} borderColor='red'>
                 <p>An error has occured, please try again later</p>
             </Popup>
-            <Members addMembers={addMembers} setMembers={setMembers} friends={friends} users={users} groups={groups} groupID={conversationID} group={group} setConversations={setConversations} />
+            <Members addMembers={addMembers} setMembers={setMembers} friends={friends} users={users} groups={groups} groupID={conversationID} group={group} setConversations={setConversations} handleListClick={handleListClick} />
 
-            <Group groupID={groupID} setGroupID={setGroupID} conversations={conversations} setConversations={setConversations} />
+            <Group groupID={groupID} setGroupID={setGroupID} conversations={conversations} setConversations={setConversations} handleListClick={handleListClick} />
 
             <Image imageURL={imageURL} setImageURL={setImageURL} />
 

@@ -5,7 +5,7 @@ import Popup from "../popup/popup"
 import { AuthContext } from '../../contexts'
 import { X, UserPlus, LoaderCircle, Search } from 'lucide-react';
 
-const Members = memo(function Members ({addMembers, setMembers, friends, users, group, setConversations}) {
+const Members = memo(function Members ({addMembers, setMembers, friends, users, group, setConversations, handleListClick}) {
     const { token } = useContext(AuthContext)
     const [searchValue, setSearchValue] = useState('');
     const [addingMember, setAddingMember] = useState(0);
@@ -52,6 +52,8 @@ const Members = memo(function Members ({addMembers, setMembers, friends, users, 
             } else {
                 addMember(userId)
             }
+        } else {
+            handleListClick(e)
         }
     }
     if(searchValue) {
@@ -103,6 +105,7 @@ Members.propTypes = {
     friends: PropTypes.array.isRequired,
     users: PropTypes.array.isRequired,
     setConversations: PropTypes.func.isRequired,
+    handleListClick: PropTypes.func.isRequired,
 }
 
 export default Members;

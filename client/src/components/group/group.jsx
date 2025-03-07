@@ -5,7 +5,7 @@ import Popup from "../popup/popup"
 import { AuthContext } from '../../contexts'
 import { X, UserX, LoaderCircle } from 'lucide-react';
 
-const Group = memo(function Group ({groupID, setGroupID, conversations, setConversations}) {
+const Group = memo(function Group ({groupID, setGroupID, conversations, setConversations, handleListClick}) {
     const { user, token, socket, socketOn } = useContext(AuthContext)
     const [loading, setLoading] = useState(true)
     const [edit, setEdit] = useState(false);
@@ -85,6 +85,8 @@ const Group = memo(function Group ({groupID, setGroupID, conversations, setConve
         if (button && button.dataset.func === 'remove-member') {
             const userId = +button.id;
             removeMember(userId)
+        } else {
+            handleListClick(e)
         }
     }
 
@@ -282,6 +284,7 @@ Group.propTypes = {
     setGroupID: PropTypes.func.isRequired,
     conversations: PropTypes.array.isRequired,
     setConversations: PropTypes.func.isRequired,
+    handleListClick: PropTypes.func.isRequired,
 }
 
 export default Group;

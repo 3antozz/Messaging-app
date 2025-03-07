@@ -31,8 +31,6 @@ export default function Login () {
             const response = await request.json();
             if(!request.ok) {
                 const error = new Error(response.message || 'Invalid Request')
-                console.log(typeof response)
-                console.log(response)
                 error.errors = response.errors;
                 throw error
             }
