@@ -4,7 +4,7 @@ import Popup from "../popup/popup"
 import { AuthContext } from '../../contexts'
 import { Link } from 'react-router';
 import { useContext, useState, useMemo, memo, useEffect } from 'react';
-import { MessageSquare, LoaderCircle, Circle, MessageCircleMore, Handshake, Users, UserRoundSearch, LogOut, LogIn, Search } from 'lucide-react';
+import { Mail, LoaderCircle, Circle, MessageCircleMore, Handshake, Users, UserRoundSearch, LogOut, LogIn, Search } from 'lucide-react';
 
 const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFriends, setConversations, handleListClick, onlineFriends, setOnlineFriends, setConversationID, conversationID, users, usersLoading, error, connectedRooms, setConnectedToRooms, loadingConversation}) {
     const { user, token, socket, socketOn, logout } = useContext(AuthContext)
@@ -358,7 +358,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                                 <button id={friend.id} data-func="profile">{friend.first_name} {friend.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={friend.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== friend.id ? <MessageSquare size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
+                                <button id={friend.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== friend.id ? <Mail size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                             </div>
                         </li>
                     ) : view === 'Groups' ?
@@ -399,7 +399,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                                 <button id={user.id} data-func="profile">{user.first_name} {user.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={user.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== user.id ? <MessageSquare size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
+                                <button id={user.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== user.id ? <Mail size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                             </div>
                         </li>
                         )
