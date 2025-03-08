@@ -154,6 +154,10 @@
     max-width: 75%;
 }
 
+.friendButton > button:first-of-type {
+    flex-shrink: 0;
+}
+
 .messageImage {
     max-width: 100%;
     cursor: pointer;

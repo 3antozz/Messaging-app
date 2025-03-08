@@ -192,6 +192,7 @@ nav {
     font-size: 1.1rem;
     transition: transform 200ms ease;
     padding: 0;
+    text-align: left;
 }
 
 .friendButton > button:hover, .friendButton > div > button:hover {
@@ -199,6 +200,10 @@ nav {
     color: red;
     cursor: pointer;
     transform: scale(1.05);
+}
+
+.friendButton > button:first-of-type {
+    flex-shrink: 0;
 }
 
 .createGroup {
