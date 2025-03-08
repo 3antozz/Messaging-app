@@ -440,7 +440,7 @@ nav {
     }
     .conversations ul {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr) );
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     }
     .sidebar {
         max-height: 450px;
@@ -490,5 +490,8 @@ nav {
         right: 0;
         top: 10%;
         min-width: 13px;
+    }
+    .sidebar {
+        min-width: auto;
     }
 }
