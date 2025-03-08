@@ -2,16 +2,16 @@
 
 A full-stack messenger application designed to provide seamless communication.
 
-![App Interface](./client/public/signup.png)
+![App Interface](./client/public/showcase/interface.png)
 
 ## Signup page
 
-![Signup Page](./client/public/signup.png)
+![Signup Page](./client/public/showcase/sign-up.png)
 
 
 ## User Profile
 
-![User Profile](./client/public/signup.png)
+![User Profile](./client/public/showcase/interface.png)
 
 ## Features
 
