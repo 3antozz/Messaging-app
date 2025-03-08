@@ -11,7 +11,7 @@ A full-stack messenger application designed to provide seamless communication.
 
 ## User Profile
 
-![User Profile](./client/public/showcase/interface.png)
+![User Profile](./client/public/showcase/profile.png)
 
 ## Features
 
