@@ -152,6 +152,13 @@ export default function Messenger () {
         if (button && button.dataset.func === 'convo') {
             const id = +button.id;
             setConversationID(id)
+            setConversations(prev => {
+                const index = prev.findIndex(conversation => id === conversation.id);
+                const copy = prev.slice();
+                const convo = {...copy[index], notification: false}
+                copy[index] = convo;
+                return copy
+            })
         } else if (button && button.dataset.func === 'new-convo') {
             const userId = +button.id;
             const isExistant = conversations.findIndex(conversation => {

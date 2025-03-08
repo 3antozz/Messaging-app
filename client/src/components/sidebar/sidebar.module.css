@@ -5,7 +5,6 @@
 
 .navButtons {
     flex: 0.5;
-    /* min-width: 160px; */
     display: flex;
     flex-direction: column;
 }
@@ -68,6 +67,7 @@
 }
 
 nav > button, nav > a {
+    position: relative;
     font-size: 1.2rem;
     background-color: inherit;
     color: inherit;
@@ -96,6 +96,10 @@ nav > button svg {
 
 nav > button:hover, nav > a:hover {
     background-color: #ca3535 ;
+}
+
+nav > button:hover .notification2 {
+    fill: white;
 }
 
 nav > button:disabled {
@@ -167,6 +171,17 @@ nav {
     position: absolute;
     right: 0;
     bottom: 10%;
+    min-width: 13px;
+}
+
+.notification {
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.notification2 {
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 .friendButton > button, .friendButton > div > button{
@@ -347,9 +362,20 @@ nav {
         transform: rotate(1turn);
     }
 }
+@media (min-width: 1000px) {
+    .navButtons {
+        min-width: 170px;
+    }
+}
 @media (min-width: 800px) AND (max-width: 1000px) {
     nav > button > p, nav > a > p {
         display: none;
+    }
+    .notification2 {
+        position: absolute;
+        right: 0;
+        top: 10%;
+        min-width: 13px;
     }
     .navButtons {
         flex: 0 1 auto;
@@ -397,13 +423,16 @@ nav {
         margin-left: auto;
     }
 
+    .notification2 {
+        width: 15px;
+    }
+
     nav > *:first-child {
         margin-left: auto;
     }
     nav > button, nav > a {
         font-size: 1rem;
     }
-
     .conversations ul {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr) );
@@ -450,5 +479,11 @@ nav {
     }
     .you button {
         padding: 0.3rem 0.2rem;
+    }
+    .notification2 {
+        position: absolute;
+        right: 0;
+        top: 10%;
+        min-width: 13px;
     }
 }

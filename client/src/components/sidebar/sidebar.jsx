@@ -14,8 +14,18 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
     const [search, setSearch] = useState('')
     const [groupError, setGroupError] = useState(null);
     const [groupSuccess, setGroupSuccess] = useState(false)
+    const [messagesNotification, setMessagesNotification] = useState(false);
+    const [groupsNotification, setGroupsNotification] = useState(false);
     const [creatingGroup, setCreatingGroup] = useState(false)
-    const messages = useMemo(() => conversations.filter(conversation => conversation.messages.length > 0 && !conversation.isGroup), [conversations])
+    const messages = useMemo(() => conversations.filter(conversation => {
+        if(!conversation.isGroup && conversation.notification) {
+            setMessagesNotification(true)
+        }
+        if(conversation.isGroup && conversation.notification) {
+            setGroupsNotification(true)
+        }
+        return conversation.messages.length > 0 && !conversation.isGroup
+    }), [conversations])
     const sortedFriends = useMemo(() => friends.toSorted((friend1, friend2) => {
         if(friend1.isOnline && !friend2.isOnline) {
             return -1
@@ -178,7 +188,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             setConversations(prev => {
                 const index = prev.findIndex(conversation => msg.conversationId === conversation.id);
                 const copy = prev.slice();
-                const convo = {...copy[index], messages: [msg]}
+                const convo = {...copy[index], messages: [msg], notification: conversationID === copy[index].id ? false : true}
                 copy.splice(index, 1)
                 copy.unshift(convo);
                 return copy
@@ -193,11 +203,17 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                 listener.off('chat message', updateLastMessage);
             }
         };
-    }, [socket, conversations, setConversations, socketOn])
+    }, [socket, conversations, setConversations, socketOn, conversationID])
     const handleViews = (e) => {
         if (e.target.closest('button')) {
             setView(e.target.closest('button').textContent);
             setSearch('')
+            if(e.target.closest('button').textContent === 'Messages') {
+                setMessagesNotification(false)
+                setGroupsNotification(true)
+            } else if(e.target.closest('button').textContent === 'Groups') {
+                setGroupsNotification(false)
+            }
         } else {
             return;
         }
@@ -305,8 +321,8 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                 </button>
             </section>
             <nav onClick={handleViews}>
-                <button className={view === 'Messages' ? `${styles.selected}` : ''}><MessageCircleMore size={30}/><p>Messages</p></button>
-                <button className={view === 'Groups' ? `${styles.selected}` : ''}><Users size={30} /><p>Groups</p></button>
+                <button className={view === 'Messages' ? `${styles.selected}` : ''}><MessageCircleMore size={30}/><p>Messages</p>{messagesNotification && <Circle className={styles.notification2} strokeWidth={0} size={17} fill='#d61414'/>}</button>
+                <button className={view === 'Groups' ? `${styles.selected}` : ''}><Users size={30} /><p>Groups</p>{groupsNotification && <Circle className={styles.notification2} strokeWidth={0} size={17} fill='#d61414'/>}</button>
                 <button className={view === 'Friends' ? `${styles.selected}` : ''}><Handshake size={30} /><p>Friends</p></button>
                 <button className={view === 'Users' ? `${styles.selected}` : ''}><UserRoundSearch size={30} /><p>Users</p></button>
                 {!user ?
@@ -373,6 +389,9 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                                     <p>No messages yet</p>
                                     }
                                 </div>
+                                {group.notification &&
+                                <Circle className={styles.notification} strokeWidth={0} size={17} fill='#d61414'/>
+                                }
                             </button>
                         </li>
                     ) : view === 'Messages' ? 
@@ -385,6 +404,9 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                                     <p>{conversation.participants[0].first_name} {conversation.participants[0].last_name}</p>
                                     <p>{conversation.messages[0].senderId !== user.id ? `${conversation.messages[0].sender.first_name}: ` : 'You: '} {conversation.messages[0].content || 'Sent an image'}</p>
                                 </div>
+                                {conversation.notification &&
+                                <Circle className={styles.notification} strokeWidth={0} size={17} fill='#d61414'/>
+                                }
                             </button>
                         </li>
                         )
