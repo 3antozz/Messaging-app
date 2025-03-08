@@ -29,6 +29,7 @@ A full-stack messenger application designed to provide seamless communication.
 - React
 - Vite
 - Vercel
+- Socket.IO
 
 ### Backend
 
@@ -36,6 +37,7 @@ A full-stack messenger application designed to provide seamless communication.
 - Nodejs
 - PostgreSQL
 - Prisma ORM
+- Socket.IO
 - Cloudinary
 - Koyeb
 - Aiven
