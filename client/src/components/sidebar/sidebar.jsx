@@ -210,7 +210,6 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             setSearch('')
             if(e.target.closest('button').textContent === 'Messages') {
                 setMessagesNotification(false)
-                setGroupsNotification(true)
             } else if(e.target.closest('button').textContent === 'Groups') {
                 setGroupsNotification(false)
             }
