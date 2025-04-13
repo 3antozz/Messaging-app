@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import './App.css'
-import { Routes, Route, useNavigate } from "react-router";
+import { Routes, Route } from "react-router";
 import AuthLayout from './components/auth/layout.jsx';
 import Login from './components/auth/login.jsx';
 import Register from './components/auth/register.jsx';
@@ -17,7 +17,6 @@ function App() {
   const [isAuthenticated, setAuthentication] = useState(false)
   const socket = useRef(null)
   const [socketOn, setSocket] = useState(false)
-  const navigate = useNavigate();
   const logout = useCallback(async() => {
     try {
       const request = await fetch(`${import.meta.env.VITE_API_URL}/logout`, {
@@ -28,20 +27,11 @@ function App() {
         const error = new Error('An error has occured, please try again later')
         throw error;
       }
+      window.location.href = '/login';
     } catch(err) {
       console.log(err);
-      navigate('/login')
-    } finally {
-      token.current = null;
-      socket.current.disconnect();
-      socket.current = null;
-      setUser(null)
-      setFetched(false)
-      setAuthentication(false);
-      setSocket(false);
-      navigate('/login')
     }
-  }, [navigate])
+  }, [])
   const fetchToken = useCallback(async function fetchToken () {
     try {
       const request = await fetch(`${import.meta.env.VITE_API_URL}/refresh`, {

@@ -32,6 +32,8 @@
 }
 
 .brand > div {
+    width: 21rem;
+    margin: auto;
     display: flex;
     align-items: center;
     flex-direction: column;
@@ -40,6 +42,10 @@
 .brand h1 {
     font-family: 'Merienda';
     font-size: 5rem;
+    animation: 6s infinite text-type;
+    overflow: hidden;
+    white-space: nowrap;
+    align-self: flex-start;
 }
 
 .form > form {
@@ -180,6 +186,24 @@
     }
 }
 
+@keyframes text-type {
+    0% {
+        width: 0;
+    }
+    25% {
+        width: 100%;  
+    }
+    50% {
+        width: 100%;
+    }
+    75% {
+        width: 0;
+    }
+    100% {
+        width: 0;
+    }
+}
+
 
 @media (max-width: 800px) {
     .container {
@@ -191,6 +215,9 @@
         flex-direction: row;
         justify-content: center;
         gap: 1rem;
+    }
+    .brand h1 {
+        align-self: center;
     }
     .brand img {
         width: 6rem;
@@ -216,3 +243,4 @@
         width: 100%;
     }
 }
+

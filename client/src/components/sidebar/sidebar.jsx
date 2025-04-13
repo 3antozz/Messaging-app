@@ -290,7 +290,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                         <div className={styles.info}>
                             <p>{group.group_name}</p>
                             {group.messages[0] ?
-                            <p>{group.messages[0].sender.first_name} {group.messages[0].content || 'Sent an image'}</p> :
+                            <p>{group.messages[0].sender.first_name}: {group.messages[0].content || 'Sent an image'}</p> :
                             <p>No messages yet</p>
                             }
                         </div>
