@@ -1,6 +1,6 @@
 # Messenger App
 
-A full-stack messenger application designed to provide seamless communication.
+A full-stack messenger application designed to provide seamless messaging communication.
 
 ![App Interface](./client/public/showcase/interface.png)
 
