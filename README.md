@@ -50,8 +50,8 @@ This was one of the first FullStack projects I created, it's purpose was to tie 
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v16 or later recommended)
-- [npm](https://www.npmjs.com/) (comes with Node.js)
+- [Node.js](https://nodejs.org/)
+- [npm](https://www.npmjs.com/)
 - [PostgreSQL](https://www.postgresql.org/) (ensure your database is running)
 - Basic knowledge of using a terminal (steps are beginner-friendly)
 
