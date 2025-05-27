@@ -67,13 +67,13 @@ cd api
 npm install
 ```
 
-**Create a .env file in the api/ directory (based on .env.example) and fill in the required environment variables such as:** 
+**1- Create a .env file in the api/ directory (based on .env.example) and fill in the required environment variables such as:** 
 
 * Database connection URL
 * JWT secrets
 * Cloudinary credentials
 
-Start the backend server:
+2- Start the backend server:
 
 ```bash
 npm start
@@ -83,13 +83,13 @@ npm start
 
 ### 3. Setup the Frontend (Client)
 
-Open a new terminal window or tab:
+1- Open a new terminal window or tab:
 ```bash
 cd client
 npm install
 npm run dev
 ```
-**Rename the .env.example file to .env in the client/ directory**
+**2- Rename the .env.example file to .env in the client/ directory**
 
 > [!NOTE]
 > The frontend will run on http://localhost:5173 by default.
