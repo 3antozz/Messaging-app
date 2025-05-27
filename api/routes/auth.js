@@ -63,7 +63,7 @@ router.post('/login', validateLogin, asyncHandler(async(req, res, next) => {
         username: user.username
     }
     const refreshToken = jwt.sign(payload, process.env.REFRESH_TOKEN_KEY, { expiresIn: "7d"})
-    res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, sameSite: 'none', maxAge: 1000 * 60 * 60 * 24 * 7}) // 7 days
+    res.cookie('jwt', refreshToken, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : false, maxAge: 1000 * 60 * 60 * 24 * 7}) // 7 days
     const accessToken = jwt.sign(payload, process.env.ACCESS_TOKEN_KEY, { expiresIn: 900})
     return res.json({accessToken})
 }))
@@ -97,7 +97,7 @@ router.post('/logout', asyncHandler((req, res) => {
         error.code = 401;
         throw error;
     }
-    res.clearCookie('jwt', { httpOnly: true, secure: true, sameSite: 'none' })
+    res.clearCookie('jwt', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : false })
     res.json({done: true})
 }))
 

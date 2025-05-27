@@ -9,7 +9,6 @@ const messagesRouter = require('./routes/messages')
 const usersRouter = require('./routes/users')
 const messagesController = require('./controllers/messagesController')
 const groupsRouter = require('./routes/groups')
-const fn = require('./routes/fn')
 const { createServer } = require('node:http');
 const { Server } = require('socket.io');
 require('./db/populate');
@@ -64,8 +63,7 @@ io.on('connection', (socket) => {
         try {
             const message = await messagesController.postMessageSocket(+msgData.convoId, msgData.message, +msgData.senderId, msgData.date, msgData.url)
             if (message) {
-                const formattedMessage = {...message, date: fn.formatDate(message.date)}
-                io.to(`convo${msgData.convoId}`).emit('chat message', formattedMessage);
+                io.to(`convo${msgData.convoId}`).emit('chat message', message);
             }
         } catch(err) {
             console.log(err);

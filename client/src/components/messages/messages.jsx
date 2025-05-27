@@ -4,6 +4,7 @@ import { useContext, useEffect, useState, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useInView } from 'react-intersection-observer';
 import { SendHorizontal, LoaderCircle, Image, X, UserPlus } from 'lucide-react';
+import formatDate from '../../utils';
 
 
 const Message = ({message, index, conversation, user, root}) => {
@@ -43,7 +44,7 @@ const Message = ({message, index, conversation, user, root}) => {
                 { shouldShowSenderName && <p className={styles.sender}>{message.sender.first_name}</p>}
                 {message.picture_url && <img loading='lazy' style={{backgroundColor: '#ffffff00'}} src={message.picture_url} data-func='img' className={!isUserMessage ? `${styles.messageImage} ${styles.otherMessage}` : `${styles.messageImage} ${styles.yourMessage}`}/>}
                 { message.content && <p className={!isUserMessage ? `${styles.messageContent} ${styles.otherMessage}` : `${styles.messageContent} ${styles.yourMessage}`}>{message.content}</p>}
-                <p className={styles.messageDate}>{message.date}</p>
+                <p className={styles.messageDate}>{formatDate(message.date)}</p>
             </div>
         </div> : <div  style={{ height: message.picture_url ? "100px" : '40px' }} className={`${styles.messageContent} ${styles.yourDiv}`}></div>}
     </li>

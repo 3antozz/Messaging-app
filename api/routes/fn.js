@@ -36,10 +36,6 @@ exports.isAuthenticated = (req, res, next) => {
     })
 }
 
-exports.formatDate = (date) => {
-    return format(new Date(date), 'PP, H:mm');
-}
-
 exports.formatDateWithoutTime = (date) => {
     return format(new Date(date), 'PP');
 }

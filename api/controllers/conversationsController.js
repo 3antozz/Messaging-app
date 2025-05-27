@@ -1,5 +1,4 @@
 const db = require('../db/queries');
-const fn = require('../routes/fn');
 
 exports.createConversation = async(req, res) => {
     const user1 = +req.user.id;
@@ -11,16 +10,12 @@ exports.createConversation = async(req, res) => {
 }
 
 exports.getPublicConversation = async(req, res) => {
-    const convo = await db.getPublicConversation();
-    const formattedMessages = convo.messages.map((message) => ({ ...message, date: fn.formatDate(message.date)}))
-    const conversation = { ...convo, messages: formattedMessages}
+    const conversation = await db.getPublicConversation();
     res.json({conversation})
 }
 
 exports.getConversation = async(req, res) => {
     const convoId = +req.params.convoId;
-    const convo = await db.getConversation(req.user.id, convoId);
-    const formattedMessages = convo.messages.map((message) => ({ ...message, date: fn.formatDate(message.date)}))
-    const newConvo = { ...convo, messages: formattedMessages}
-    return res.json({conversation: newConvo});
+    const conversation = await db.getConversation(req.user.id, convoId);
+    return res.json({conversation});
 }
