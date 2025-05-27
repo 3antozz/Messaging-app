@@ -21,6 +21,10 @@ A full-stack messenger application designed to provide seamless communication.
 - Group creation and management.
 - User connection and interaction.
 
+## Why build this project ?
+
+This was one of the first FullStack projects I created, it's purpose was to tie everything I learned together in a relatively complex project. A messaging app is a common application in the web.
+
 ## Technologies Used
 
 ### Frontend
