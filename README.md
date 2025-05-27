@@ -23,7 +23,7 @@ A full-stack messenger application designed to provide seamless communication.
 
 ## Why build this project ?
 
-This was one of the first FullStack projects I created, it's purpose was to tie everything I learned together in a relatively complex project. A messaging app is a common application in the web.
+This was one of the first FullStack projects I created, it's purpose was to tie everything I learned together in a relatively complex project. A messaging app is a common application on the web.
 
 ## Technologies Used
 
