@@ -67,7 +67,7 @@ cd api
 npm install
 ```
 
-** Create a .env file in the api/ directory (based on .env.example) and fill in the required environment variables such as: ** 
+**Create a .env file in the api/ directory (based on .env.example) and fill in the required environment variables such as:** 
 
 * Database connection URL
 * JWT secrets
@@ -89,7 +89,7 @@ cd client
 npm install
 npm run dev
 ```
-** Rename the .env.example file to .env in the client/ directory **
+**Rename the .env.example file to .env in the client/ directory**
 
 > [!NOTE]
 > The frontend will run on http://localhost:5173 by default.
