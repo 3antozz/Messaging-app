@@ -13,6 +13,11 @@ A full-stack messenger application designed to provide seamless messaging commun
 
 ![User Profile](./client/public/showcase/profile.png)
 
+# [Live Preview](https://messaging-app-blue-chi.vercel.app/)
+
+> [!NOTE]
+> App is hosted with free tier services, first load might take some time.
+
 ## Why build this project ?
 
 This was one of the first FullStack projects I created, it's purpose was to tie everything I learned from The Odin Project's course together in a relatively complex project. A messaging app is a common application on the web.
