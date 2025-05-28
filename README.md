@@ -13,6 +13,10 @@ A full-stack messenger application designed to provide seamless messaging commun
 
 ![User Profile](./client/public/showcase/profile.png)
 
+## Why build this project ?
+
+This was one of the first FullStack projects I created, it's purpose was to tie everything I learned from The Odin Project's course together in a relatively complex project. A messaging app is a common application on the web.
+
 ## Features
 
 - Authentification with refresh/access cookie based jwt tokens.
@@ -21,9 +25,6 @@ A full-stack messenger application designed to provide seamless messaging commun
 - Group creation and management.
 - User connection and interaction.
 
-## Why build this project ?
-
-This was one of the first FullStack projects I created, it's purpose was to tie everything I learned together in a relatively complex project. A messaging app is a common application on the web.
 
 ## Technologies Used
 
@@ -120,9 +121,10 @@ npm run dev
 ### Backend
 
 - [bcryptjs](https://www.npmjs.com/package/bcryptjs) – For securing passwords by hashing and salting.
+- [prisma/client](https://www.npmjs.com/package/@prisma/client) – ORM - Auto-generated and type-safe query builder for Node.js.
 - [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) – Implementation of JSON Web Token for signing tokens and authenticating users.
 - [express-validator](https://www.npmjs.com/package/express-validator) – User input validation middleware.
-- [cloudinary](https://cloudinary.com/) – Images storage service.
+- [cloudinary](https://cloudinary.com/) – Image storage service integration.
 - [multer](https://www.npmjs.com/package/multer) – Node.js middleware for handling multipart/form-data, used for uploading files.
 - [express-async-handler](https://www.npmjs.com/package/express-async-handler) – Asynchronous exception-handling middleware.
 - [Socket.IO](https://socket.io/) – Low-latency, bidirectional and event-based communication between a client and a server for real time updates.
