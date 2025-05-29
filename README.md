@@ -6,7 +6,7 @@ A full-stack messenger application designed to provide seamless messaging commun
 
 ## Signup page
 
-![Signup Page](./client/public/showcase/sign-up.png)
+![Signup Page](./client/public/showcase/login.png)
 
 
 ## User Profile
