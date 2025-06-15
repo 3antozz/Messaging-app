@@ -7,7 +7,7 @@ export default function Popup ({children, shouldRender, close, borderColor = 'gr
     const [isVisible, setVisible] = useState(false);
     const [exiting, setExiting] = useState(false)
     const closePopup = () => {
-        if(!shouldRender) {
+        if(exiting) {
             setVisible(false)
             close(false)
         }

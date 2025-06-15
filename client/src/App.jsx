@@ -29,7 +29,7 @@ function App() {
       }
       window.location.href = '/login';
     } catch(err) {
-      console.log(err);
+      console.log('Error');
     }
   }, [])
   const fetchToken = useCallback(async function fetchToken () {

@@ -39,7 +39,7 @@ const Message = ({message, index, conversation, user, root}) => {
         {inView || !messagesReady ? 
         <div className={!isUserMessage ? null : `${styles.yourDiv}`}>
             {shouldShowPicture ? 
-            !isUserMessage && (<button><img loading='lazy' src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`} data-func='profile' id={message.sender.id}></img></button>) : <div className={styles.void}></div>}
+            !isUserMessage && (<button aria-label={`open ${message.sender.first_name} ${message.sender.last_name} profile`}><img loading='lazy' src={message.sender.picture_url || '/images/no-profile-pic.jpg'} alt={`${message.sender.first_name} ${message.sender.last_name} profile picture`} data-func='profile' id={message.sender.id}></img></button>) : <div className={styles.void}></div>}
             <div style={{marginBottom: shouldShowPicture ? '0.5rem' : null }} className={styles.msgDiv}>
                 { shouldShowSenderName && <p className={styles.sender}>{message.sender.first_name}</p>}
                 {message.picture_url && <img loading='lazy' style={{backgroundColor: '#ffffff00'}} src={message.picture_url} data-func='img' className={!isUserMessage ? `${styles.messageImage} ${styles.otherMessage}` : `${styles.messageImage} ${styles.yourMessage}`}/>}
@@ -324,8 +324,8 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             <div className={styles.forms}>
                 <form className={styles.messageDiv}>
                     <input name="message" id="message" placeholder='Login to send messages' disabled></input>
-                    <button disabled><SendHorizontal color='white' size={30} /></button>
-                    <button disabled><Image color='white' size={35} /></button>
+                    <button aria-label="send message"disabled><SendHorizontal color='white' size={30} /></button>
+                    <button aria-label="send images" disabled><Image color='white' size={35} /></button>
                 </form>
             </div>
         </section>
@@ -335,14 +335,14 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
         <section className={styles.messenger}>
             <div className={styles.info}>
                 {!conversation.isGroup ?
-                <button onClick={() => setProfileID(otherUser.id)}><img src={otherUser.picture_url || '/images/no-profile-pic.jpg'} alt={`${otherUser.first_name} ${otherUser.last_name} profile picture`}></img></button> : 
+                <button aria-label={`open ${otherUser.first_name} ${otherUser.last_name} profile`} onClick={() => setProfileID(otherUser.id)}><img src={otherUser.picture_url || '/images/no-profile-pic.jpg'} alt={`${otherUser.first_name} ${otherUser.last_name} profile picture`}></img></button> : 
                 <button onClick={() => setGroupID(conversation.id)}><img src={conversation.picture_url || '/images/no-group-pic.png'} alt={`${conversation.group_name} group picture`}></img></button>
                 }
                 {!conversation.isGroup ? 
                 <button onClick={() => setProfileID(otherUser.id)}>{otherUser.first_name} {otherUser.last_name}</button> : 
                 <>
                     <button onClick={() => setGroupID(conversation.id)}>{conversation.group_name}</button>
-                    {!conversation.isPublic && <button onClick={() => setMembers(true)}><UserPlus size={28} /></button>}
+                    {!conversation.isPublic && <button aria-label="Show group members" onClick={() => setMembers(true)}><UserPlus size={28} /></button>}
                 </>
                 }
             </div>
@@ -363,14 +363,14 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                     <div className={styles.messageDiv}>
                         <label htmlFor="message" hidden></label>
                         <input name="message" id="message" maxLength={200} onChange={(e) => setMessageInput(e.target.value)} placeholder='Send a message...' value={messageInput} ref={inputRef}></input>
-                        <button><SendHorizontal size={30} color='white' /></button>
-                        <label htmlFor="image" disabled={isUploading} className={styles.label}>{!isUploading ? <Image color='white' size={35} /> : <LoaderCircle  size={40} color='white' className={styles.loading}/>}</label>
+                        <button aria-label="send message"><SendHorizontal size={30} color='white' /></button>
+                        <label aria-label="send an image" htmlFor="image" disabled={isUploading} className={styles.label}>{!isUploading ? <Image color='white' size={35} /> : <LoaderCircle  size={40} color='white' className={styles.loading}/>}</label>
                     </div>
                     <div className={styles.file} ref={fileDivRef}>
                         {uploadError ? <p className={styles.fileError}>{uploadError}</p> : <p>Max size: 5 MB</p>}
                         <div>
                             <input type="file" id='image' accept='image/*' ref={fileRef} onChange={handleFileClick} />
-                            <button onClick={cancelFile}><X color='white' size={30} /></button>
+                            <button aria-label="cancel" onClick={cancelFile}><X color='white' size={30} /></button>
                         </div>
                     </div>
                 </form>

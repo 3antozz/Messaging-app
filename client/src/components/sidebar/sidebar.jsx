@@ -260,17 +260,17 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
             <>
             <aside className={styles.navButtons}>
                 <section className={styles.you}>
-                        <Link to='/login'>
-                            <img src='/images/no-profile-pic.jpg'></img>
+                        <Link aria-label='login' to='/login'>
+                            <img width={96} height={96} src='/images/no-profile-pic.jpg' alt='no profile picture'></img>
                             <h3>Guest</h3>
                         </Link>
                 </section>
                 <nav>
-                        <button disabled><MessageCircleMore size={30}/><p>Messages</p></button>
-                        <button disabled><Users size={30} /><p>Groups</p></button>
-                        <button disabled><Handshake size={30} /><p>Friends</p></button>
-                        <button disabled><UserRoundSearch size={30} /><p>Users</p></button>
-                        <Link to="/login"><LogIn size={30}/><p>Login</p></Link>
+                        <button aria-label='messages' disabled><MessageCircleMore size={30}/><p>Messages</p></button>
+                        <button aria-label='groups' disabled><Users size={30} /><p>Groups</p></button>
+                        <button aria-label='friends' disabled><Handshake size={30} /><p>Friends</p></button>
+                        <button aria-label='users' disabled><UserRoundSearch size={30} /><p>Users</p></button>
+                        <Link aria-label='login' to="/login"><LogIn size={30}/><p>Login</p></Link>
                 </nav>
             </aside>
             <aside className={styles.sidebar}>
@@ -285,7 +285,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                 <ul>
                 {filteredArray.map(group => 
                 <li key={group.id} className={styles.conversation}>
-                    <button id={group.id} data-func='convo' disabled className={styles.messageButton}>
+                    <button aria-label='open convo' id={group.id} data-func='convo' disabled className={styles.messageButton}>
                         <img src={group.picture_url || '/images/no-group-pic.png'} alt={`${group.name} group picture`}></img>
                         <div className={styles.info}>
                             <p>{group.group_name}</p>
@@ -314,19 +314,19 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
         </Popup>
         <aside className={styles.navButtons}>
             <section className={styles.you}>
-                <button onClick={handleListClick} data-func='profile' id={user.id}>
-                    <img src={user.picture_url || '/images/no-profile-pic.jpg'} alt={`${user.first_name} ${user.last_name} profile picture`}></img>
+                <button aria-label='open my profile' onClick={handleListClick} data-func='profile' id={user.id}>
+                    <img width={96} height={96} src={user.picture_url || '/images/no-profile-pic.jpg'} alt={`${user.first_name} ${user.last_name} profile picture`}></img>
                     <h3>{user.first_name}</h3>
                 </button>
             </section>
             <nav onClick={handleViews}>
-                <button className={view === 'Messages' ? `${styles.selected}` : ''}><MessageCircleMore size={30}/><p>Messages</p>{messagesNotification && <Circle className={styles.notification2} strokeWidth={0} size={17} fill='#d61414'/>}</button>
-                <button className={view === 'Groups' ? `${styles.selected}` : ''}><Users size={30} /><p>Groups</p>{groupsNotification && <Circle className={styles.notification2} strokeWidth={0} size={17} fill='#d61414'/>}</button>
-                <button className={view === 'Friends' ? `${styles.selected}` : ''}><Handshake size={30} /><p>Friends</p></button>
-                <button className={view === 'Users' ? `${styles.selected}` : ''}><UserRoundSearch size={30} /><p>Users</p></button>
+                <button aria-label='messages' className={view === 'Messages' ? `${styles.selected}` : ''}><MessageCircleMore size={30}/><p>Messages</p>{messagesNotification && <Circle className={styles.notification2} strokeWidth={0} size={17} fill='#d61414'/>}</button>
+                <button aria-label='groups' className={view === 'Groups' ? `${styles.selected}` : ''}><Users size={30} /><p>Groups</p>{groupsNotification && <Circle className={styles.notification2} strokeWidth={0} size={17} fill='#d61414'/>}</button>
+                <button aria-label='friends' className={view === 'Friends' ? `${styles.selected}` : ''}><Handshake size={30} /><p>Friends</p></button>
+                <button aria-label='users' className={view === 'Users' ? `${styles.selected}` : ''}><UserRoundSearch size={30} /><p>Users</p></button>
                 {!user ?
-                <Link to="/login"><p>Login</p></Link> :
-                <button onClick={logout}><LogOut size={30} /><p>Logout</p></button>
+                <Link aria-label='login' to="/login"><p>Login</p></Link> :
+                <button aria-label='logout' onClick={logout}><LogOut size={30} /><p>Logout</p></button>
                 }
             </nav>
         </aside>
@@ -367,19 +367,19 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                         <li key={friend.id} className={`${styles.conversation} ${styles.shadow}`}>
                             <div className={styles.friendButton}>
                                 <div>
-                                    <button id={friend.id} data-func="profile"><img src={friend.picture_url || '/images/no-profile-pic.jpg'} alt={`${friend.first_name} ${friend.last_name} profile picture`}></img></button>
+                                    <button aria-label={`open ${friend.first_name} ${friend.last_name} profile`} id={friend.id} data-func="profile"><img src={friend.picture_url || '/images/no-profile-pic.jpg'} alt={`${friend.first_name} ${friend.last_name} profile picture`}></img></button>
                                     <Circle className={styles.circle} strokeWidth={0} size={17} fill={friend.isOnline ? '#0bd80b' : 'grey'}/>
                                 </div>
                                 <button id={friend.id} data-func="profile">{friend.first_name} {friend.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={friend.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== friend.id ? <Mail size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
+                                <button aria-label={`open conversations with ${friend.first_name} ${friend.last_name}`} id={friend.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== friend.id ? <Mail size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                             </div>
                         </li>
                     ) : view === 'Groups' ?
                     filteredArray.map(group => 
                         <li key={group.id} className={styles.conversation}>
-                            <button id={group.id} data-func='convo' className={styles.messageButton}>
+                            <button aria-label={`open group ${group.name} conversation`} id={group.id} data-func='convo' className={styles.messageButton}>
                                 <img src={group.picture_url || '/images/no-group-pic.png'} alt={`${group.name} group picture`}></img>
                                 <div className={styles.info}>
                                     <p>{group.group_name}</p>
@@ -397,7 +397,7 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                     filteredArray.map(conversation => {
                         return (
                         <li key={conversation.id} className={styles.conversation}>
-                            <button id={conversation.id} data-func='convo' className={styles.messageButton}>
+                            <button  aria-label={`open conversation with ${conversation.participants[0].first_name} ${conversation.participants[0].last_name}`} id={conversation.id} data-func='convo' className={styles.messageButton}>
                                 <img src={conversation.participants[0].picture_url || '/images/no-profile-pic.jpg'} alt={`${conversation.participants[0].first_name} ${conversation.participants[0].last_name} profile picture`}></img>
                                 <div className={styles.info}>
                                     <p>{conversation.participants[0].first_name} {conversation.participants[0].last_name}</p>
@@ -416,11 +416,11 @@ const Sidebar = memo(function Sidebar ({friends, conversations, groups, setFrien
                         return (
                         <li className={`${styles.conversation} ${styles.shadow}`} key={user.id}>
                             <div className={styles.friendButton}>
-                                <button id={user.id} data-func="profile"><img src={user.picture_url || '/images/no-profile-pic.jpg'} alt={`${user.first_name} ${user.last_name} profile picture`}></img></button>
+                                <button aria-label={`open ${user.first_name} ${user.last_name} profile`}  id={user.id} data-func="profile"><img src={user.picture_url || '/images/no-profile-pic.jpg'} alt={`${user.first_name} ${user.last_name} profile picture`}></img></button>
                                 <button id={user.id} data-func="profile">{user.first_name} {user.last_name}</button>
                             </div>
                             <div className={styles.buttons}>
-                                <button id={user.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== user.id ? <Mail size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
+                                <button aria-label={`open ${user.first_name} ${user.last_name} profile`} id={user.id} disabled={loadingConversation} data-func='new-convo'>{loadingConversation !== user.id ? <Mail size={24} color={loadingConversation ? '#ffffff00' : 'white'} /> :  <LoaderCircle  size={28} color='white' className={styles.loading}/>}</button>
                             </div>
                         </li>
                         )
