@@ -24,7 +24,7 @@ This was one of the first FullStack projects I created, it's purpose was to tie 
 
 ## Features
 
-- Authentification with refresh/access cookie based jwt tokens.
+- Authentication with refresh/access cookie based jwt tokens.
 - Real time messaging.
 - Image sharing capability.
 - Group creation and management.
