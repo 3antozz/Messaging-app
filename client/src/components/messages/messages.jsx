@@ -324,8 +324,8 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
             <div className={styles.forms}>
                 <form className={styles.messageDiv}>
                     <input name="message" id="message" placeholder='Login to send messages' disabled></input>
-                    <button aria-label="send message"disabled><SendHorizontal color='white' size={30} /></button>
-                    <button aria-label="send images" disabled><Image color='white' size={35} /></button>
+                    <button aria-label="send message"disabled><SendHorizontal color='white' size={25} /></button>
+                    <button aria-label="send images" disabled><Image color='white' size={30} /></button>
                 </form>
             </div>
         </section>
@@ -363,8 +363,8 @@ export default function Messages ({conversationID, setProfileID, setImageURL, se
                     <div className={styles.messageDiv}>
                         <label htmlFor="message" hidden></label>
                         <input name="message" id="message" maxLength={200} onChange={(e) => setMessageInput(e.target.value)} placeholder='Send a message...' value={messageInput} ref={inputRef}></input>
-                        <button aria-label="send message"><SendHorizontal size={30} color='white' /></button>
-                        <label aria-label="send an image" htmlFor="image" disabled={isUploading} className={styles.label}>{!isUploading ? <Image color='white' size={35} /> : <LoaderCircle  size={40} color='white' className={styles.loading}/>}</label>
+                        <button aria-label="send message"><SendHorizontal size={25} color='white' /></button>
+                        <label aria-label="send an image" htmlFor="image" disabled={isUploading} className={styles.label}>{!isUploading ? <Image color='white' size={30} /> : <LoaderCircle  size={40} color='white' className={styles.loading}/>}</label>
                     </div>
                     <div className={styles.file} ref={fileDivRef}>
                         {uploadError ? <p className={styles.fileError}>{uploadError}</p> : <p>Max size: 5 MB</p>}

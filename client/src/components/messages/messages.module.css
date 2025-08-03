@@ -10,7 +10,7 @@
 .main {
     overflow-y: auto;
     position: relative;
-    padding: 0.5rem;
+    padding: 0.8rem;
     padding-bottom: 0;
     padding-top: 1.4rem;
     flex: 1;
@@ -203,6 +203,7 @@
     padding: 0.2rem 0.4rem;
     flex: 1;
     border: 2px solid grey;
+    margin-right: 0.5rem;
 }
 
 .messageDiv button, .label {
@@ -214,6 +215,10 @@
     flex-shrink: 0;
     transition: transform 200ms ease;
     padding: 0 0.5rem;
+}
+
+.label {
+    background-color: rgb(84, 84, 235);
 }
 
 .messageDiv button:disabled {
@@ -241,7 +246,7 @@
 
 
 .forms {
-    padding: 1rem 0.6rem;
+    padding: 1rem 1rem;
 }
 
 .loading {
